@@ -364,5 +364,15 @@ func SetApiRouter(router *gin.Engine) {
 			deploymentsRoute.POST("/:id/extend", controller.ExtendDeployment)
 			deploymentsRoute.DELETE("/:id", controller.DeleteDeployment)
 		}
+
+		vibeapiRoute := apiRouter.Group("/vibeapi")
+		vibeapiRoute.Use(middleware.AdminAuth())
+		{
+			vibeapiRoute.GET("/status", controller.VibeAPIStatus)
+			vibeapiRoute.GET("/user-usage", controller.VibeAPIUserUsage)
+			vibeapiRoute.POST("/provision/:userId", controller.VibeAPIProvisionUser)
+			vibeapiRoute.POST("/provision-all", controller.VibeAPIProvisionAll)
+			vibeapiRoute.Any("/*path", controller.VibeAPIProxy)
+		}
 	}
 }

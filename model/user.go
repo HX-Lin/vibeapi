@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -79,7 +78,7 @@ func (user *User) SetAccessToken(token string) {
 func (user *User) GetSetting() dto.UserSetting {
 	setting := dto.UserSetting{}
 	if user.Setting != "" {
-		err := json.Unmarshal([]byte(user.Setting), &setting)
+		err := common.Unmarshal([]byte(user.Setting), &setting)
 		if err != nil {
 			common.SysLog("failed to unmarshal setting: " + err.Error())
 		}
@@ -88,7 +87,7 @@ func (user *User) GetSetting() dto.UserSetting {
 }
 
 func (user *User) SetSetting(setting dto.UserSetting) {
-	settingBytes, err := json.Marshal(setting)
+	settingBytes, err := common.Marshal(setting)
 	if err != nil {
 		common.SysLog("failed to marshal setting: " + err.Error())
 		return
@@ -149,7 +148,7 @@ func generateDefaultSidebarConfigForRole(userRole int) string {
 	// 普通用户不包含admin区域
 
 	// 转换为JSON字符串
-	configBytes, err := json.Marshal(defaultConfig)
+	configBytes, err := common.Marshal(defaultConfig)
 	if err != nil {
 		common.SysLog("生成默认边栏配置失败: " + err.Error())
 		return ""
@@ -415,6 +414,17 @@ func (user *User) Insert(inviterId int) error {
 		}
 	}
 
+	if OnUserCreated != nil {
+		uid, uname := user.Id, user.Username
+		if uid == 0 {
+			uid = createdUser.Id
+		}
+		if uname == "" {
+			uname = createdUser.Username
+		}
+		gopool.Go(func() { OnUserCreated(uid, uname) })
+	}
+
 	if common.QuotaForNewUser > 0 {
 		RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", logger.LogQuota(common.QuotaForNewUser)))
 	}
@@ -474,6 +484,11 @@ func (user *User) FinalizeOAuthUserCreation(inviterId int) {
 			createdUser.Update(false)
 			common.SysLog(fmt.Sprintf("为新用户 %s (角色: %d) 初始化边栏配置", createdUser.Username, createdUser.Role))
 		}
+	}
+
+	if OnUserCreated != nil {
+		uid, uname := user.Id, user.Username
+		gopool.Go(func() { OnUserCreated(uid, uname) })
 	}
 
 	if common.QuotaForNewUser > 0 {
@@ -1027,6 +1042,18 @@ func (user *User) FillUserByLinuxDOId() error {
 	}
 	err := DB.Where("linux_do_id = ?", user.LinuxDOId).First(user).Error
 	return err
+}
+
+// UpdateUserSettingField updates only the setting column for a user.
+func UpdateUserSettingField(userId int, setting string) error {
+	return DB.Model(&User{}).Where("id = ?", userId).Update("setting", setting).Error
+}
+
+// GetAllUsersBasicInfo returns all non-deleted users with basic info and billing fields.
+func GetAllUsersBasicInfo() ([]*User, error) {
+	var users []*User
+	err := DB.Omit("password").Order("id asc").Find(&users).Error
+	return users, err
 }
 
 func RootUserExists() bool {

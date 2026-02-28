@@ -17,6 +17,7 @@ import (
 	relayconstant "github.com/QuantumNous/new-api/relay/constant"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
+	"github.com/QuantumNous/new-api/setting/vibeapi_setting"
 	"github.com/QuantumNous/new-api/types"
 
 	"github.com/gin-gonic/gin"
@@ -377,6 +378,28 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	common.SetContextKey(c, constant.ContextKeyChannelKey, key)
 	common.SetContextKey(c, constant.ContextKeyChannelBaseUrl, channel.GetBaseURL())
 
+	// Upstream per-user key substitution
+	if vibeapi_setting.UpstreamEnabled && vibeapi_setting.UpstreamURL != "" {
+		channelBaseUrl := channel.GetBaseURL()
+		if normalizeURL(channelBaseUrl) == normalizeURL(vibeapi_setting.UpstreamURL) {
+			userSetting, ok := common.GetContextKeyType[dto.UserSetting](c, constant.ContextKeyUserSetting)
+			if ok && userSetting.UpstreamToken != "" {
+				common.SetContextKey(c, constant.ContextKeyChannelKey, userSetting.UpstreamToken)
+			} else {
+				userId := c.GetInt("id")
+				userName := c.GetString("username")
+				if userId > 0 {
+					token, err := service.GetOrProvisionUpstreamToken(userId, userName)
+					if err != nil {
+						common.SysError(fmt.Sprintf("failed to provision upstream token for user %d: %s", userId, err.Error()))
+					} else if token != "" {
+						common.SetContextKey(c, constant.ContextKeyChannelKey, token)
+					}
+				}
+			}
+		}
+	}
+
 	common.SetContextKey(c, constant.ContextKeySystemPromptOverride, false)
 
 	// TODO: api_version统一
@@ -427,4 +450,9 @@ func extractModelNameFromGeminiPath(path string) string {
 
 	// 返回模型名部分
 	return path[startIndex : startIndex+colonIndex]
+}
+
+// normalizeURL trims trailing slashes and whitespace for URL comparison.
+func normalizeURL(u string) string {
+	return strings.TrimRight(strings.TrimSpace(u), "/")
 }
