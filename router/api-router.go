@@ -372,7 +372,7 @@ func SetApiRouter(router *gin.Engine) {
 			vibeapiRoute.GET("/user-usage", controller.VibeAPIUserUsage)
 			vibeapiRoute.POST("/provision/:userId", controller.VibeAPIProvisionUser)
 			vibeapiRoute.POST("/provision-all", controller.VibeAPIProvisionAll)
-			vibeapiRoute.Any("/*path", controller.VibeAPIProxy)
+			vibeapiRoute.Any("/proxy/*path", controller.VibeAPIProxy)
 		}
 	}
 }

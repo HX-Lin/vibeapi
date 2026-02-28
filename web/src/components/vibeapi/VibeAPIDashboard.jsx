@@ -80,7 +80,7 @@ const VibeAPIDashboard = () => {
   const loadAccounts = useCallback(async () => {
     setAccountsLoading(true);
     try {
-      const res = await API.get('/api/vibeapi/accounts');
+      const res = await API.get('/api/vibeapi/proxy/accounts');
       if (res.status === 200) {
         const data = res.data;
         setAccountsData(Array.isArray(data) ? data : data?.data || []);
@@ -97,7 +97,7 @@ const VibeAPIDashboard = () => {
     setTokenStatsLoading(true);
     try {
       const res = await API.get(
-        '/api/vibeapi/stats/tokens/summary?hours=24',
+        '/api/vibeapi/proxy/stats/tokens/summary?hours=24',
       );
       if (res.status === 200) {
         setTokenStats(res.data?.data || res.data || null);
@@ -113,7 +113,7 @@ const VibeAPIDashboard = () => {
   const loadLogs = useCallback(async () => {
     setLogsLoading(true);
     try {
-      const res = await API.get('/api/vibeapi/logs?limit=50');
+      const res = await API.get('/api/vibeapi/proxy/logs?limit=50');
       if (res.status === 200) {
         const data = res.data;
         setLogsData(Array.isArray(data) ? data : data?.data || []);
