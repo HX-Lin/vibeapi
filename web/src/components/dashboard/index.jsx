@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { getRelativeTime } from '../../helpers';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
@@ -136,6 +136,19 @@ const Dashboard = () => {
   // ========== Effects ==========
   useEffect(() => {
     initChart();
+  }, []);
+
+  // Auto-refresh every 60 seconds
+  const refreshRef = useRef(dashboardData.refresh);
+  useEffect(() => {
+    refreshRef.current = dashboardData.refresh;
+  }, [dashboardData.refresh]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      refreshRef.current();
+    }, 60000);
+    return () => clearInterval(timer);
   }, []);
 
   return (

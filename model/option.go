@@ -12,6 +12,7 @@ import (
 	"github.com/QuantumNous/new-api/setting/performance_setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 	"github.com/QuantumNous/new-api/setting/system_setting"
+	"github.com/QuantumNous/new-api/setting/vibeapi_setting"
 )
 
 type Option struct {
@@ -148,6 +149,10 @@ func InitOptionMap() {
 	common.OptionMap["AutomaticDisableStatusCodes"] = operation_setting.AutomaticDisableStatusCodesToString()
 	common.OptionMap["AutomaticRetryStatusCodes"] = operation_setting.AutomaticRetryStatusCodesToString()
 	common.OptionMap["ExposeRatioEnabled"] = strconv.FormatBool(ratio_setting.IsExposeRatioEnabled())
+
+	common.OptionMap["VibeAPIUpstreamURL"] = vibeapi_setting.UpstreamURL
+	common.OptionMap["VibeAPIUpstreamAPIKey"] = vibeapi_setting.UpstreamAPIKey
+	common.OptionMap["VibeAPIUpstreamEnabled"] = strconv.FormatBool(vibeapi_setting.UpstreamEnabled)
 
 	// 自动添加所有注册的模型配置
 	modelConfigs := config.GlobalConfig.ExportAllConfigs()
@@ -458,6 +463,12 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.StreamCacheQueueLength, _ = strconv.Atoi(value)
 	case "PayMethods":
 		err = operation_setting.UpdatePayMethodsByJsonString(value)
+	case "VibeAPIUpstreamURL":
+		vibeapi_setting.UpstreamURL = value
+	case "VibeAPIUpstreamAPIKey":
+		vibeapi_setting.UpstreamAPIKey = value
+	case "VibeAPIUpstreamEnabled":
+		vibeapi_setting.UpstreamEnabled = value == "true"
 	}
 	return err
 }
