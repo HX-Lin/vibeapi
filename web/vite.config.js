@@ -21,8 +21,9 @@ import react from '@vitejs/plugin-react';
 import { defineConfig, transformWithEsbuild } from 'vite';
 import pkg from '@douyinfe/vite-plugin-semi';
 import path from 'path';
-import { codeInspectorPlugin } from 'code-inspector-plugin';
 const { vitePluginSemi } = pkg;
+
+const isDev = process.env.NODE_ENV !== 'production';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -32,9 +33,14 @@ export default defineConfig({
     },
   },
   plugins: [
-    codeInspectorPlugin({
-      bundler: 'vite',
-    }),
+    // code-inspector-plugin: dev-only, excluded from production builds
+    ...(isDev
+      ? [
+          import('code-inspector-plugin').then((m) =>
+            m.codeInspectorPlugin({ bundler: 'vite' }),
+          ),
+        ]
+      : []),
     {
       name: 'treat-js-files-as-jsx',
       async transform(code, id) {
@@ -56,7 +62,6 @@ export default defineConfig({
     }),
   ],
   optimizeDeps: {
-    force: true,
     esbuildOptions: {
       loader: {
         '.js': 'jsx',
@@ -83,6 +88,20 @@ export default defineConfig({
             'react-i18next',
             'i18next-browser-languagedetector',
           ],
+          mermaid: ['mermaid'],
+          vchart: [
+            '@visactor/vchart',
+            '@visactor/react-vchart',
+            '@visactor/vchart-semi-theme',
+          ],
+          katex: ['katex', 'rehype-katex', 'remark-math'],
+          markdown: [
+            'react-markdown',
+            'rehype-highlight',
+            'remark-gfm',
+            'remark-breaks',
+          ],
+          icons: ['lucide-react', 'react-icons', '@lobehub/icons'],
         },
       },
     },
