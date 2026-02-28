@@ -7,4 +7,16 @@ Makefile
 docs
 .eslintcache
 .gocache
+.claude
+
+# Frontend — only needed in Stage 1 (bun builder), not in Stage 2 (go builder)
 /web/node_modules
+/web/dist
+/web/.cache
+/web/.vite
+
+# Build artifacts
+/data
+/logs
+*.exe
+*.test
