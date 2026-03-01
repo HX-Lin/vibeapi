@@ -24,10 +24,35 @@ body.sidebar-collapsed {
   --sidebar-current-width: var(--sidebar-width-collapsed);
 }
 
+/* Indigo-Violet theme override */
+body {
+  --semi-color-primary: #6366f1;
+  --semi-color-primary-hover: #5558e6;
+  --semi-color-primary-active: #4f46e5;
+  --semi-color-primary-disabled: rgba(99, 102, 241, 0.4);
+  --semi-color-primary-light-default: rgba(99, 102, 241, 0.08);
+  --semi-color-primary-light-hover: rgba(99, 102, 241, 0.12);
+  --semi-color-primary-light-active: rgba(99, 102, 241, 0.16);
+}
+
+body[theme-mode='dark'] {
+  --semi-color-primary: #818cf8;
+  --semi-color-primary-hover: #9ba3fb;
+  --semi-color-primary-active: #a5b4fc;
+  --semi-color-primary-disabled: rgba(129, 140, 248, 0.4);
+  --semi-color-primary-light-default: rgba(129, 140, 248, 0.1);
+  --semi-color-primary-light-hover: rgba(129, 140, 248, 0.15);
+  --semi-color-primary-light-active: rgba(129, 140, 248, 0.2);
+}
+
 body {
   font-family: Lato, 'Helvetica Neue', Arial, Helvetica, 'Microsoft YaHei',
     sans-serif;
   color: var(--semi-color-text-0);
+  background-color: #fafafa;
+}
+
+body[theme-mode='dark'] {
   background-color: var(--semi-color-bg-0);
 }
 
@@ -149,12 +174,12 @@ code {
 }
 
 .sidebar-nav-item:hover {
-  background-color: rgba(var(--semi-blue-0), 0.08);
+  background-color: var(--semi-color-primary-light-hover);
   color: var(--semi-color-primary);
 }
 
 .sidebar-nav-item-selected {
-  background-color: rgba(var(--semi-blue-0), 0.12);
+  background-color: var(--semi-color-primary-light-active);
   color: var(--semi-color-primary);
   font-weight: 500;
 }
@@ -660,9 +685,9 @@ code {
   opacity: 0.5;
 }
 
-.blur-ball-teal {
-  background: #14b8a6;
-  /* teal-400 */
+.blur-ball-violet {
+  background: #8b5cf6;
+  /* violet-500 */
   top: 200px;
   left: 30%;
   opacity: 0.4;
@@ -673,7 +698,7 @@ html:not(.dark) .blur-ball-indigo {
   opacity: 0.25;
 }
 
-html:not(.dark) .blur-ball-teal {
+html:not(.dark) .blur-ball-violet {
   opacity: 0.2;
 }
 
@@ -683,14 +708,14 @@ html:not(.dark) .blur-ball-teal {
   position: relative;
   overflow: hidden;
   /* 默认变量（明亮模式） */
-  --pb1: #ffd1dc;
-  /* 粉 */
-  --pb2: #e5d4ff;
-  /* 薰衣草 */
-  --pb3: #d1fff6;
-  /* 薄荷 */
-  --pb4: #ffe5d9;
-  /* 桃 */
+  --pb1: #e0e3ff;
+  /* light indigo */
+  --pb2: #ede5ff;
+  /* light violet */
+  --pb3: #ddd6fe;
+  /* lavender */
+  --pb4: #e8e0ff;
+  /* soft purple */
   --pb-opacity: 0.55;
   --pb-blur: 60px;
 }
@@ -716,16 +741,15 @@ html:not(.dark) .blur-ball-teal {
 
 /* 暗黑模式下更柔和的色彩和透明度 */
 html.dark .with-pastel-balls {
-  /* 使用与明亮模式一致的“刚才那组”马卡龙色，但整体更柔和 */
-  --pb1: #ffd1dc;
-  /* 粉 */
-  --pb2: #e5d4ff;
-  /* 薰衣草 */
-  --pb3: #d1fff6;
-  /* 薄荷 */
-  --pb4: #ffe5d9;
-  /* 桃 */
-  --pb-opacity: 0.36;
+  --pb1: #e0e3ff;
+  /* light indigo */
+  --pb2: #ede5ff;
+  /* light violet */
+  --pb3: #ddd6fe;
+  /* lavender */
+  --pb4: #e8e0ff;
+  /* soft purple */
+  --pb-opacity: 0.3;
   --pb-blur: 65px;
 }
 
@@ -873,5 +897,5 @@ html.dark .with-pastel-balls::before {
 .semi-select,
 .semi-button,
 .semi-datepicker-range-input {
-  border-radius: 10px !important;
+  border-radius: 8px !important;
 }
