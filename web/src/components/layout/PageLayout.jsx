@@ -54,8 +54,6 @@ const PageLayout = () => {
     '/console/redemption',
     '/console/user',
     '/console/token',
-    '/console/midjourney',
-    '/console/task',
     '/console/models',
     '/pricing',
   ];
@@ -64,7 +62,6 @@ const PageLayout = () => {
 
   const shouldInnerPadding =
     location.pathname.includes('/console') &&
-    !location.pathname.startsWith('/console/chat') &&
     location.pathname !== '/console/playground';
 
   const isConsoleRoute = location.pathname.startsWith('/console');

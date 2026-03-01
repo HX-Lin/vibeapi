@@ -26,23 +26,22 @@ const sidebarEventTarget = new EventTarget();
 const SIDEBAR_REFRESH_EVENT = 'sidebar-refresh';
 
 export const DEFAULT_ADMIN_CONFIG = {
-  chat: {
-    enabled: true,
-    playground: true,
-    chat: true,
-  },
   console: {
     enabled: true,
+    playground: true,
     detail: true,
     token: true,
     log: true,
-    midjourney: true,
-    task: true,
   },
   personal: {
     enabled: true,
     topup: true,
     personal: true,
+  },
+  help: {
+    enabled: true,
+    'help-claude-cli': true,
+    'help-vscode': true,
   },
   admin: {
     enabled: true,
@@ -52,6 +51,7 @@ export const DEFAULT_ADMIN_CONFIG = {
     redemption: true,
     user: true,
     subscription: true,
+    vibeapi: true,
     setting: true,
   },
 };

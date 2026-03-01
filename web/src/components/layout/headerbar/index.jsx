@@ -20,11 +20,9 @@ For commercial licensing, please contact support@quantumnous.com
 import React from 'react';
 import { useHeaderBar } from '../../../hooks/common/useHeaderBar';
 import { useNotifications } from '../../../hooks/common/useNotifications';
-import { useNavigation } from '../../../hooks/common/useNavigation';
 import NoticeModal from '../NoticeModal';
 import MobileMenuButton from './MobileMenuButton';
 import HeaderLogo from './HeaderLogo';
-import Navigation from './Navigation';
 import ActionButtons from './ActionButtons';
 
 const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
@@ -40,12 +38,9 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     logo,
     isNewYear,
     isSelfUseMode,
-    docsLink,
     isDemoSiteMode,
     isConsoleRoute,
     theme,
-    headerNavModules,
-    pricingRequireAuth,
     logout,
     handleLanguageChange,
     handleThemeToggle,
@@ -61,8 +56,6 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     handleNoticeClose,
     getUnreadKeys,
   } = useNotifications(statusState);
-
-  const { mainNavLinks } = useNavigation(t, docsLink, headerNavModules);
 
   return (
     <header className='text-semi-color-text-0 sticky top-0 z-50 transition-colors duration-300 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg border-b border-gray-200/60 dark:border-zinc-700/60'>
@@ -99,13 +92,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             />
           </div>
 
-          <Navigation
-            mainNavLinks={mainNavLinks}
-            isMobile={isMobile}
-            isLoading={isLoading}
-            userState={userState}
-            pricingRequireAuth={pricingRequireAuth}
-          />
+          <div className='flex-1' />
 
           <ActionButtons
             isNewYear={isNewYear}

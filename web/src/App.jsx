@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { lazy, Suspense, useContext, useMemo } from 'react';
-import { Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import Loading from './components/common/ui/Loading';
 import { AuthRedirect, PrivateRoute, AdminRoute } from './helpers';
 import NotFound from './pages/NotFound';
@@ -27,9 +27,7 @@ import { StatusContext } from './context/Status';
 import SetupCheck from './components/layout/SetupCheck';
 
 // Lazy-load all pages and heavy components
-const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
-const About = lazy(() => import('./pages/About'));
 const UserAgreement = lazy(() => import('./pages/UserAgreement'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const User = lazy(() => import('./pages/User'));
@@ -39,17 +37,15 @@ const Token = lazy(() => import('./pages/Token'));
 const Redemption = lazy(() => import('./pages/Redemption'));
 const TopUp = lazy(() => import('./pages/TopUp'));
 const Log = lazy(() => import('./pages/Log'));
-const Chat = lazy(() => import('./pages/Chat'));
-const Chat2Link = lazy(() => import('./pages/Chat2Link'));
-const Midjourney = lazy(() => import('./pages/Midjourney'));
 const Pricing = lazy(() => import('./pages/Pricing'));
-const Task = lazy(() => import('./pages/Task'));
 const ModelPage = lazy(() => import('./pages/Model'));
 const ModelDeploymentPage = lazy(() => import('./pages/ModelDeployment'));
 const Playground = lazy(() => import('./pages/Playground'));
 const Subscription = lazy(() => import('./pages/Subscription'));
 const VibeAPI = lazy(() => import('./pages/VibeAPI'));
 const Setup = lazy(() => import('./pages/Setup'));
+const ClaudeCliGuide = lazy(() => import('./pages/HelpCenter/ClaudeCliGuide'));
+const VscodeGuide = lazy(() => import('./pages/HelpCenter/VscodeGuide'));
 const PersonalSetting = lazy(() => import('./components/settings/PersonalSetting'));
 const RegisterForm = lazy(() => import('./components/auth/RegisterForm'));
 const LoginForm = lazy(() => import('./components/auth/LoginForm'));
@@ -91,14 +87,7 @@ function App() {
   return (
     <SetupCheck>
       <Routes>
-        <Route
-          path='/'
-          element={
-            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-              <Home />
-            </Suspense>
-          }
-        />
+        <Route path='/' element={<Navigate to='/console' replace />} />
         <Route
           path='/setup'
           element={
@@ -315,31 +304,31 @@ function App() {
           }
         />
         <Route
+          path='/console/help/claude-cli'
+          element={
+            <PrivateRoute>
+              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+                <ClaudeCliGuide />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path='/console/help/vscode'
+          element={
+            <PrivateRoute>
+              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+                <VscodeGuide />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path='/console'
           element={
             <PrivateRoute>
               <Suspense fallback={<Loading></Loading>} key={location.pathname}>
                 <Dashboard />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path='/console/midjourney'
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-                <Midjourney />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path='/console/task'
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-                <Task />
               </Suspense>
             </PrivateRoute>
           }
@@ -364,14 +353,6 @@ function App() {
           }
         />
         <Route
-          path='/about'
-          element={
-            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-              <About />
-            </Suspense>
-          }
-        />
-        <Route
           path='/user-agreement'
           element={
             <Suspense fallback={<Loading></Loading>} key={location.pathname}>
@@ -385,25 +366,6 @@ function App() {
             <Suspense fallback={<Loading></Loading>} key={location.pathname}>
               <PrivacyPolicy />
             </Suspense>
-          }
-        />
-        <Route
-          path='/console/chat/:id?'
-          element={
-            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-              <Chat />
-            </Suspense>
-          }
-        />
-        {/* 方便使用chat2link直接跳转聊天... */}
-        <Route
-          path='/chat2link'
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-                <Chat2Link />
-              </Suspense>
-            </PrivateRoute>
           }
         />
         <Route path='*' element={<NotFound />} />

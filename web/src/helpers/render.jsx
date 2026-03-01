@@ -76,6 +76,9 @@ import {
   Server,
   CalendarClock,
   Orbit,
+  LifeBuoy,
+  Terminal,
+  Code2,
 } from 'lucide-react';
 import {
   SiAtlassian,
@@ -150,6 +153,10 @@ export function getLucideIcon(key, selected = false) {
       return <Orbit {...commonProps} color={iconColor} />;
     case 'setting':
       return <Settings {...commonProps} color={iconColor} />;
+    case 'help-claude-cli':
+      return <Terminal {...commonProps} color={iconColor} />;
+    case 'help-vscode':
+      return <Code2 {...commonProps} color={iconColor} />;
     default:
       return <CircleUser {...commonProps} color={iconColor} />;
   }
