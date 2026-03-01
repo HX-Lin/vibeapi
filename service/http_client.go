@@ -34,11 +34,18 @@ func checkRedirect(req *http.Request, via []*http.Request) error {
 }
 
 func InitHttpClient() {
+	// Register SSRF protection provider so SafeDialContext can check settings at connect time
+	common.SetSSRFProtectionProvider(func() (enabled, allowPrivateIp bool) {
+		fs := system_setting.GetFetchSetting()
+		return fs.EnableSSRFProtection, fs.AllowPrivateIp
+	})
+
 	transport := &http.Transport{
 		MaxIdleConns:        common.RelayMaxIdleConns,
 		MaxIdleConnsPerHost: common.RelayMaxIdleConnsPerHost,
 		ForceAttemptHTTP2:   true,
 		Proxy:               http.ProxyFromEnvironment, // Support HTTP_PROXY, HTTPS_PROXY, NO_PROXY env vars
+		DialContext:         common.SafeDialContext,     // DNS rebinding protection: validate resolved IPs before connecting
 	}
 	if common.TLSInsecureSkipVerify {
 		transport.TLSClientConfig = common.InsecureTLSConfig

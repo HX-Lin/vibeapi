@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"github.com/QuantumNous/new-api/common"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -9,15 +8,21 @@ import (
 func CORS() gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
-	config.AllowCredentials = true
+	config.AllowCredentials = false // Security: credentials must not be combined with wildcard origin
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
-	config.AllowHeaders = []string{"*"}
+	config.AllowHeaders = []string{
+		"Authorization", "Content-Type", "Accept", "Origin",
+		"X-Requested-With", "New-Api-User",
+	}
 	return cors.New(config)
 }
 
-func PoweredBy() gin.HandlerFunc {
+// SecurityHeaders adds security-related HTTP headers to all responses.
+func SecurityHeaders() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("X-New-Api-Version", common.Version)
+		c.Header("X-Content-Type-Options", "nosniff")
+		c.Header("X-Frame-Options", "DENY")
+		c.Header("Referrer-Policy", "strict-origin-when-cross-origin")
 		c.Next()
 	}
 }

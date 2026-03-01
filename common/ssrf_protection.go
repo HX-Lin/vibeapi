@@ -1,11 +1,13 @@
 package common
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // SSRFProtection SSRF防护配置
@@ -283,6 +285,65 @@ func (p *SSRFProtection) ValidateURL(urlStr string) error {
 		}
 	}
 	return nil
+}
+
+// SSRFProtectionProvider is a function that returns the current SSRF protection settings.
+// This avoids import cycles between common and setting packages.
+type SSRFProtectionProvider func() (enabled, allowPrivateIp bool)
+
+var ssrfProtectionProvider SSRFProtectionProvider
+
+// SetSSRFProtectionProvider registers the function that provides SSRF settings.
+// Called once during initialization from the service layer.
+func SetSSRFProtectionProvider(provider SSRFProtectionProvider) {
+	ssrfProtectionProvider = provider
+}
+
+// SafeDialContext returns a DialContext function that validates resolved IPs
+// before establishing TCP connections, preventing DNS rebinding attacks.
+// This is the transport-level counterpart to ValidateURL: even if a domain
+// passed the URL pre-check with a safe IP, the actual connection will be
+// blocked if DNS resolves to a private/forbidden IP at connect time.
+func SafeDialContext(ctx context.Context, network, addr string) (net.Conn, error) {
+	// Only intercept TCP connections (HTTP/HTTPS)
+	if network != "tcp" && network != "tcp4" && network != "tcp6" {
+		dialer := &net.Dialer{Timeout: 30 * time.Second}
+		return dialer.DialContext(ctx, network, addr)
+	}
+
+	// Check if SSRF protection is enabled
+	if ssrfProtectionProvider != nil {
+		enabled, allowPrivateIp := ssrfProtectionProvider()
+		if enabled {
+			host, _, err := net.SplitHostPort(addr)
+			if err != nil {
+				return nil, fmt.Errorf("SSRF protection: invalid address %s: %v", addr, err)
+			}
+
+			// Resolve the host to IPs ourselves
+			ips, err := net.DefaultResolver.LookupIPAddr(ctx, host)
+			if err != nil {
+				// If host is already an IP, ParseIP will handle it
+				if ip := net.ParseIP(host); ip != nil {
+					if !allowPrivateIp && isPrivateIP(ip) {
+						return nil, fmt.Errorf("SSRF protection: connection to private IP %s blocked", ip)
+					}
+				} else {
+					return nil, fmt.Errorf("SSRF protection: DNS resolution failed for %s: %v", host, err)
+				}
+			} else {
+				// Validate all resolved IPs
+				for _, ipAddr := range ips {
+					if !allowPrivateIp && isPrivateIP(ipAddr.IP) {
+						return nil, fmt.Errorf("SSRF protection: connection to private IP %s (resolved from %s) blocked", ipAddr.IP, host)
+					}
+				}
+			}
+		}
+	}
+
+	dialer := &net.Dialer{Timeout: 30 * time.Second}
+	return dialer.DialContext(ctx, network, addr)
 }
 
 // ValidateURLWithFetchSetting 使用FetchSetting配置验证URL

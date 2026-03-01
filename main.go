@@ -150,6 +150,36 @@ func main() {
 
 	// Initialize HTTP server
 	server := gin.New()
+
+	// Security: Configure trusted proxy and real client IP extraction.
+	// When behind Cloudflare, use CF-Connecting-IP header for real client IP.
+	// Set TRUSTED_PROXIES env var to restrict which proxies are trusted (comma-separated CIDRs).
+	// Examples:
+	//   TRUSTED_PROXIES=173.245.48.0/20,103.21.244.0/22,108.162.192.0/18  (Cloudflare IPs)
+	//   TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8  (local reverse proxy)
+	//   TRUSTED_PROXIES=*  (trust all proxies, not recommended for production)
+	trustedProxies := os.Getenv("TRUSTED_PROXIES")
+	if trustedProxies == "" {
+		// Default: trust no proxy, use RemoteAddr directly
+		_ = server.SetTrustedProxies(nil)
+	} else if trustedProxies == "*" {
+		// Trust all proxies (backwards compatible, but not recommended)
+		_ = server.SetTrustedProxies([]string{"0.0.0.0/0", "::/0"})
+	} else {
+		proxies := strings.Split(trustedProxies, ",")
+		for i := range proxies {
+			proxies[i] = strings.TrimSpace(proxies[i])
+		}
+		_ = server.SetTrustedProxies(proxies)
+	}
+
+	// When behind Cloudflare proxy, extract real client IP from CF-Connecting-IP header.
+	// Set REAL_IP_HEADER env var to customize (e.g., "X-Real-IP" for Nginx, "CF-Connecting-IP" for Cloudflare).
+	realIPHeader := os.Getenv("REAL_IP_HEADER")
+	if realIPHeader != "" {
+		server.TrustedPlatform = realIPHeader
+	}
+
 	server.Use(gin.CustomRecovery(func(c *gin.Context, err any) {
 		common.SysLog(fmt.Sprintf("panic detected: %v", err))
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -162,16 +192,19 @@ func main() {
 	// This will cause SSE not to work!!!
 	//server.Use(gzip.Gzip(gzip.DefaultCompression))
 	server.Use(middleware.RequestId())
-	server.Use(middleware.PoweredBy())
+	server.Use(middleware.SecurityHeaders())
 	server.Use(middleware.I18n())
 	middleware.SetUpLogger(server)
 	// Initialize session store
 	store := cookie.NewStore([]byte(common.SessionSecret))
+	// Security: Secure=true requires HTTPS (standard for Cloudflare proxied sites)
+	// Set SESSION_SECURE=false env var if running without HTTPS (dev only)
+	sessionSecure := os.Getenv("SESSION_SECURE") != "false"
 	store.Options(sessions.Options{
 		Path:     "/",
 		MaxAge:   2592000, // 30 days
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   sessionSecure,
 		SameSite: http.SameSiteStrictMode,
 	})
 	server.Use(sessions.Sessions("session", store))
