@@ -25,15 +25,11 @@ import {
   Spin,
   Input,
   Typography,
-  Empty,
   Tabs,
   Collapse,
   Tooltip,
 } from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../common/ui/EmptyState';
 import { IconSearch, IconInfoCircle } from '@douyinfe/semi-icons';
 import { useTranslation } from 'react-i18next';
 import { getModelCategories } from '../../../../helpers/render';
@@ -346,16 +342,7 @@ const ModelSelectModal = ({
       <Spin spinning={!models || models.length === 0}>
         <div style={{ maxHeight: 400, overflowY: 'auto', paddingRight: 8 }}>
           {filteredModels.length === 0 ? (
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
-              description={t('暂无匹配模型')}
-              style={{ padding: 30 }}
-            />
+            <EmptyState preset='noResult' size='medium' description={t('暂无匹配模型')} />
           ) : (
             <Checkbox.Group
               value={checkedList}

@@ -18,13 +18,10 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Card, Avatar, Tag, Divider, Empty } from '@douyinfe/semi-ui';
+import { Card, Avatar, Tag, Divider } from '@douyinfe/semi-ui';
 import { Server, Gauge, ExternalLink } from 'lucide-react';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
 import ScrollableContainer from '../common/ui/ScrollableContainer';
+import EmptyState from '../common/ui/EmptyState';
 
 const ApiInfoPanel = ({
   apiInfoData,
@@ -32,7 +29,6 @@ const ApiInfoPanel = ({
   handleSpeedTest,
   CARD_PROPS,
   FLEX_CENTER_GAP2,
-  ILLUSTRATION_SIZE,
   t,
 }) => {
   return (
@@ -100,16 +96,13 @@ const ApiInfoPanel = ({
             </React.Fragment>
           ))
         ) : (
-          <div className='flex justify-center items-center min-h-[20rem] w-full'>
-            <Empty
-              image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-              darkModeImage={
-                <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-              }
-              title={t('暂无API信息')}
-              description={t('请联系管理员在系统设置中配置API信息')}
-            />
-          </div>
+          <EmptyState
+            preset='construction'
+            size='medium'
+            title={t('暂无API信息')}
+            description={t('请联系管理员在系统设置中配置API信息')}
+            style={{ minHeight: '20rem' }}
+          />
         )}
       </ScrollableContainer>
     </Card>

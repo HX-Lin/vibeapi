@@ -46,6 +46,9 @@ const VibeAPI = lazy(() => import('./pages/VibeAPI'));
 const Setup = lazy(() => import('./pages/Setup'));
 const ClaudeCliGuide = lazy(() => import('./pages/HelpCenter/ClaudeCliGuide'));
 const VscodeGuide = lazy(() => import('./pages/HelpCenter/VscodeGuide'));
+const MjLog = lazy(() => import('./pages/MjLog'));
+const TaskLog = lazy(() => import('./pages/TaskLog'));
+const About = lazy(() => import('./pages/About'));
 const PersonalSetting = lazy(() => import('./components/settings/PersonalSetting'));
 const RegisterForm = lazy(() => import('./components/auth/RegisterForm'));
 const LoginForm = lazy(() => import('./components/auth/LoginForm'));
@@ -304,6 +307,26 @@ function App() {
           }
         />
         <Route
+          path='/console/midjourney'
+          element={
+            <PrivateRoute>
+              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+                <MjLog />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path='/console/task'
+          element={
+            <PrivateRoute>
+              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+                <TaskLog />
+              </Suspense>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path='/console/help/claude-cli'
           element={
             <PrivateRoute>
@@ -350,6 +373,14 @@ function App() {
                 <Pricing />
               </Suspense>
             )
+          }
+        />
+        <Route
+          path='/about'
+          element={
+            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+              <About />
+            </Suspense>
           }
         />
         <Route

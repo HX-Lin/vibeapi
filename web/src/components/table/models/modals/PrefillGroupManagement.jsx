@@ -28,13 +28,9 @@ import {
   Card,
   Avatar,
   Spin,
-  Empty,
 } from '@douyinfe/semi-ui';
 import { IconPlus, IconLayers } from '@douyinfe/semi-icons';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../common/ui/EmptyState';
 import {
   API,
   showError,
@@ -276,18 +272,7 @@ const PrefillGroupManagement = ({ visible, onClose }) => {
                   scroll={{ x: 'max-content' }}
                 />
               ) : (
-                <Empty
-                  image={
-                    <IllustrationNoResult style={{ width: 150, height: 150 }} />
-                  }
-                  darkModeImage={
-                    <IllustrationNoResultDark
-                      style={{ width: 150, height: 150 }}
-                    />
-                  }
-                  description={t('暂无预填组')}
-                  style={{ padding: 30 }}
-                />
+                <EmptyState preset='noResult' size='medium' description={t('暂无预填组')} />
               )}
             </Card>
           </div>

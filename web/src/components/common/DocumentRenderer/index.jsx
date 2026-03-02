@@ -19,12 +19,9 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useEffect, useState } from 'react';
 import { API, showError } from '../../../helpers';
-import { Empty, Card, Spin, Typography } from '@douyinfe/semi-ui';
+import { Card, Spin, Typography } from '@douyinfe/semi-ui';
 const { Title } = Typography;
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../ui/EmptyState';
 import { useTranslation } from 'react-i18next';
 import MarkdownRenderer from '../markdown/MarkdownRenderer';
 
@@ -163,14 +160,10 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
   if (!content || content.trim() === '') {
     return (
       <div className='flex justify-center items-center min-h-screen bg-gray-50'>
-        <Empty
+        <EmptyState
+          preset='construction'
+          size='medium'
           title={t('管理员未设置' + title + '内容')}
-          image={
-            <IllustrationConstruction style={{ width: 150, height: 150 }} />
-          }
-          darkModeImage={
-            <IllustrationConstructionDark style={{ width: 150, height: 150 }} />
-          }
           className='p-8'
         />
       </div>

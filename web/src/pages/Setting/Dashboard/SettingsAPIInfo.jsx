@@ -24,17 +24,13 @@ import {
   Table,
   Form,
   Typography,
-  Empty,
   Divider,
   Avatar,
   Modal,
   Tag,
   Switch,
 } from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../components/common/ui/EmptyState';
 import { Plus, Edit, Trash2, Save, Settings } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
@@ -424,13 +420,9 @@ const SettingsAPIInfo = ({ options, refresh }) => {
           size='middle'
           loading={loading}
           empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
+            <EmptyState
+              preset='noResult'
+              size='medium'
               description={t('暂无API信息')}
               style={{ padding: 30 }}
             />

@@ -23,6 +23,7 @@ import { useNotifications } from '../../../hooks/common/useNotifications';
 import NoticeModal from '../NoticeModal';
 import MobileMenuButton from './MobileMenuButton';
 import HeaderLogo from './HeaderLogo';
+import HeaderNav from './HeaderNav';
 import ActionButtons from './ActionButtons';
 
 const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
@@ -41,6 +42,8 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
     isDemoSiteMode,
     isConsoleRoute,
     theme,
+    docsLink,
+    headerNavModules,
     logout,
     handleLanguageChange,
     handleThemeToggle,
@@ -92,7 +95,11 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             />
           </div>
 
-          <div className='flex-1' />
+          <HeaderNav
+            headerNavModules={headerNavModules}
+            docsLink={docsLink}
+            t={t}
+          />
 
           <ActionButtons
             isNewYear={isNewYear}

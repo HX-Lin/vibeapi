@@ -3296,6 +3296,22 @@
     "写": "Ghi",
     "根据 Anthropic 协定，/v1/messages 的输入 tokens 仅统计非缓存输入，不包含缓存读取与缓存写入 tokens。": "Theo quy ước của Anthropic, input tokens của /v1/messages chỉ tính phần đầu vào không dùng cache và không bao gồm tokens đọc/ghi cache.",
     "设计版本": "b80c3466cb6feafeb3990c7820e10e50",
-    "未匹配到模型，按回车键可将「{{name}}」作为自定义模型名添加": "Không tìm thấy mô hình khớp. Nhấn Enter để thêm \"{{name}}\" làm tên mô hình tùy chỉnh."
+    "未匹配到模型，按回车键可将「{{name}}」作为自定义模型名添加": "Không tìm thấy mô hình khớp. Nhấn Enter để thêm \"{{name}}\" làm tên mô hình tùy chỉnh.",
+    "核心特性": "Key Features",
+    "多供应商聚合": "Multi-Provider Aggregation",
+    "支持 40+ 主流 AI 供应商，统一 API 接口调用": "Supports 40+ mainstream AI providers with unified API interface",
+    "安全可靠": "Secure & Reliable",
+    "JWT 认证、WebAuthn 无密码登录、细粒度权限控制": "JWT auth, WebAuthn passwordless login, fine-grained access control",
+    "高性能": "High Performance",
+    "内置缓存、速率限制、流式响应，保障服务稳定运行": "Built-in caching, rate limiting, streaming responses for stable operation",
+    "国际化": "Internationalization",
+    "支持多语言界面，包括中文、英文、日文等": "Multi-language support including Chinese, English, Japanese, etc.",
+    "快捷键": "Keyboard Shortcuts",
+    "全局搜索": "Global Search",
+    "搜索页面...": "Search pages...",
+    "没有找到匹配的页面": "No matching pages found",
+    "导航": "Navigate",
+    "公共页面": "Public Pages",
+    "AI API 聚合管理平台，支持多种主流 AI 服务提供商。": "AI API aggregation platform supporting multiple mainstream AI providers."
   }
 }

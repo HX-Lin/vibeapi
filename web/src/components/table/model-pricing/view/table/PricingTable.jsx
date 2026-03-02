@@ -18,11 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useMemo } from 'react';
-import { Card, Table, Empty } from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import { Card, Table } from '@douyinfe/semi-ui';
+import EmptyState from '../../../../common/ui/EmptyState';
 import { getPricingTableColumns } from './PricingTableColumns';
 
 const PricingTable = ({
@@ -103,18 +100,7 @@ const PricingTable = ({
             onClick: () => openModelDetail && openModelDetail(record),
             style: { cursor: 'pointer' },
           })}
-          empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
-              description={t('搜索无结果')}
-              style={{ padding: 30 }}
-            />
-          }
+          empty={<EmptyState preset='noResult' size='medium' description={t('搜索无结果')} />}
           pagination={{
             defaultPageSize: 20,
             pageSize: pageSize,

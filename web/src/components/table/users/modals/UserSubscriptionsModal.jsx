@@ -20,7 +20,6 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Button,
-  Empty,
   Modal,
   Select,
   SideSheet,
@@ -29,10 +28,7 @@ import {
   Typography,
 } from '@douyinfe/semi-ui';
 import { IconPlusCircle } from '@douyinfe/semi-icons';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../common/ui/EmptyState';
 import { API, showError, showSuccess } from '../../../../helpers';
 import { convertUSDToCurrency } from '../../../../helpers/render';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
@@ -411,18 +407,7 @@ const UserSubscriptionsModal = ({ visible, onCancel, user, t, onSuccess }) => {
             showSizeChanger: false,
             onPageChange: handlePageChange,
           }}
-          empty={
-            <Empty
-              image={
-                <IllustrationNoResult style={{ width: 150, height: 150 }} />
-              }
-              darkModeImage={
-                <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-              }
-              description={t('暂无订阅记录')}
-              style={{ padding: 30 }}
-            />
-          }
+          empty={<EmptyState preset='noResult' size='medium' description={t('暂无订阅记录')} />}
           size='middle'
         />
       </div>

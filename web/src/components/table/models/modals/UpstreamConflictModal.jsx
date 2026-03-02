@@ -23,11 +23,11 @@ import {
   Table,
   Checkbox,
   Typography,
-  Empty,
   Tag,
   Popover,
   Input,
 } from '@douyinfe/semi-ui';
+import EmptyState from '../../../common/ui/EmptyState';
 import { MousePointerClick } from 'lucide-react';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import { MODEL_TABLE_PAGE_SIZE } from '../../../../constants';
@@ -274,7 +274,7 @@ const UpstreamConflictModal = ({
       width={isMobile ? '100%' : 1000}
     >
       {dataSource.length === 0 ? (
-        <Empty description={t('无冲突项')} className='p-6' />
+        <EmptyState preset='noResult' size='small' description={t('无冲突项')} className='p-6' />
       ) : (
         <>
           <div className='mb-3 text-[var(--semi-color-text-2)]'>
@@ -308,7 +308,9 @@ const UpstreamConflictModal = ({
               scroll={{ x: 'max-content' }}
             />
           ) : (
-            <Empty
+            <EmptyState
+              preset='noResult'
+              size='small'
               description={
                 searchKeyword ? t('未找到匹配的模型') : t('无冲突项')
               }

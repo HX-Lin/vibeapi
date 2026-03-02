@@ -18,12 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useMemo } from 'react';
-import { Empty } from '@douyinfe/semi-ui';
 import CardTable from '../../common/ui/CardTable';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../common/ui/EmptyState';
 import { getSubscriptionsColumns } from './SubscriptionsColumnDefs';
 
 const SubscriptionsTable = (subscriptionsData) => {
@@ -67,16 +63,7 @@ const SubscriptionsTable = (subscriptionsData) => {
       hidePagination={true}
       loading={loading}
       rowKey={(row) => row?.plan?.id}
-      empty={
-        <Empty
-          image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-          darkModeImage={
-            <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-          }
-          description={t('暂无订阅套餐')}
-          style={{ padding: 30 }}
-        />
-      }
+      empty={<EmptyState preset='noResult' size='medium' description={t('暂无订阅套餐')} />}
       className='overflow-hidden'
       size='middle'
     />

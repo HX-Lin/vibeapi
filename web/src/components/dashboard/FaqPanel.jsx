@@ -18,21 +18,17 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Card, Collapse, Empty } from '@douyinfe/semi-ui';
+import { Card, Collapse } from '@douyinfe/semi-ui';
 import { HelpCircle } from 'lucide-react';
 import { IconPlus, IconMinus } from '@douyinfe/semi-icons';
 import { marked } from 'marked';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
 import ScrollableContainer from '../common/ui/ScrollableContainer';
+import EmptyState from '../common/ui/EmptyState';
 
 const FaqPanel = ({
   faqData,
   CARD_PROPS,
   FLEX_CENTER_GAP2,
-  ILLUSTRATION_SIZE,
   t,
 }) => {
   return (
@@ -69,16 +65,12 @@ const FaqPanel = ({
             ))}
           </Collapse>
         ) : (
-          <div className='flex justify-center items-center py-8'>
-            <Empty
-              image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-              darkModeImage={
-                <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-              }
-              title={t('暂无常见问答')}
-              description={t('请联系管理员在系统设置中配置常见问答')}
-            />
-          </div>
+          <EmptyState
+            preset='construction'
+            size='medium'
+            title={t('暂无常见问答')}
+            description={t('请联系管理员在系统设置中配置常见问答')}
+          />
         )}
       </ScrollableContainer>
     </Card>

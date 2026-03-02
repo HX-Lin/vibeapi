@@ -23,15 +23,11 @@ import {
   Badge,
   Typography,
   Toast,
-  Empty,
   Button,
   Input,
   Tag,
 } from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../common/ui/EmptyState';
 import { Coins } from 'lucide-react';
 import { IconSearch } from '@douyinfe/semi-icons';
 import { API, timestamp2string } from '../../../helpers';
@@ -271,16 +267,7 @@ const TopupHistoryModal = ({ visible, onCancel, t }) => {
           onPageSizeChange: handlePageSizeChange,
         }}
         size='small'
-        empty={
-          <Empty
-            image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-            darkModeImage={
-              <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无充值记录')}
-            style={{ padding: 30 }}
-          />
-        }
+        empty={<EmptyState preset='noResult' size='medium' description={t('暂无充值记录')} />}
       />
     </Modal>
   );

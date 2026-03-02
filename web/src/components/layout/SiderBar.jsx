@@ -21,12 +21,14 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getLucideIcon } from '../../helpers/render';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
 import { useSidebar } from '../../hooks/common/useSidebar';
+import { useSidebarSections } from '../../hooks/common/useSidebarSections';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
 import { isAdmin, isRoot } from '../../helpers';
 import SkeletonWrapper from './components/SkeletonWrapper';
+import SidebarUserProfile from './SidebarUserProfile';
 
 import { Nav, Divider, Button } from '@douyinfe/semi-ui';
 
@@ -38,6 +40,8 @@ const routerMap = {
   user: '/console/user',
   subscription: '/console/subscription',
   log: '/console/log',
+  midjourney: '/console/midjourney',
+  task: '/console/task',
   setting: '/console/setting',
   detail: '/console',
   pricing: '/pricing',
@@ -59,6 +63,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     loading: sidebarLoading,
   } = useSidebar();
 
+  const { isSectionCollapsed, toggleSection } = useSidebarSections();
   const showSkeleton = useMinimumLoadingTime(sidebarLoading, 200);
 
   const [selectedKeys, setSelectedKeys] = useState(['detail']);
@@ -90,6 +95,16 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('使用日志'),
         itemKey: 'log',
         to: '/log',
+      },
+      {
+        text: t('绘图日志'),
+        itemKey: 'midjourney',
+        to: '/midjourney',
+      },
+      {
+        text: t('任务日志'),
+        itemKey: 'task',
+        to: '/task',
       },
     ];
 
@@ -268,6 +283,46 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     );
   };
 
+  // 渲染可折叠的区域
+  const renderSection = (sectionKey, label, items, isFirst = false) => {
+    const sectionFolded = isSectionCollapsed(sectionKey);
+
+    return (
+      <>
+        {!isFirst && <Divider className='sidebar-divider' />}
+        <div className={isFirst ? 'sidebar-section' : ''}>
+          {!collapsed && (
+            <div
+              className='sidebar-section-header'
+              onClick={() => toggleSection(sectionKey)}
+            >
+              <div className='sidebar-group-label'>{label}</div>
+              <ChevronDown
+                size={12}
+                strokeWidth={2}
+                color='var(--semi-color-text-2)'
+                className={`sidebar-fold-icon${sectionFolded ? ' sidebar-fold-icon-visible' : ''}`}
+                style={{
+                  transform: sectionFolded ? 'rotate(-90deg)' : 'rotate(0deg)',
+                }}
+              />
+            </div>
+          )}
+          <div
+            className={`sidebar-section-content${sectionFolded && !collapsed ? ' sidebar-section-content-collapsed' : ' sidebar-section-content-expanded'}`}
+            style={
+              !sectionFolded || collapsed
+                ? { maxHeight: `${items.length * 48 + 20}px` }
+                : undefined
+            }
+          >
+            {items.map((item) => renderNavItem(item))}
+          </div>
+        </div>
+      </>
+    );
+  };
+
   return (
     <div
       className='sidebar-container'
@@ -321,57 +376,26 @@ const SiderBar = ({ onNavigate = () => {} }) => {
           }}
         >
           {/* 工作台区域 */}
-          {hasSectionVisibleModules('console') && (
-            <div className='sidebar-section'>
-              {!collapsed && (
-                <div className='sidebar-group-label'>{t('工作台')}</div>
-              )}
-              {workspaceItems.map((item) => renderNavItem(item))}
-            </div>
-          )}
+          {hasSectionVisibleModules('console') &&
+            renderSection('console', t('工作台'), workspaceItems, true)}
 
           {/* 个人中心区域 */}
-          {hasSectionVisibleModules('personal') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('个人中心')}</div>
-                )}
-                {financeItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+          {hasSectionVisibleModules('personal') &&
+            renderSection('personal', t('个人中心'), financeItems)}
 
           {/* 帮助中心区域 */}
-          {hasSectionVisibleModules('help') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('帮助中心')}</div>
-                )}
-                {helpItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+          {hasSectionVisibleModules('help') &&
+            renderSection('help', t('帮助中心'), helpItems)}
 
           {/* 管理员区域 - 只在管理员时显示且配置允许时显示 */}
-          {isAdmin() && hasSectionVisibleModules('admin') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('管理员')}</div>
-                )}
-                {adminItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+          {isAdmin() &&
+            hasSectionVisibleModules('admin') &&
+            renderSection('admin', t('管理员'), adminItems)}
         </Nav>
       </SkeletonWrapper>
 
-      {/* 底部折叠按钮 */}
+      {/* 底部用户信息 + 折叠按钮 */}
+      <SidebarUserProfile collapsed={collapsed} />
       <div className='sidebar-collapse-button'>
         <SkeletonWrapper
           loading={showSkeleton}

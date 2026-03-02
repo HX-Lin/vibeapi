@@ -40,7 +40,6 @@ import {
   CHART_CONFIG,
   CARD_PROPS,
   FLEX_CENTER_GAP2,
-  ILLUSTRATION_SIZE,
   ANNOUNCEMENT_LEGEND_DATA,
   UPTIME_STATUS_MAP,
 } from '../../constants/dashboard.constants';
@@ -212,7 +211,6 @@ const Dashboard = () => {
               handleSpeedTest={handleSpeedTest}
               CARD_PROPS={CARD_PROPS}
               FLEX_CENTER_GAP2={FLEX_CENTER_GAP2}
-              ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
               t={dashboardData.t}
             />
           )}
@@ -234,7 +232,6 @@ const Dashboard = () => {
                   }),
                 )}
                 CARD_PROPS={CARD_PROPS}
-                ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
                 t={dashboardData.t}
               />
             )}
@@ -245,7 +242,6 @@ const Dashboard = () => {
                 faqData={faqData}
                 CARD_PROPS={CARD_PROPS}
                 FLEX_CENTER_GAP2={FLEX_CENTER_GAP2}
-                ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
                 t={dashboardData.t}
               />
             )}
@@ -273,7 +269,6 @@ const Dashboard = () => {
                   )
                 }
                 CARD_PROPS={CARD_PROPS}
-                ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
                 t={dashboardData.t}
               />
             )}

@@ -20,6 +20,8 @@ For commercial licensing, please contact support@quantumnous.com
 import HeaderBar from './headerbar';
 import { Layout } from '@douyinfe/semi-ui';
 import SiderBar from './SiderBar';
+import Breadcrumb from './Breadcrumb';
+import CommandPalette from './CommandPalette';
 import App from '../../App';
 import FooterBar from './Footer';
 import { ToastContainer } from 'react-toastify';
@@ -51,6 +53,8 @@ const PageLayout = () => {
   const cardProPages = [
     '/console/channel',
     '/console/log',
+    '/console/midjourney',
+    '/console/task',
     '/console/redemption',
     '/console/user',
     '/console/token',
@@ -189,6 +193,7 @@ const PageLayout = () => {
               position: 'relative',
             }}
           >
+            {shouldInnerPadding && !isMobile && <Breadcrumb />}
             <App />
           </Content>
           {!shouldHideFooter && (
@@ -203,6 +208,7 @@ const PageLayout = () => {
           )}
         </Layout>
       </Layout>
+      <CommandPalette />
       <ToastContainer />
     </Layout>
   );

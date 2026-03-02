@@ -29,9 +29,12 @@ export const DEFAULT_ADMIN_CONFIG = {
   console: {
     enabled: true,
     playground: true,
+    chat: true,
     detail: true,
     token: true,
     log: true,
+    midjourney: true,
+    task: true,
   },
   personal: {
     enabled: true,
@@ -48,15 +51,46 @@ export const DEFAULT_ADMIN_CONFIG = {
     channel: true,
     models: true,
     deployment: true,
+    subscription: true,
     redemption: true,
     user: true,
-    subscription: true,
     vibeapi: true,
     setting: true,
   },
 };
 
-const deepClone = (value) => JSON.parse(JSON.stringify(value));
+export const deepClone = (value) => JSON.parse(JSON.stringify(value));
+
+// UI 元数据：区域标题和描述（用于设置页面自动渲染）
+export const SECTION_META = {
+  console: { titleKey: '工作台', descKey: '操练场、数据管理和日志查看' },
+  personal: { titleKey: '个人中心', descKey: '用户个人功能' },
+  help: { titleKey: '帮助中心', descKey: '使用帮助和配置指南' },
+  admin: { titleKey: '管理员', descKey: '系统管理功能' },
+};
+
+// UI 元数据：模块标题和描述
+export const MODULE_META = {
+  playground: { titleKey: '操练场', descKey: 'AI模型测试环境' },
+  chat: { titleKey: '聊天', descKey: '聊天会话管理（即将推出）' },
+  detail: { titleKey: '数据看板', descKey: '系统数据统计' },
+  token: { titleKey: '令牌管理', descKey: 'API令牌管理' },
+  log: { titleKey: '使用日志', descKey: 'API使用记录' },
+  midjourney: { titleKey: '绘图日志', descKey: '绘图任务记录' },
+  task: { titleKey: '任务日志', descKey: '系统任务记录' },
+  topup: { titleKey: '钱包管理', descKey: '余额充值管理' },
+  personal: { titleKey: '个人设置', descKey: '个人信息设置' },
+  'help-claude-cli': { titleKey: 'Claude Code CLI 配置', descKey: 'Claude CLI 使用指南' },
+  'help-vscode': { titleKey: 'VSCode 配置', descKey: 'VSCode 使用指南' },
+  channel: { titleKey: '渠道管理', descKey: 'API渠道配置' },
+  models: { titleKey: '模型管理', descKey: 'AI模型配置' },
+  deployment: { titleKey: '模型部署', descKey: '模型部署管理' },
+  subscription: { titleKey: '订阅管理', descKey: '订阅套餐管理' },
+  redemption: { titleKey: '兑换码管理', descKey: '兑换码生成管理' },
+  user: { titleKey: '用户管理', descKey: '用户账户管理' },
+  vibeapi: { titleKey: 'VibeAPI 管理', descKey: 'VibeAPI 系统管理' },
+  setting: { titleKey: '系统设置', descKey: '系统参数配置' },
+};
 
 export const mergeAdminConfig = (savedConfig) => {
   const merged = deepClone(DEFAULT_ADMIN_CONFIG);

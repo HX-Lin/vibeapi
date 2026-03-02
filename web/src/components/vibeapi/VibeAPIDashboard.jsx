@@ -6,11 +6,11 @@ import {
   Tag,
   Button,
   Spin,
-  Empty,
   Typography,
   Tooltip,
   Banner,
 } from '@douyinfe/semi-ui';
+import EmptyState from '../common/ui/EmptyState';
 import {
   Activity,
   Server,
@@ -736,14 +736,11 @@ const VibeAPIDashboard = () => {
                   rowKey='id'
                   pagination={{ pageSize: 20 }}
                   size='small'
-                  empty={<Empty description={t('暂无数据')} />}
+                  empty={<EmptyState preset='noResult' size='small' description={t('暂无数据')} />}
                 />
               </>
             ) : (
-              <Empty
-                description={t('暂无数据')}
-                style={{ padding: '40px 0' }}
-              />
+              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
             )}
           </Spin>
         )}
@@ -757,13 +754,10 @@ const VibeAPIDashboard = () => {
                 dataSource={accountsData}
                 pagination={{ pageSize: 10 }}
                 size='small'
-                empty={<Empty description={t('暂无数据')} />}
+                empty={<EmptyState preset='noResult' size='small' description={t('暂无数据')} />}
               />
             ) : (
-              <Empty
-                description={t('暂无数据')}
-                style={{ padding: '40px 0' }}
-              />
+              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
             )}
           </Spin>
         )}
@@ -794,10 +788,7 @@ const VibeAPIDashboard = () => {
                 ))}
               </div>
             ) : (
-              <Empty
-                description={t('暂无数据')}
-                style={{ padding: '40px 0' }}
-              />
+              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
             )}
             {successRate !== null && logsLoaded && (
               <div className='mt-4 flex items-center gap-4 px-3 py-2 rounded-lg bg-blue-50 border border-blue-100'>
@@ -829,13 +820,10 @@ const VibeAPIDashboard = () => {
                 dataSource={logsData}
                 pagination={{ pageSize: 20 }}
                 size='small'
-                empty={<Empty description={t('暂无数据')} />}
+                empty={<EmptyState preset='noResult' size='small' description={t('暂无数据')} />}
               />
             ) : (
-              <Empty
-                description={t('暂无数据')}
-                style={{ padding: '40px 0' }}
-              />
+              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
             )}
           </Spin>
         )}
