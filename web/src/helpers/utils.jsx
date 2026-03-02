@@ -18,20 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import { Toast, Pagination } from '@douyinfe/semi-ui';
-import { toastConstants } from '../constants';
 import React from 'react';
-import { toast } from 'react-toastify';
 import {
   THINK_TAG_REGEX,
   MESSAGE_ROLES,
 } from '../constants/playground.constants';
 import { TABLE_COMPACT_MODES_KEY } from '../constants';
-import { MOBILE_BREAKPOINT } from '../hooks/common/useIsMobile';
 
-const HTMLToastContent = ({ htmlContent }) => {
-  return <div dangerouslySetInnerHTML={{ __html: htmlContent }} />;
-};
-export default HTMLToastContent;
 export function isAdmin() {
   let user = localStorage.getItem('user');
   if (!user) return false;
@@ -96,28 +89,6 @@ export async function copy(text) {
 
 // isMobile 函数已移除，请改用 useIsMobile Hook
 
-let showErrorOptions = { autoClose: toastConstants.ERROR_TIMEOUT };
-let showWarningOptions = { autoClose: toastConstants.WARNING_TIMEOUT };
-let showSuccessOptions = { autoClose: toastConstants.SUCCESS_TIMEOUT };
-let showInfoOptions = { autoClose: toastConstants.INFO_TIMEOUT };
-let showNoticeOptions = { autoClose: false };
-
-const isMobileScreen = window.matchMedia(
-  `(max-width: ${MOBILE_BREAKPOINT - 1}px)`,
-).matches;
-if (isMobileScreen) {
-  showErrorOptions.position = 'top-center';
-  // showErrorOptions.transition = 'flip';
-
-  showSuccessOptions.position = 'top-center';
-  // showSuccessOptions.transition = 'flip';
-
-  showInfoOptions.position = 'top-center';
-  // showInfoOptions.transition = 'flip';
-
-  showNoticeOptions.position = 'top-center';
-  // showNoticeOptions.transition = 'flip';
-}
 
 export function showError(error) {
   console.error(error);
@@ -164,7 +135,7 @@ export function showInfo(message) {
 
 export function showNotice(message, isHTML = false) {
   if (isHTML) {
-    toast(<HTMLToastContent htmlContent={message} />, showNoticeOptions);
+    Toast.info({ content: <div dangerouslySetInnerHTML={{ __html: message }} />, duration: 0 });
   } else {
     Toast.info(message);
   }

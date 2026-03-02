@@ -20,13 +20,13 @@ For commercial licensing, please contact support@quantumnous.com
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getLucideIcon } from '../../helpers/render';
+import { getLucideIcon } from '../../helpers/lucide-icons';
 import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
 import { useSidebar } from '../../hooks/common/useSidebar';
 import { useSidebarSections } from '../../hooks/common/useSidebarSections';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
-import { isAdmin, isRoot } from '../../helpers';
+import { isAdmin, isRoot } from '../../helpers/utils';
 import { StatusContext } from '../../context/Status';
 import SkeletonWrapper from './components/SkeletonWrapper';
 import SidebarUserProfile from './SidebarUserProfile';

@@ -21,8 +21,8 @@ import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Search } from 'lucide-react';
-import { getLucideIcon } from '../../helpers/render';
-import { isAdmin, isRoot } from '../../helpers';
+import { getLucideIcon } from '../../helpers/lucide-icons';
+import { isAdmin, isRoot } from '../../helpers/utils';
 import { SECTION_META, MODULE_META } from '../../hooks/common/useSidebar';
 
 /**

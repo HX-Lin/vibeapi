@@ -24,18 +24,13 @@ import Breadcrumb from './Breadcrumb';
 import CommandPalette from './CommandPalette';
 import App from '../../App';
 import FooterBar from './Footer';
-import { ToastContainer } from 'react-toastify';
 import React, { useContext, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
 import { useTranslation } from 'react-i18next';
-import {
-  API,
-  getLogo,
-  getSystemName,
-  showError,
-  setStatusData,
-} from '../../helpers';
+import { API } from '../../helpers/api';
+import { getLogo, getSystemName, showError } from '../../helpers/utils';
+import { setStatusData } from '../../helpers/data';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
 import { useLocation } from 'react-router-dom';
@@ -209,7 +204,6 @@ const PageLayout = () => {
         </Layout>
       </Layout>
       <CommandPalette />
-      <ToastContainer />
     </Layout>
   );
 };

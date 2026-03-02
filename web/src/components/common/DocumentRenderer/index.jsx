@@ -23,7 +23,7 @@ import { Card, Spin, Typography } from '@douyinfe/semi-ui';
 const { Title } = Typography;
 import EmptyState from '../ui/EmptyState';
 import { useTranslation } from 'react-i18next';
-import MarkdownRenderer from '../markdown/MarkdownRenderer';
+import LazyMarkdownRenderer from '../markdown/LazyMarkdownRenderer';
 
 // 检查是否为 URL
 const isUrl = (content) => {
@@ -235,7 +235,7 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
             {title}
           </Title>
           <div className='prose prose-lg max-w-none'>
-            <MarkdownRenderer content={content} />
+            <LazyMarkdownRenderer content={content} />
           </div>
         </div>
       </div>

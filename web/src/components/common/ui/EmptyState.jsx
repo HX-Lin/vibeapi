@@ -17,34 +17,33 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Empty, Button } from '@douyinfe/semi-ui';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-  IllustrationNotFound,
-  IllustrationNotFoundDark,
-} from '@douyinfe/semi-illustrations';
+
+const LazyIllustrationConstruction = lazy(() => import('@douyinfe/semi-illustrations').then(m => ({ default: m.IllustrationConstruction })));
+const LazyIllustrationConstructionDark = lazy(() => import('@douyinfe/semi-illustrations').then(m => ({ default: m.IllustrationConstructionDark })));
+const LazyIllustrationNoResult = lazy(() => import('@douyinfe/semi-illustrations').then(m => ({ default: m.IllustrationNoResult })));
+const LazyIllustrationNoResultDark = lazy(() => import('@douyinfe/semi-illustrations').then(m => ({ default: m.IllustrationNoResultDark })));
+const LazyIllustrationNotFound = lazy(() => import('@douyinfe/semi-illustrations').then(m => ({ default: m.IllustrationNotFound })));
+const LazyIllustrationNotFoundDark = lazy(() => import('@douyinfe/semi-illustrations').then(m => ({ default: m.IllustrationNotFoundDark })));
 
 /**
  * 预设插图映射
  * key: 预设名称
- * value: { light, dark } 组件
+ * value: { light, dark } 组件（懒加载）
  */
 const ILLUSTRATION_PRESETS = {
   construction: {
-    light: IllustrationConstruction,
-    dark: IllustrationConstructionDark,
+    light: LazyIllustrationConstruction,
+    dark: LazyIllustrationConstructionDark,
   },
   noResult: {
-    light: IllustrationNoResult,
-    dark: IllustrationNoResultDark,
+    light: LazyIllustrationNoResult,
+    dark: LazyIllustrationNoResultDark,
   },
   notFound: {
-    light: IllustrationNotFound,
-    dark: IllustrationNotFoundDark,
+    light: LazyIllustrationNotFound,
+    dark: LazyIllustrationNotFoundDark,
   },
 };
 
@@ -113,8 +112,9 @@ const EmptyState = ({
   } else if (illustrationPreset) {
     const LightIllustration = illustrationPreset.light;
     const DarkIllustration = illustrationPreset.dark;
-    imageProps.image = <LightIllustration style={dimensions} />;
-    imageProps.darkModeImage = <DarkIllustration style={dimensions} />;
+    const fallback = <div style={dimensions} />;
+    imageProps.image = <Suspense fallback={fallback}><LightIllustration style={dimensions} /></Suspense>;
+    imageProps.darkModeImage = <Suspense fallback={fallback}><DarkIllustration style={dimensions} /></Suspense>;
   }
 
   return (

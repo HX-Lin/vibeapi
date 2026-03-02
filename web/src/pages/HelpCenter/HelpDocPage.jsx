@@ -22,7 +22,7 @@ import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Typography } from '@douyinfe/semi-ui';
 import { StatusContext } from '../../context/Status';
-import MarkdownRenderer from '../../components/common/markdown/MarkdownRenderer';
+import LazyMarkdownRenderer from '../../components/common/markdown/LazyMarkdownRenderer';
 
 const { Title, Text } = Typography;
 
@@ -50,7 +50,7 @@ const HelpDocPage = () => {
 
   return (
     <div className='mt-[60px] px-2 max-w-4xl mx-auto pb-12'>
-      <MarkdownRenderer content={doc.content} />
+      <LazyMarkdownRenderer content={doc.content} />
     </div>
   );
 };

@@ -20,6 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 import react from '@vitejs/plugin-react';
 import { defineConfig, transformWithEsbuild } from 'vite';
 import pkg from '@douyinfe/vite-plugin-semi';
+import compression from 'vite-plugin-compression';
 import path from 'path';
 const { vitePluginSemi } = pkg;
 
@@ -60,6 +61,12 @@ export default defineConfig({
     vitePluginSemi({
       cssLayer: true,
     }),
+    // gzip 预压缩：构建时生成 .gz 文件，nginx 直接发送无需实时压缩
+    compression({
+      algorithm: 'gzip',
+      threshold: 1024,
+      ext: '.gz',
+    }),
   ],
   optimizeDeps: {
     esbuildOptions: {
@@ -74,13 +81,13 @@ export default defineConfig({
       output: {
         manualChunks: {
           'react-core': ['react', 'react-dom', 'react-router-dom'],
-          'semi-ui': ['@douyinfe/semi-icons', '@douyinfe/semi-ui'],
+          'semi-ui': ['@douyinfe/semi-ui'],
+          'semi-icons': ['@douyinfe/semi-icons'],
           tools: ['axios', 'history', 'marked'],
           'react-components': [
             'react-dropzone',
             'react-fireworks',
             'react-telegram-login',
-            'react-toastify',
             'react-turnstile',
           ],
           i18n: [

@@ -22,7 +22,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Tooltip } from '@douyinfe/semi-ui';
 import { LogOut } from 'lucide-react';
-import { isAdmin, isRoot, API, showSuccess } from '../../helpers';
+import { API } from '../../helpers/api';
+import { isAdmin, isRoot, showSuccess } from '../../helpers/utils';
 import { UserContext } from '../../context/User';
 
 /**

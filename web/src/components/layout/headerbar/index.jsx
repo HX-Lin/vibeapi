@@ -17,10 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { useHeaderBar } from '../../../hooks/common/useHeaderBar';
 import { useNotifications } from '../../../hooks/common/useNotifications';
-import NoticeModal from '../NoticeModal';
+const NoticeModal = lazy(() => import('../NoticeModal'));
 import MobileMenuButton from './MobileMenuButton';
 import HeaderLogo from './HeaderLogo';
 import HeaderNav from './HeaderNav';
@@ -62,13 +62,17 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
 
   return (
     <header className='text-semi-color-text-0 sticky top-0 z-50 transition-colors duration-300 bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg border-b border-gray-200/60 dark:border-zinc-700/60'>
-      <NoticeModal
-        visible={noticeVisible}
-        onClose={handleNoticeClose}
-        isMobile={isMobile}
-        defaultTab={unreadCount > 0 ? 'system' : 'inApp'}
-        unreadKeys={getUnreadKeys()}
-      />
+      {noticeVisible && (
+        <Suspense fallback={null}>
+          <NoticeModal
+            visible={noticeVisible}
+            onClose={handleNoticeClose}
+            isMobile={isMobile}
+            defaultTab={unreadCount > 0 ? 'system' : 'inApp'}
+            unreadKeys={getUnreadKeys()}
+          />
+        </Suspense>
+      )}
 
       <div className='w-full px-2'>
         <div className='flex items-center justify-between h-16'>
