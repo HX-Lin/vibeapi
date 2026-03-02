@@ -116,7 +116,7 @@ const SettingsHelpDocs = ({ options, refresh }) => {
   ];
 
   const updateOption = async (key, value) => {
-    const res = await API.put('/api/option/', {
+    const res = await API.put('/api/help-docs', {
       key,
       value,
     });

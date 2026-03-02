@@ -202,6 +202,9 @@ func SetApiRouter(router *gin.Engine) {
 		channelRoute := apiRouter.Group("/channel")
 		channelRoute.Use(middleware.AdminAuth())
 		{
+			// Help docs management (admin level)
+			apiRouter.PUT("/help-docs", middleware.AdminAuth(), controller.UpdateHelpDocs)
+
 			channelRoute.GET("/", controller.GetAllChannels)
 			channelRoute.GET("/search", controller.SearchChannels)
 			channelRoute.GET("/models", controller.ChannelListModels)
