@@ -77,6 +77,13 @@ export default defineConfig({
     },
   },
   build: {
+    // 过滤掉懒加载 chunk 的 modulepreload，避免首屏抢占带宽
+    modulePreload: {
+      resolveDependencies: (filename, deps) => {
+        const lazyChunks = ['mermaid', 'katex', 'markdown', 'semi-illustrations', 'icons-extra', 'vchart'];
+        return deps.filter(dep => !lazyChunks.some(chunk => dep.includes(chunk)));
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
