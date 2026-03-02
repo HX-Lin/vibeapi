@@ -27,3 +27,7 @@ data/
 .gomodcache/
 .gocache-temp
 .gopath
+.env.server
+docs/
+nginx.conf
+nul
