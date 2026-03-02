@@ -39,6 +39,7 @@ import {
   API,
   showSuccess,
   showError,
+  getQuotaPresets,
 } from '../../../../helpers';
 import CodeViewer from '../../../playground/CodeViewer';
 import { StatusContext } from '../../../../context/Status';
@@ -444,12 +445,7 @@ const NotificationSettings = ({
                     </span>
                   }
                   placeholder={t('请输入预警额度')}
-                  data={[
-                    { value: 100000, label: '0.2$' },
-                    { value: 500000, label: '1$' },
-                    { value: 1000000, label: '2$' },
-                    { value: 5000000, label: '10$' },
-                  ]}
+                  data={getQuotaPresets([0.2, 1, 2, 10])}
                   onChange={(val) => handleFormChange('warningThreshold', val)}
                   prefix={<IconBell />}
                   extraText={t(

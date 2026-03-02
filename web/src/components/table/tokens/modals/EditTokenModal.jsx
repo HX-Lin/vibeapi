@@ -27,6 +27,7 @@ import {
   renderQuotaWithPrompt,
   getModelCategories,
   selectFilter,
+  getQuotaPresets,
 } from '../../../../helpers';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import {
@@ -505,14 +506,7 @@ const EditTokenModal = (props) => {
                           ? []
                           : [{ required: true, message: t('请输入额度') }]
                       }
-                      data={[
-                        { value: 500000, label: '1$' },
-                        { value: 5000000, label: '10$' },
-                        { value: 25000000, label: '50$' },
-                        { value: 50000000, label: '100$' },
-                        { value: 250000000, label: '500$' },
-                        { value: 500000000, label: '1000$' },
-                      ]}
+                      data={getQuotaPresets([1, 10, 50, 100, 500, 1000])}
                     />
                   </Col>
                   <Col span={24}>
