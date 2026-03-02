@@ -19,7 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React, { useRef, useEffect } from 'react';
 import { Typography, TextArea, Button } from '@douyinfe/semi-ui';
-import LazyMarkdownRenderer from '../common/markdown/LazyMarkdownRenderer';
+import MarkdownRenderer from '../common/markdown/MarkdownRenderer';
 import ThinkingContent from './ThinkingContent';
 import { Loader2, Check, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -298,7 +298,7 @@ const MessageContent = ({
                     <div
                       className={`prose prose-xs sm:prose-sm prose-gray max-w-none overflow-x-auto text-xs sm:text-sm ${message.role === 'user' ? 'user-message' : ''}`}
                     >
-                      <LazyMarkdownRenderer
+                      <MarkdownRenderer
                         content={textContent.text}
                         className={
                           message.role === 'user' ? 'user-message' : ''
@@ -338,7 +338,7 @@ const MessageContent = ({
 
                 return (
                   <div className='prose prose-xs sm:prose-sm prose-gray max-w-none overflow-x-auto text-xs sm:text-sm'>
-                    <LazyMarkdownRenderer
+                    <MarkdownRenderer
                       content={finalDisplayableFinalContent}
                       className=''
                       animated={isThinkingStatus}
@@ -352,7 +352,7 @@ const MessageContent = ({
                 <div
                   className={`prose prose-xs sm:prose-sm prose-gray max-w-none overflow-x-auto text-xs sm:text-sm ${message.role === 'user' ? 'user-message' : ''}`}
                 >
-                  <LazyMarkdownRenderer
+                  <MarkdownRenderer
                     content={message.content}
                     className={message.role === 'user' ? 'user-message' : ''}
                     animated={false}
