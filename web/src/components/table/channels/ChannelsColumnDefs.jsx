@@ -33,11 +33,11 @@ import {
   timestamp2string,
   renderGroup,
   renderQuota,
-  getChannelIcon,
   renderQuotaWithAmount,
   showSuccess,
   showError,
 } from '../../../helpers';
+import { getChannelIcon } from '../../../helpers/icons';
 import { CHANNEL_OPTIONS } from '../../../constants';
 import {
   IconTreeTriangleDown,

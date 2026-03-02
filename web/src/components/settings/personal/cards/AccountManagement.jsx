@@ -50,8 +50,8 @@ import {
   onLinuxDOOAuthClicked,
   onDiscordOAuthClicked,
   onCustomOAuthClicked,
-  getOAuthProviderIcon,
 } from '../../../../helpers';
+import { getOAuthProviderIcon } from '../../../../helpers/icons';
 import TwoFASetting from '../components/TwoFASetting';
 
 const AccountManagement = ({

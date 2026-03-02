@@ -23,8 +23,8 @@ import {
   API,
   showError,
   showSuccess,
-  getOAuthProviderIcon,
 } from '../../../../helpers';
+import { getOAuthProviderIcon } from '../../../../helpers/icons';
 import {
   Modal,
   Spin,

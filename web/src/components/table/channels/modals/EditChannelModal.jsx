@@ -51,10 +51,9 @@ import {
 import {
   getChannelModels,
   copy,
-  getChannelIcon,
-  getModelCategories,
   selectFilter,
 } from '../../../../helpers';
+import { getChannelIcon, getModelCategories } from '../../../../helpers/icons';
 import ModelSelectModal from './ModelSelectModal';
 import SingleModelSelectModal from './SingleModelSelectModal';
 import OllamaModelModal from './OllamaModelModal';

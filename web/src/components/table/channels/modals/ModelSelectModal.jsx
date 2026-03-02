@@ -32,7 +32,7 @@ import {
 import EmptyState from '../../../common/ui/EmptyState';
 import { IconSearch, IconInfoCircle } from '@douyinfe/semi-icons';
 import { useTranslation } from 'react-i18next';
-import { getModelCategories } from '../../../../helpers/render';
+import { getModelCategories } from '../../../../helpers/icons';
 
 const ModelSelectModal = ({
   visible,

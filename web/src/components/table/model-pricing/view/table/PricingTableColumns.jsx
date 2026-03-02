@@ -21,11 +21,10 @@ import React from 'react';
 import { Tag, Space, Tooltip } from '@douyinfe/semi-ui';
 import { IconHelpCircle } from '@douyinfe/semi-icons';
 import {
-  renderModelTag,
   stringToColor,
   calculateModelPrice,
-  getLobeHubIcon,
 } from '../../../../../helpers';
+import { renderModelTag, getLobeHubIcon } from '../../../../../helpers/icons';
 import {
   renderLimitedItems,
   renderDescription,

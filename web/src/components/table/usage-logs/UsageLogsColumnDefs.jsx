@@ -33,7 +33,6 @@ import {
   renderQuota,
   stringToColor,
   getLogOther,
-  renderModelTag,
   renderClaudeLogContent,
   renderLogContent,
   renderModelPriceSimple,
@@ -41,6 +40,7 @@ import {
   renderClaudeModelPrice,
   renderModelPrice,
 } from '../../../helpers';
+import { renderModelTag } from '../../../helpers/icons';
 import { IconHelpCircle } from '@douyinfe/semi-icons';
 import { Route, Sparkles } from 'lucide-react';
 

@@ -29,7 +29,7 @@ import {
 } from '@douyinfe/semi-ui';
 import EmptyState from '../../../common/ui/EmptyState';
 import { IconSearch } from '@douyinfe/semi-icons';
-import { getModelCategories } from '../../../../helpers/render';
+import { getModelCategories } from '../../../../helpers/icons';
 
 const SingleModelSelectModal = ({
   visible,

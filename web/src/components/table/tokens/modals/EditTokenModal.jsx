@@ -25,10 +25,10 @@ import {
   timestamp2string,
   renderGroupOption,
   renderQuotaWithPrompt,
-  getModelCategories,
   selectFilter,
   getQuotaPresets,
 } from '../../../../helpers';
+import { getModelCategories } from '../../../../helpers/icons';
 import { useIsMobile } from '../../../../hooks/common/useIsMobile';
 import {
   Button,
