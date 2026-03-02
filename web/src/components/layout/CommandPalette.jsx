@@ -42,9 +42,6 @@ const ALL_ROUTES = [
   // 个人中心
   { section: 'personal', key: 'topup', path: '/console/topup' },
   { section: 'personal', key: 'personal', path: '/console/personal' },
-  // 帮助中心
-  { section: 'help', key: 'help-claude-cli', path: '/console/help/claude-cli' },
-  { section: 'help', key: 'help-vscode', path: '/console/help/vscode' },
   // 管理员
   { section: 'admin', key: 'channel', path: '/console/channel' },
   { section: 'admin', key: 'models', path: '/console/models' },

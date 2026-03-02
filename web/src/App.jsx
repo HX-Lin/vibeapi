@@ -44,8 +44,7 @@ const Playground = lazy(() => import('./pages/Playground'));
 const Subscription = lazy(() => import('./pages/Subscription'));
 const VibeAPI = lazy(() => import('./pages/VibeAPI'));
 const Setup = lazy(() => import('./pages/Setup'));
-const ClaudeCliGuide = lazy(() => import('./pages/HelpCenter/ClaudeCliGuide'));
-const VscodeGuide = lazy(() => import('./pages/HelpCenter/VscodeGuide'));
+const HelpDocPage = lazy(() => import('./pages/HelpCenter/HelpDocPage'));
 const MjLog = lazy(() => import('./pages/MjLog'));
 const TaskLog = lazy(() => import('./pages/TaskLog'));
 const About = lazy(() => import('./pages/About'));
@@ -327,21 +326,11 @@ function App() {
           }
         />
         <Route
-          path='/console/help/claude-cli'
+          path='/console/help/:slug'
           element={
             <PrivateRoute>
               <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-                <ClaudeCliGuide />
-              </Suspense>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path='/console/help/vscode'
-          element={
-            <PrivateRoute>
-              <Suspense fallback={<Loading></Loading>} key={location.pathname}>
-                <VscodeGuide />
+                <HelpDocPage />
               </Suspense>
             </PrivateRoute>
           }

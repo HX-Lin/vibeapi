@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getLucideIcon } from '../../helpers/render';
@@ -27,12 +27,13 @@ import { useSidebar } from '../../hooks/common/useSidebar';
 import { useSidebarSections } from '../../hooks/common/useSidebarSections';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
 import { isAdmin, isRoot } from '../../helpers';
+import { StatusContext } from '../../context/Status';
 import SkeletonWrapper from './components/SkeletonWrapper';
 import SidebarUserProfile from './SidebarUserProfile';
 
 import { Nav, Divider, Button } from '@douyinfe/semi-ui';
 
-const routerMap = {
+const baseRouterMap = {
   channel: '/console/channel',
   token: '/console/token',
   redemption: '/console/redemption',
@@ -50,13 +51,12 @@ const routerMap = {
   playground: '/console/playground',
   personal: '/console/personal',
   vibeapi: '/console/vibeapi',
-  'help-claude-cli': '/console/help/claude-cli',
-  'help-vscode': '/console/help/vscode',
 };
 
 const SiderBar = ({ onNavigate = () => {} }) => {
   const { t } = useTranslation();
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
+  const [statusState] = useContext(StatusContext);
   const {
     isModuleVisible,
     hasSectionVisibleModules,
@@ -66,17 +66,14 @@ const SiderBar = ({ onNavigate = () => {} }) => {
   const { isSectionCollapsed, toggleSection } = useSidebarSections();
   const showSkeleton = useMinimumLoadingTime(sidebarLoading, 200);
 
+  const vibeapiUpstreamEnabled = statusState?.status?.vibeapi_upstream_enabled || false;
+
   const [selectedKeys, setSelectedKeys] = useState(['detail']);
   const [openedKeys, setOpenedKeys] = useState([]);
   const location = useLocation();
 
   const workspaceItems = useMemo(() => {
     const items = [
-      {
-        text: t('操练场'),
-        itemKey: 'playground',
-        to: '/playground',
-      },
       {
         text: t('数据看板'),
         itemKey: 'detail',
@@ -144,28 +141,33 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     return filteredItems;
   }, [t, isModuleVisible]);
 
+  const helpDocs = statusState?.status?.help_docs;
+
+  // 动态构建 routerMap，包含帮助文档路由
+  const routerMap = useMemo(() => {
+    const map = { ...baseRouterMap };
+    if (Array.isArray(helpDocs)) {
+      helpDocs.forEach((doc) => {
+        map['help-' + doc.slug] = '/console/help/' + doc.slug;
+      });
+    }
+    return map;
+  }, [helpDocs]);
+
   const helpItems = useMemo(() => {
-    const items = [
-      {
-        text: t('Claude Code CLI 配置'),
-        itemKey: 'help-claude-cli',
-        to: '/console/help/claude-cli',
-      },
-      {
-        text: t('VSCode 配置'),
-        itemKey: 'help-vscode',
-        to: '/console/help/vscode',
-      },
-    ];
+    if (!Array.isArray(helpDocs) || helpDocs.length === 0) return [];
 
-    // 根据配置过滤项目
-    const filteredItems = items.filter((item) => {
-      const configVisible = isModuleVisible('help', item.itemKey);
-      return configVisible;
-    });
+    const items = helpDocs
+      .slice()
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((doc) => ({
+        text: doc.title,
+        itemKey: 'help-' + doc.slug,
+        to: '/console/help/' + doc.slug,
+      }));
 
-    return filteredItems;
-  }, [t, isModuleVisible]);
+    return items;
+  }, [helpDocs]);
 
   const adminItems = useMemo(() => {
     const items = [
@@ -209,7 +211,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('VibeAPI 管理'),
         itemKey: 'vibeapi',
         to: '/vibeapi',
-        className: isAdmin() ? '' : 'tableHiddle',
+        className: isAdmin() && vibeapiUpstreamEnabled ? '' : 'tableHiddle',
       },
       {
         text: t('系统设置'),
@@ -226,7 +228,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     });
 
     return filteredItems;
-  }, [isAdmin(), isRoot(), t, isModuleVisible]);
+  }, [isAdmin(), isRoot(), t, isModuleVisible, vibeapiUpstreamEnabled]);
 
   // 根据当前路径设置选中的菜单项
   useEffect(() => {
@@ -384,7 +386,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
             renderSection('personal', t('个人中心'), financeItems)}
 
           {/* 帮助中心区域 */}
-          {hasSectionVisibleModules('help') &&
+          {helpItems.length > 0 &&
             renderSection('help', t('帮助中心'), helpItems)}
 
           {/* 管理员区域 - 只在管理员时显示且配置允许时显示 */}

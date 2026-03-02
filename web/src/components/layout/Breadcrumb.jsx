@@ -17,9 +17,10 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { StatusContext } from '../../context/Status';
 import { ChevronRight, Home } from 'lucide-react';
 
 /**
@@ -41,16 +42,6 @@ const ROUTE_BREADCRUMBS = {
   // 个人中心
   '/console/personal': [{ labelKey: '个人设置' }],
   '/console/topup': [{ labelKey: '钱包管理' }],
-
-  // 帮助中心
-  '/console/help/claude-cli': [
-    { labelKey: '帮助中心', to: null },
-    { labelKey: 'Claude Code CLI 配置' },
-  ],
-  '/console/help/vscode': [
-    { labelKey: '帮助中心', to: null },
-    { labelKey: 'VSCode 配置' },
-  ],
 
   // 管理员
   '/console/channel': [{ labelKey: '渠道管理' }],
@@ -85,12 +76,26 @@ const SETTINGS_TAB_LABELS = {
 const Breadcrumb = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const [statusState] = useContext(StatusContext);
 
   const crumbs = useMemo(() => {
     const path = location.pathname;
 
     // 只在 /console 路由下显示面包屑
     if (!path.startsWith('/console')) return null;
+
+    // 动态帮助文档面包屑
+    const helpMatch = path.match(/^\/console\/help\/([a-z0-9-]+)$/);
+    if (helpMatch) {
+      const slug = helpMatch[1];
+      const helpDocs = statusState?.status?.help_docs;
+      const doc = Array.isArray(helpDocs) ? helpDocs.find((d) => d.slug === slug) : null;
+      return [
+        { label: t('控制台'), to: '/console', isHome: true },
+        { label: t('帮助中心'), to: null, isCurrent: false },
+        { label: doc ? doc.title : slug, to: null, isCurrent: true },
+      ];
+    }
 
     const config = ROUTE_BREADCRUMBS[path];
     if (!config) return null;

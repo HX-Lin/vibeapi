@@ -17,10 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useContext, useMemo } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { isAdmin, isRoot } from '../../helpers';
+import { Tooltip } from '@douyinfe/semi-ui';
+import { LogOut } from 'lucide-react';
+import { isAdmin, isRoot, API, showSuccess } from '../../helpers';
+import { UserContext } from '../../context/User';
 
 /**
  * 侧边栏底部用户简介组件
@@ -28,6 +31,8 @@ import { isAdmin, isRoot } from '../../helpers';
  */
 const SidebarUserProfile = ({ collapsed }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [, userDispatch] = useContext(UserContext);
 
   const userInfo = useMemo(() => {
     try {
@@ -38,6 +43,16 @@ const SidebarUserProfile = ({ collapsed }) => {
       return null;
     }
   }, []);
+
+  const handleLogout = useCallback(async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await API.get('/api/user/logout');
+    showSuccess(t('注销成功!'));
+    userDispatch({ type: 'logout' });
+    localStorage.removeItem('user');
+    navigate('/login');
+  }, [navigate, t, userDispatch]);
 
   if (!userInfo) return null;
 
@@ -52,27 +67,42 @@ const SidebarUserProfile = ({ collapsed }) => {
 
   if (collapsed) {
     return (
-      <Link to='/console/personal' style={{ textDecoration: 'none' }}>
-        <div
-          className='sidebar-user-profile'
-          style={{ justifyContent: 'center', padding: '8px 0' }}
-        >
+      <div className='sidebar-user-profile' style={{ justifyContent: 'center', padding: '8px 0', flexDirection: 'column', gap: '8px' }}>
+        <Link to='/console/personal' style={{ textDecoration: 'none' }}>
           <div className='sidebar-user-avatar'>{initial}</div>
-        </div>
-      </Link>
+        </Link>
+        <Tooltip content={t('退出')} position='right'>
+          <button
+            onClick={handleLogout}
+            className='flex items-center justify-center w-7 h-7 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors'
+            title={t('退出')}
+          >
+            <LogOut size={14} className='text-gray-400 hover:text-red-500 transition-colors' />
+          </button>
+        </Tooltip>
+      </div>
     );
   }
 
   return (
-    <Link to='/console/personal' style={{ textDecoration: 'none' }}>
-      <div className='sidebar-user-profile'>
+    <div className='sidebar-user-profile'>
+      <Link to='/console/personal' style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
         <div className='sidebar-user-avatar'>{initial}</div>
         <div className='sidebar-user-info'>
           <div className='sidebar-user-name'>{username}</div>
           <div className='sidebar-user-role'>{roleLabel}</div>
         </div>
-      </div>
-    </Link>
+      </Link>
+      <Tooltip content={t('退出')} position='top'>
+        <button
+          onClick={handleLogout}
+          className='flex items-center justify-center w-7 h-7 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors flex-shrink-0'
+          title={t('退出')}
+        >
+          <LogOut size={14} className='text-gray-400 hover:text-red-500 transition-colors' />
+        </button>
+      </Tooltip>
+    </div>
   );
 };
 

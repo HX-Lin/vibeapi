@@ -358,41 +358,45 @@ const EditTokenModal = (props) => {
                       showClear
                     />
                   </Col>
-                  <Col span={24}>
-                    {groups.length > 0 ? (
-                      <Form.Select
-                        field='group'
-                        label={t('令牌分组')}
-                        placeholder={t('令牌分组，默认为用户的分组')}
-                        optionList={groups}
-                        renderOptionItem={renderGroupOption}
-                        showClear
-                        style={{ width: '100%' }}
-                      />
-                    ) : (
-                      <Form.Select
-                        placeholder={t('管理员未设置用户可选分组')}
-                        disabled
-                        label={t('令牌分组')}
-                        style={{ width: '100%' }}
-                      />
-                    )}
-                  </Col>
-                  <Col
-                    span={24}
-                    style={{
-                      display: values.group === 'auto' ? 'block' : 'none',
-                    }}
-                  >
-                    <Form.Switch
-                      field='cross_group_retry'
-                      label={t('跨分组重试')}
-                      size='default'
-                      extraText={t(
-                        '开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道',
-                      )}
-                    />
-                  </Col>
+                  {statusState?.status?.token_group_enabled !== false && (
+                    <>
+                      <Col span={24}>
+                        {groups.length > 0 ? (
+                          <Form.Select
+                            field='group'
+                            label={t('令牌分组')}
+                            placeholder={t('令牌分组，默认为用户的分组')}
+                            optionList={groups}
+                            renderOptionItem={renderGroupOption}
+                            showClear
+                            style={{ width: '100%' }}
+                          />
+                        ) : (
+                          <Form.Select
+                            placeholder={t('管理员未设置用户可选分组')}
+                            disabled
+                            label={t('令牌分组')}
+                            style={{ width: '100%' }}
+                          />
+                        )}
+                      </Col>
+                      <Col
+                        span={24}
+                        style={{
+                          display: values.group === 'auto' ? 'block' : 'none',
+                        }}
+                      >
+                        <Form.Switch
+                          field='cross_group_retry'
+                          label={t('跨分组重试')}
+                          size='default'
+                          extraText={t(
+                            '开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道',
+                          )}
+                        />
+                      </Col>
+                    </>
+                  )}
                   <Col xs={24} sm={24} md={24} lg={10} xl={10}>
                     <Form.DatePicker
                       field='expired_time'
