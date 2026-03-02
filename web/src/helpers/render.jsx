@@ -21,6 +21,7 @@ import i18next from 'i18next';
 import { Modal, Tag, Typography, Avatar } from '@douyinfe/semi-ui';
 import { copy, showSuccess } from './utils';
 import { MOBILE_BREAKPOINT } from '../hooks/common/useIsMobile';
+import { visit } from 'unist-util-visit';
 
 // Icon-heavy functions moved to helpers/icons.jsx for code splitting:
 // getModelCategories, getChannelIcon, getLobeHubIcon, getOAuthProviderIcon, renderModelTag
