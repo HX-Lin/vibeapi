@@ -49,9 +49,36 @@ const HelpDocPage = () => {
   }
 
   return (
-    <div className='mt-[60px] px-2 max-w-4xl mx-auto pb-12'>
-      <LazyMarkdownRenderer content={doc.content} />
-    </div>
+    <>
+      <style>{`
+        .help-doc-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+        .help-doc-scroll::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 3px;
+        }
+        .help-doc-scroll::-webkit-scrollbar-thumb {
+          background: var(--semi-color-fill-2);
+          border-radius: 3px;
+        }
+        .help-doc-scroll::-webkit-scrollbar-thumb:hover {
+          background: var(--semi-color-fill-3);
+        }
+      `}</style>
+      <div
+        className='help-doc-scroll mt-[60px] px-2 max-w-4xl mx-auto pb-12'
+        style={{
+          maxHeight: 'calc(100vh - 80px)',
+          overflowY: 'auto',
+          paddingRight: '8px',
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'var(--semi-color-fill-2) transparent',
+        }}
+      >
+        <LazyMarkdownRenderer content={doc.content} />
+      </div>
+    </>
   );
 };
 
