@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -71,6 +72,39 @@ var imageExtensions = map[string]bool{
 
 // filenameRegex validates UUID-based filenames to prevent path traversal.
 var filenameRegex = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]+$`)
+
+// originalNames maps UUID filenames to their original upload names for Content-Disposition.
+var originalNames sync.Map
+
+const nameMapFile = "data/uploads/.namemap"
+
+func init() {
+	loadNameMap()
+}
+
+func loadNameMap() {
+	data, err := os.ReadFile(nameMapFile)
+	if err != nil {
+		return
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		parts := strings.SplitN(line, "\t", 2)
+		if len(parts) == 2 {
+			originalNames.Store(parts[0], parts[1])
+		}
+	}
+}
+
+func saveNameMapping(uuidName, originalName string) {
+	originalNames.Store(uuidName, originalName)
+	// Append to file
+	f, err := os.OpenFile(nameMapFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	f.WriteString(uuidName + "\t" + originalName + "\n")
+}
 
 func UploadFile(c *gin.Context) {
 	if err := c.Request.ParseMultipartForm(maxUploadSize); err != nil {
@@ -186,6 +220,9 @@ func UploadFile(c *gin.Context) {
 		"message": "",
 		"data":    "/uploads/" + newFilename,
 	})
+
+	// Save original filename mapping (after response)
+	saveNameMapping(newFilename, filepath.Base(fileHeader.Filename))
 }
 
 func ServeUploadedFile(c *gin.Context) {
@@ -221,9 +258,13 @@ func ServeUploadedFile(c *gin.Context) {
 
 	c.Header("Content-Type", contentType)
 	c.Header("Cache-Control", "public, max-age=31536000, immutable")
-	// Non-image files should trigger download instead of inline display
+	// Non-image files should trigger download with original filename
 	if !imageExtensions[ext] {
-		c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
+		downloadName := filename
+		if orig, ok := originalNames.Load(filename); ok {
+			downloadName = orig.(string)
+		}
+		c.Header("Content-Disposition", "attachment; filename=\""+downloadName+"\"")
 	}
 	c.File(fullPath)
 }
