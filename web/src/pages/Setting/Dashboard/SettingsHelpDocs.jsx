@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Button,
   Space,
@@ -29,9 +29,10 @@ import {
   Tooltip,
 } from '@douyinfe/semi-ui';
 import EmptyState from '../../../components/common/ui/EmptyState';
-import { Plus, Edit, Trash2, Save, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, BookOpen, Upload, GripVertical } from 'lucide-react';
 import { API, showError, showSuccess } from '../../../helpers';
 import { useTranslation } from 'react-i18next';
+import { useDropzone } from 'react-dropzone';
 
 const { Text } = Typography;
 
@@ -46,6 +47,7 @@ const SettingsHelpDocs = ({ options, refresh }) => {
   const [modalLoading, setModalLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [docForm, setDocForm] = useState({
     title: '',
     slug: '',
@@ -55,8 +57,127 @@ const SettingsHelpDocs = ({ options, refresh }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [dragIndex, setDragIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+  const textAreaRef = useRef(null);
+
+  // --- File Upload ---
+  const handleFileUpload = useCallback(
+    async (acceptedFiles) => {
+      if (acceptedFiles.length === 0) return;
+      setUploading(true);
+      try {
+        for (const file of acceptedFiles) {
+          const formData = new FormData();
+          formData.append('file', file);
+          const res = await API.post('/api/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          const { success, message, data: fileUrl } = res.data;
+          if (!success) {
+            showError(message || t('上传失败'));
+            continue;
+          }
+          const isImage = /\.(png|jpe?g|gif|webp|svg|ico)$/i.test(file.name);
+          const markdownSnippet = isImage
+            ? `![${file.name}](${fileUrl})\n`
+            : `[${file.name}](${fileUrl})\n`;
+
+          setDocForm((prev) => ({
+            ...prev,
+            content: (prev.content || '') + markdownSnippet,
+          }));
+        }
+        showSuccess(t('文件上传成功'));
+      } catch (error) {
+        showError(t('上传失败') + ': ' + (error.message || ''));
+      } finally {
+        setUploading(false);
+      }
+    },
+    [t],
+  );
+
+  const { getRootProps, getInputProps, isDragActive, open: openFilePicker } =
+    useDropzone({
+      onDrop: handleFileUpload,
+      accept: {
+        'image/png': ['.png'],
+        'image/jpeg': ['.jpg', '.jpeg'],
+        'image/gif': ['.gif'],
+        'image/webp': ['.webp'],
+        'image/svg+xml': ['.svg'],
+        'image/x-icon': ['.ico'],
+        'application/pdf': ['.pdf'],
+      },
+      maxSize: 10 * 1024 * 1024,
+      noClick: true,
+      noKeyboard: true,
+    });
+
+  const handlePaste = useCallback(
+    async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const imageFiles = [];
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        await handleFileUpload(imageFiles);
+      }
+    },
+    [handleFileUpload],
+  );
+
+  // --- Drag to Reorder ---
+  const handleDragStart = (index) => {
+    setDragIndex(index);
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    setDragOverIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (dragIndex !== null && dragOverIndex !== null && dragIndex !== dragOverIndex) {
+      const newList = [...docList];
+      const [dragged] = newList.splice(dragIndex, 1);
+      newList.splice(dragOverIndex, 0, dragged);
+      // Update sort_order based on new positions
+      const reordered = newList.map((item, idx) => ({
+        ...item,
+        sort_order: idx,
+      }));
+      setDocList(reordered);
+      setHasChanges(true);
+    }
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
 
   const columns = [
+    {
+      title: '',
+      key: 'drag',
+      width: 40,
+      render: (text, record, index) => (
+        <div
+          draggable
+          onDragStart={() => handleDragStart(index)}
+          onDragOver={(e) => handleDragOver(e, index)}
+          onDragEnd={handleDragEnd}
+          style={{ cursor: 'grab', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <GripVertical size={14} className='text-gray-400' />
+        </div>
+      ),
+    },
     {
       title: t('文档标题'),
       dataIndex: 'title',
@@ -286,7 +407,7 @@ const SettingsHelpDocs = ({ options, refresh }) => {
         <div className='flex items-center text-blue-500'>
           <BookOpen size={16} className='mr-2' />
           <Text>
-            {t('管理帮助中心的文档内容，支持 Markdown 格式')}
+            {t('管理帮助中心的文档内容，支持 Markdown 格式。拖拽行左侧图标可调整顺序。')}
           </Text>
         </div>
       </div>
@@ -418,15 +539,47 @@ const SettingsHelpDocs = ({ options, refresh }) => {
             onChange={(value) => setDocForm({ ...docForm, slug: value })}
             extraText={t('用于 URL 路径，例如：/console/help/your-slug')}
           />
-          <Form.TextArea
-            field='content'
-            label={t('文档内容（Markdown）')}
-            placeholder={t('请输入文档内容，支持 Markdown 格式')}
-            maxCount={50000}
-            rows={12}
-            rules={[{ required: true, message: t('请输入文档内容') }]}
-            onChange={(value) => setDocForm({ ...docForm, content: value })}
-          />
+          <div style={{ marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Button
+              icon={<Upload size={14} />}
+              size='small'
+              theme='light'
+              onClick={openFilePicker}
+              loading={uploading}
+            >
+              {t('上传图片/文件')}
+            </Button>
+            <Text type='tertiary' size='small'>
+              {t('支持拖拽或粘贴图片，PNG/JPG/GIF/WebP/SVG/PDF，最大 10MB')}
+            </Text>
+          </div>
+          <div
+            {...getRootProps()}
+            onPaste={handlePaste}
+            style={{
+              border: isDragActive
+                ? '2px dashed var(--semi-color-primary)'
+                : '2px dashed transparent',
+              borderRadius: 6,
+              transition: 'border-color 0.2s',
+            }}
+          >
+            <input {...getInputProps()} />
+            <Form.TextArea
+              field='content'
+              label={t('文档内容（Markdown）')}
+              placeholder={
+                isDragActive
+                  ? t('松开即可上传文件...')
+                  : t('请输入文档内容，支持 Markdown 格式。可拖拽或粘贴图片到此处上传。')
+              }
+              maxCount={50000}
+              rows={12}
+              rules={[{ required: true, message: t('请输入文档内容') }]}
+              onChange={(value) => setDocForm({ ...docForm, content: value })}
+              ref={textAreaRef}
+            />
+          </div>
         </Form>
       </Modal>
 

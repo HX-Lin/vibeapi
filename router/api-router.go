@@ -204,6 +204,7 @@ func SetApiRouter(router *gin.Engine) {
 		{
 			// Help docs management (admin level)
 			apiRouter.PUT("/help-docs", middleware.AdminAuth(), controller.UpdateHelpDocs)
+			apiRouter.POST("/upload", middleware.AdminAuth(), controller.UploadFile)
 
 			channelRoute.GET("/", controller.GetAllChannels)
 			channelRoute.GET("/search", controller.SearchChannels)
