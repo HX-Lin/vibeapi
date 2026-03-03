@@ -37,6 +37,7 @@ const (
 )
 
 var allowedExtensions = map[string]string{
+	// Images
 	".png":  "image/png",
 	".jpg":  "image/jpeg",
 	".jpeg": "image/jpeg",
@@ -44,11 +45,32 @@ var allowedExtensions = map[string]string{
 	".webp": "image/webp",
 	".svg":  "image/svg+xml",
 	".ico":  "image/x-icon",
+	// Documents
 	".pdf":  "application/pdf",
+	".txt":  "text/plain",
+	".json": "application/json",
+	".sh":   "text/x-shellscript",
+	".ps1":  "text/plain",
+	".bat":  "text/plain",
+	".md":   "text/markdown",
+	".csv":  "text/csv",
+	".xml":  "text/xml",
+	".yaml": "text/yaml",
+	".yml":  "text/yaml",
+	".toml": "text/plain",
+	".conf": "text/plain",
+	".log":  "text/plain",
+	".ini":  "text/plain",
+}
+
+// imageExtensions is the set of extensions that are images (displayed inline, not downloaded).
+var imageExtensions = map[string]bool{
+	".png": true, ".jpg": true, ".jpeg": true, ".gif": true,
+	".webp": true, ".svg": true, ".ico": true,
 }
 
 // filenameRegex validates UUID-based filenames to prevent path traversal.
-var filenameRegex = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z]+$`)
+var filenameRegex = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]+$`)
 
 func UploadFile(c *gin.Context) {
 	if err := c.Request.ParseMultipartForm(maxUploadSize); err != nil {
@@ -72,7 +94,7 @@ func UploadFile(c *gin.Context) {
 	if _, ok := allowedExtensions[ext]; !ok {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
-			"message": "不支持的文件类型，仅支持 PNG, JPG, GIF, WebP, SVG, ICO, PDF",
+			"message": "不支持的文件类型，支持图片(PNG/JPG/GIF/WebP/SVG/ICO)、文档(PDF/TXT/MD/CSV/XML/JSON)和脚本(SH/PS1/BAT/YAML/TOML/CONF/INI/LOG)",
 		})
 		return
 	}
@@ -93,18 +115,20 @@ func UploadFile(c *gin.Context) {
 	detectedType := http.DetectContentType(buf[:n])
 
 	// SVG may be detected as text/xml or text/plain
+	// Text-based files (sh, ps1, txt, json, md, csv, etc.) are all detected as text/plain
 	validMime := false
 	if ext == ".svg" {
 		validMime = strings.HasPrefix(detectedType, "text/") || detectedType == "image/svg+xml"
+	} else if ext == ".ico" {
+		validMime = true
+	} else if strings.HasPrefix(allowedExtensions[ext], "text/") || ext == ".json" {
+		// Text-based files: http.DetectContentType returns text/plain for all of them
+		validMime = strings.HasPrefix(detectedType, "text/") || detectedType == "application/json"
 	} else {
 		validMime = detectedType == allowedExtensions[ext]
 		// JPEG can be detected as "image/jpeg" for both .jpg and .jpeg
 		if ext == ".jpg" || ext == ".jpeg" {
 			validMime = detectedType == "image/jpeg"
-		}
-		// ICO may be detected as various types
-		if ext == ".ico" {
-			validMime = true
 		}
 	}
 
@@ -197,5 +221,9 @@ func ServeUploadedFile(c *gin.Context) {
 
 	c.Header("Content-Type", contentType)
 	c.Header("Cache-Control", "public, max-age=31536000, immutable")
+	// Non-image files should trigger download instead of inline display
+	if !imageExtensions[ext] {
+		c.Header("Content-Disposition", "attachment; filename=\""+filename+"\"")
+	}
 	c.File(fullPath)
 }

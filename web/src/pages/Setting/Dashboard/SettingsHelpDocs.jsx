@@ -109,6 +109,12 @@ const SettingsHelpDocs = ({ options, refresh }) => {
         'image/svg+xml': ['.svg'],
         'image/x-icon': ['.ico'],
         'application/pdf': ['.pdf'],
+        'text/plain': ['.txt', '.sh', '.ps1', '.bat', '.toml', '.conf', '.log', '.ini'],
+        'text/markdown': ['.md'],
+        'text/csv': ['.csv'],
+        'text/xml': ['.xml'],
+        'text/yaml': ['.yaml', '.yml'],
+        'application/json': ['.json'],
       },
       maxSize: 10 * 1024 * 1024,
       noClick: true,
@@ -550,7 +556,7 @@ const SettingsHelpDocs = ({ options, refresh }) => {
               {t('上传图片/文件')}
             </Button>
             <Text type='tertiary' size='small'>
-              {t('支持拖拽或粘贴图片，PNG/JPG/GIF/WebP/SVG/PDF，最大 10MB')}
+              {t('支持拖拽或粘贴文件，图片/PDF/TXT/JSON/SH/PS1/MD/CSV/YAML等，最大 10MB')}
             </Text>
           </div>
           <div
