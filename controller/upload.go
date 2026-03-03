@@ -215,14 +215,14 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
+	// Save original filename mapping before responding
+	saveNameMapping(newFilename, filepath.Base(fileHeader.Filename))
+
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
 		"data":    "/uploads/" + newFilename,
 	})
-
-	// Save original filename mapping (after response)
-	saveNameMapping(newFilename, filepath.Base(fileHeader.Filename))
 }
 
 func ServeUploadedFile(c *gin.Context) {
