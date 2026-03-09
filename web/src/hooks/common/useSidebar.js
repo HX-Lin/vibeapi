@@ -28,6 +28,7 @@ const SIDEBAR_REFRESH_EVENT = 'sidebar-refresh';
 export const DEFAULT_ADMIN_CONFIG = {
   console: {
     enabled: true,
+    pricing: true,
     playground: true,
     chat: true,
     detail: true,
@@ -63,7 +64,7 @@ export const deepClone = (value) => JSON.parse(JSON.stringify(value));
 
 // UI 元数据：区域标题和描述（用于设置页面自动渲染）
 export const SECTION_META = {
-  console: { titleKey: '工作台', descKey: '操练场、数据管理和日志查看' },
+  console: { titleKey: '工作台', descKey: '网页聊天、数据管理和日志查看' },
   personal: { titleKey: '个人中心', descKey: '用户个人功能' },
   help: { titleKey: '帮助中心', descKey: '使用帮助和配置指南' },
   admin: { titleKey: '管理员', descKey: '系统管理功能' },
@@ -71,7 +72,8 @@ export const SECTION_META = {
 
 // UI 元数据：模块标题和描述
 export const MODULE_META = {
-  playground: { titleKey: '操练场', descKey: 'AI模型测试环境' },
+  pricing: { titleKey: '模型广场', descKey: '浏览模型定价详情' },
+  playground: { titleKey: '网页聊天', descKey: 'AI模型测试环境' },
   chat: { titleKey: '聊天', descKey: '聊天会话管理（即将推出）' },
   detail: { titleKey: '数据看板', descKey: '系统数据统计' },
   token: { titleKey: '令牌管理', descKey: 'API令牌管理' },

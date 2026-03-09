@@ -17,81 +17,85 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Card } from '@douyinfe/semi-ui';
 import {
-  FlaskConical,
+  Gift,
   KeyRound,
   ScrollText,
-  Tags,
-  Wallet,
+  Server,
 } from 'lucide-react';
-
-const quickActionItems = [
-  {
-    key: 'playground',
-    icon: FlaskConical,
-    titleKey: '操练场',
-    descKey: '探索并测试 AI 模型',
-    path: '/console/playground',
-    color: 'from-blue-500 to-cyan-400',
-    iconBg: 'bg-blue-50',
-    iconColor: 'text-blue-500',
-  },
-  {
-    key: 'token',
-    icon: KeyRound,
-    titleKey: '令牌管理',
-    descKey: '管理您的 API 令牌',
-    path: '/console/token',
-    color: 'from-amber-500 to-orange-400',
-    iconBg: 'bg-amber-50',
-    iconColor: 'text-amber-500',
-  },
-  {
-    key: 'log',
-    icon: ScrollText,
-    titleKey: '使用日志',
-    descKey: '查看使用记录与统计',
-    path: '/console/log',
-    color: 'from-emerald-500 to-teal-400',
-    iconBg: 'bg-emerald-50',
-    iconColor: 'text-emerald-500',
-  },
-  {
-    key: 'pricing',
-    icon: Tags,
-    titleKey: '模型广场',
-    descKey: '浏览模型定价详情',
-    path: '/pricing',
-    color: 'from-violet-500 to-purple-400',
-    iconBg: 'bg-violet-50',
-    iconColor: 'text-violet-500',
-  },
-  {
-    key: 'topup',
-    icon: Wallet,
-    titleKey: '钱包管理',
-    descKey: '账户充值与余额管理',
-    path: '/console/topup',
-    color: 'from-rose-500 to-pink-400',
-    iconBg: 'bg-rose-50',
-    iconColor: 'text-rose-500',
-  },
-];
+import { StatusContext } from '../../context/Status';
 
 const QuickActions = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [statusState] = useContext(StatusContext);
+
+  // 获取第一个帮助文档的路径
+  const firstHelpDocPath = useMemo(() => {
+    const helpDocs = statusState?.status?.help_docs;
+    if (!Array.isArray(helpDocs) || helpDocs.length === 0) return null;
+    const sorted = helpDocs
+      .slice()
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    return '/console/help/' + sorted[0].slug;
+  }, [statusState?.status?.help_docs]);
+
+  const quickActionItems = useMemo(() => {
+    const items = [
+      {
+        key: 'redeem',
+        icon: Gift,
+        titleKey: '兑换码兑换额度',
+        descKey: '使用兑换码充值额度',
+        path: '/console/topup',
+        iconBg: 'bg-rose-50',
+        iconColor: 'text-rose-500',
+      },
+      {
+        key: 'token',
+        icon: KeyRound,
+        titleKey: '令牌添加',
+        descKey: '创建和管理 API 令牌',
+        path: '/console/token',
+        iconBg: 'bg-amber-50',
+        iconColor: 'text-amber-500',
+      },
+      ...(firstHelpDocPath
+        ? [
+            {
+              key: 'deploy',
+              icon: Server,
+              titleKey: '部署与配置',
+              descKey: '查看部署与配置指南',
+              path: firstHelpDocPath,
+              iconBg: 'bg-blue-50',
+              iconColor: 'text-blue-500',
+            },
+          ]
+        : []),
+      {
+        key: 'log',
+        icon: ScrollText,
+        titleKey: '使用日志',
+        descKey: '查看使用记录与统计',
+        path: '/console/log',
+        iconBg: 'bg-emerald-50',
+        iconColor: 'text-emerald-500',
+      },
+    ];
+    return items;
+  }, [firstHelpDocPath]);
 
   return (
     <div className='mb-6'>
       <h3 className='text-base font-semibold text-gray-600 mb-3'>
         {t('快速访问')}
       </h3>
-      <div className='grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3'>
+      <div className='grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3'>
         {quickActionItems.map((item) => {
           const IconComponent = item.icon;
           return (

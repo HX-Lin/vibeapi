@@ -22,8 +22,6 @@ import { Link, useLocation } from 'react-router-dom';
 
 // 路径前缀映射：用于高亮当前所在区域
 const PATH_PREFIX_MAP = {
-  '/console': '/console',
-  '/pricing': '/pricing',
   '/about': '/about',
 };
 
@@ -40,18 +38,6 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
       to: '/',
       external: false,
       exactMatch: true, // 首页仅精确匹配 /
-    },
-    {
-      key: 'console',
-      label: t('控制台'),
-      to: '/console',
-      external: false,
-    },
-    {
-      key: 'pricing',
-      label: t('模型广场'),
-      to: '/pricing',
-      external: false,
     },
     {
       key: 'docs',

@@ -75,6 +75,16 @@ const SiderBar = ({ onNavigate = () => {} }) => {
   const workspaceItems = useMemo(() => {
     const items = [
       {
+        text: t('模型广场'),
+        itemKey: 'pricing',
+        to: '/pricing',
+      },
+      {
+        text: t('网页聊天'),
+        itemKey: 'playground',
+        to: '/console/playground',
+      },
+      {
         text: t('数据看板'),
         itemKey: 'detail',
         to: '/detail',
@@ -217,7 +227,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('系统设置'),
         itemKey: 'setting',
         to: '/setting',
-        className: isRoot() ? '' : 'tableHiddle',
+        className: isAdmin() ? '' : 'tableHiddle',
       },
     ];
 
