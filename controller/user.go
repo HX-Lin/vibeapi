@@ -226,6 +226,59 @@ func Register(c *gin.Context) {
 	return
 }
 
+// enrichUsersWithSubscriptionQuota fetches active subscription quota for a list of users
+// and returns a slice of maps with all user fields plus subscription quota fields.
+func enrichUsersWithSubscriptionQuota(users []*model.User) []map[string]interface{} {
+	if len(users) == 0 {
+		return []map[string]interface{}{}
+	}
+	userIds := make([]int, 0, len(users))
+	for _, u := range users {
+		userIds = append(userIds, u.Id)
+	}
+	subQuotaMap, _ := model.GetActiveSubscriptionQuotaByUserIds(userIds)
+
+	result := make([]map[string]interface{}, 0, len(users))
+	for _, u := range users {
+		item := map[string]interface{}{
+			"id":               u.Id,
+			"username":         u.Username,
+			"display_name":     u.DisplayName,
+			"role":             u.Role,
+			"status":           u.Status,
+			"email":            u.Email,
+			"github_id":        u.GitHubId,
+			"discord_id":       u.DiscordId,
+			"oidc_id":          u.OidcId,
+			"wechat_id":        u.WeChatId,
+			"telegram_id":      u.TelegramId,
+			"access_token":     u.GetAccessToken(),
+			"quota":            u.Quota,
+			"used_quota":       u.UsedQuota,
+			"request_count":    u.RequestCount,
+			"group":            u.Group,
+			"aff_code":         u.AffCode,
+			"aff_count":        u.AffCount,
+			"aff_quota":        u.AffQuota,
+			"aff_history_quota": u.AffHistoryQuota,
+			"inviter_id":       u.InviterId,
+			"DeletedAt":        u.DeletedAt,
+			"linux_do_id":      u.LinuxDOId,
+			"remark":           u.Remark,
+			"stripe_customer":  u.StripeCustomer,
+		}
+		if summary, ok := subQuotaMap[u.Id]; ok {
+			item["sub_quota_total"] = summary.AmountTotal
+			item["sub_quota_used"] = summary.AmountUsed
+		} else {
+			item["sub_quota_total"] = int64(0)
+			item["sub_quota_used"] = int64(0)
+		}
+		result = append(result, item)
+	}
+	return result
+}
+
 func GetAllUsers(c *gin.Context) {
 	pageInfo := common.GetPageQuery(c)
 	users, total, err := model.GetAllUsers(pageInfo)
@@ -235,7 +288,7 @@ func GetAllUsers(c *gin.Context) {
 	}
 
 	pageInfo.SetTotal(int(total))
-	pageInfo.SetItems(users)
+	pageInfo.SetItems(enrichUsersWithSubscriptionQuota(users))
 
 	common.ApiSuccess(c, pageInfo)
 	return
@@ -252,7 +305,7 @@ func SearchUsers(c *gin.Context) {
 	}
 
 	pageInfo.SetTotal(int(total))
-	pageInfo.SetItems(users)
+	pageInfo.SetItems(enrichUsersWithSubscriptionQuota(users))
 	common.ApiSuccess(c, pageInfo)
 	return
 }

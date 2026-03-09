@@ -1164,6 +1164,43 @@ func GetSubscriptionPlanInfoByUserSubscriptionId(userSubscriptionId int) (*Subsc
 	return info, nil
 }
 
+// UserSubscriptionQuotaSummary holds aggregated subscription quota for a user.
+type UserSubscriptionQuotaSummary struct {
+	UserId      int   `json:"user_id"`
+	AmountTotal int64 `json:"sub_quota_total"`
+	AmountUsed  int64 `json:"sub_quota_used"`
+}
+
+// GetActiveSubscriptionQuotaByUserIds returns aggregated active subscription quota for given user IDs.
+func GetActiveSubscriptionQuotaByUserIds(userIds []int) (map[int]*UserSubscriptionQuotaSummary, error) {
+	result := make(map[int]*UserSubscriptionQuotaSummary)
+	if len(userIds) == 0 {
+		return result, nil
+	}
+	now := common.GetTimestamp()
+	var rows []struct {
+		UserId      int   `gorm:"column:user_id"`
+		AmountTotal int64 `gorm:"column:amount_total"`
+		AmountUsed  int64 `gorm:"column:amount_used"`
+	}
+	err := DB.Model(&UserSubscription{}).
+		Select("user_id, SUM(amount_total) as amount_total, SUM(amount_used) as amount_used").
+		Where("user_id IN ? AND status = ? AND end_time > ?", userIds, "active", now).
+		Group("user_id").
+		Find(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		result[row.UserId] = &UserSubscriptionQuotaSummary{
+			UserId:      row.UserId,
+			AmountTotal: row.AmountTotal,
+			AmountUsed:  row.AmountUsed,
+		}
+	}
+	return result, nil
+}
+
 // Update subscription used amount by delta (positive consume more, negative refund).
 func PostConsumeUserSubscriptionDelta(userSubscriptionId int, delta int64) error {
 	if userSubscriptionId <= 0 {

@@ -170,6 +170,50 @@ const renderQuotaUsage = (text, record, t) => {
   );
 };
 
+// Render subscription quota column
+const renderSubQuota = (text, record, t) => {
+  const { Paragraph } = Typography;
+  const subTotal = parseInt(record.sub_quota_total) || 0;
+  const subUsed = parseInt(record.sub_quota_used) || 0;
+  if (subTotal === 0 && subUsed === 0) {
+    return (
+      <Tag color='white' shape='circle'>
+        <span className='text-xs text-gray-400'>-</span>
+      </Tag>
+    );
+  }
+  const subRemain = subTotal - subUsed;
+  const percent = subTotal > 0 ? (subRemain / subTotal) * 100 : 0;
+  const popoverContent = (
+    <div className='text-xs p-2'>
+      <Paragraph copyable={{ content: renderQuota(subUsed) }}>
+        {t('已用额度')}: {renderQuota(subUsed)}
+      </Paragraph>
+      <Paragraph copyable={{ content: renderQuota(subRemain) }}>
+        {t('剩余额度')}: {renderQuota(subRemain)} ({percent.toFixed(0)}%)
+      </Paragraph>
+      <Paragraph copyable={{ content: renderQuota(subTotal) }}>
+        {t('总额度')}: {renderQuota(subTotal)}
+      </Paragraph>
+    </div>
+  );
+  return (
+    <Popover content={popoverContent} position='top'>
+      <Tag color='white' shape='circle'>
+        <div className='flex flex-col items-end'>
+          <span className='text-xs leading-none'>{`${renderQuota(subRemain)} / ${renderQuota(subTotal)}`}</span>
+          <Progress
+            percent={percent}
+            aria-label='subscription quota usage'
+            format={() => `${percent.toFixed(0)}%`}
+            style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
+          />
+        </div>
+      </Tag>
+    </Popover>
+  );
+};
+
 /**
  * Render invite information
  */
@@ -330,6 +374,11 @@ export const getUsersColumns = ({
       title: t('剩余额度/总额度'),
       key: 'quota_usage',
       render: (text, record) => renderQuotaUsage(text, record, t),
+    },
+    {
+      title: t('订阅剩余额度'),
+      key: 'sub_quota',
+      render: (text, record) => renderSubQuota(text, record, t),
     },
     {
       title: t('分组'),
