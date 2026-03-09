@@ -12,7 +12,7 @@ func CORS() gin.HandlerFunc {
 	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
 	config.AllowHeaders = []string{
 		"Authorization", "Content-Type", "Accept", "Origin",
-		"X-Requested-With", "New-Api-User",
+		"X-Requested-With", "VibeAPI-User",
 	}
 	return cors.New(config)
 }
