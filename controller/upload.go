@@ -20,6 +20,7 @@ For commercial licensing, please contact support@quantumnous.com
 package controller
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -27,9 +28,10 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"unicode"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
+	"golang.org/x/text/unicode/norm"
 )
 
 const (
@@ -70,8 +72,9 @@ var imageExtensions = map[string]bool{
 	".webp": true, ".svg": true, ".ico": true,
 }
 
-// filenameRegex validates UUID-based filenames to prevent path traversal.
-var filenameRegex = regexp.MustCompile(`^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-z0-9]+$`)
+// filenameRegex validates safe filenames: alphanumeric, CJK characters, hyphens, underscores, dots.
+// Must have an allowed extension at the end. No path separators or special chars.
+var filenameRegex = regexp.MustCompile(`^[a-zA-Z0-9\x{4e00}-\x{9fff}\x{3040}-\x{309f}\x{30a0}-\x{30ff}\x{ac00}-\x{d7af}_\-][a-zA-Z0-9\x{4e00}-\x{9fff}\x{3040}-\x{309f}\x{30a0}-\x{30ff}\x{ac00}-\x{d7af}_\-\.]*\.[a-z0-9]+$`)
 
 // originalNames maps UUID filenames to their original upload names for Content-Disposition.
 var originalNames sync.Map
@@ -95,15 +98,63 @@ func loadNameMap() {
 	}
 }
 
-func saveNameMapping(uuidName, originalName string) {
-	originalNames.Store(uuidName, originalName)
+func saveNameMapping(storedName, originalName string) {
+	originalNames.Store(storedName, originalName)
 	// Append to file
 	f, err := os.OpenFile(nameMapFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return
 	}
 	defer f.Close()
-	f.WriteString(uuidName + "\t" + originalName + "\n")
+	f.WriteString(storedName + "\t" + originalName + "\n")
+}
+
+// sanitizeFilename converts an original filename into a safe, readable name.
+// It preserves CJK characters, letters, digits, hyphens and underscores.
+// Spaces become hyphens, consecutive hyphens are collapsed.
+func sanitizeFilename(name string) string {
+	// Normalize unicode (NFC)
+	name = norm.NFC.String(name)
+
+	var b strings.Builder
+	prevHyphen := false
+	for _, r := range name {
+		if unicode.IsLetter(r) || unicode.IsDigit(r) || r == '_' || r == '.' {
+			b.WriteRune(r)
+			prevHyphen = false
+		} else if r == ' ' || r == '-' || r == '\t' {
+			if !prevHyphen {
+				b.WriteRune('-')
+				prevHyphen = true
+			}
+		}
+		// skip all other characters
+	}
+
+	result := b.String()
+	// Trim leading/trailing hyphens and dots
+	result = strings.Trim(result, "-.")
+	if result == "" {
+		return ""
+	}
+	return result
+}
+
+// generateUniqueFilename finds a non-colliding filename in the upload directory.
+// For "photo.png" it tries: photo.png, photo-1.png, photo-2.png, ...
+func generateUniqueFilename(dir, baseName, ext string) string {
+	candidate := baseName + ext
+	if _, err := os.Stat(filepath.Join(dir, candidate)); os.IsNotExist(err) {
+		return candidate
+	}
+	for i := 1; i < 10000; i++ {
+		candidate = fmt.Sprintf("%s-%d%s", baseName, i, ext)
+		if _, err := os.Stat(filepath.Join(dir, candidate)); os.IsNotExist(err) {
+			return candidate
+		}
+	}
+	// Extremely unlikely fallback
+	return baseName + "-" + fmt.Sprintf("%d", os.Getpid()) + ext
 }
 
 func UploadFile(c *gin.Context) {
@@ -192,8 +243,16 @@ func UploadFile(c *gin.Context) {
 		return
 	}
 
-	// Generate UUID filename
-	newFilename := uuid.New().String() + ext
+	// Generate friendly filename from original name
+	originalName := filepath.Base(fileHeader.Filename)
+	nameWithoutExt := strings.TrimSuffix(originalName, ext)
+	sanitized := sanitizeFilename(nameWithoutExt)
+	if sanitized == "" {
+		// Fallback for filenames that sanitize to empty (e.g. all special chars)
+		sanitized = "file"
+	}
+	// Convert extension to lowercase for consistency
+	newFilename := generateUniqueFilename(uploadDir, sanitized, ext)
 	dstPath := filepath.Join(uploadDir, newFilename)
 
 	dst, err := os.Create(dstPath)
@@ -216,7 +275,7 @@ func UploadFile(c *gin.Context) {
 	}
 
 	// Save original filename mapping before responding
-	saveNameMapping(newFilename, filepath.Base(fileHeader.Filename))
+	saveNameMapping(newFilename, originalName)
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -228,8 +287,8 @@ func UploadFile(c *gin.Context) {
 func ServeUploadedFile(c *gin.Context) {
 	filename := c.Param("filename")
 
-	// Strict validation: only UUID-format filenames with allowed extensions
-	if !filenameRegex.MatchString(filename) {
+	// Validate filename: must match safe pattern and have no path separators
+	if !filenameRegex.MatchString(filename) || strings.ContainsAny(filename, "/\\") {
 		c.JSON(http.StatusNotFound, gin.H{
 			"success": false,
 			"message": "文件不存在",
