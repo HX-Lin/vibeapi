@@ -94,6 +94,10 @@ const RechargeCard = ({
   activeSubscriptions = [],
   allSubscriptions = [],
   reloadSubscriptionSelf,
+  subscriptionRedemptionCode = '',
+  setSubscriptionRedemptionCode,
+  redeemSubscription,
+  isRedeemingSubscription = false,
 }) => {
   const onlineFormApiRef = useRef(null);
   const redeemFormApiRef = useRef(null);
@@ -571,6 +575,48 @@ const RechargeCard = ({
                   </Text>
                 </Text>
               )
+            }
+          />
+        </Form>
+      </Card>
+
+      {/* 订阅兑换码 */}
+      <Card
+        className='!rounded-xl w-full'
+        title={
+          <Text type='tertiary' strong>
+            {t('订阅兑换码')}
+          </Text>
+        }
+      >
+        <Form
+          initValues={{ subscriptionRedemptionCode: subscriptionRedemptionCode }}
+        >
+          <Form.Input
+            field='subscriptionRedemptionCode'
+            noLabel={true}
+            placeholder={t('请输入订阅兑换码')}
+            value={subscriptionRedemptionCode}
+            onChange={(value) => setSubscriptionRedemptionCode(value)}
+            prefix={<IconGift />}
+            suffix={
+              <div className='flex items-center gap-2'>
+                <Button
+                  type='primary'
+                  theme='solid'
+                  onClick={redeemSubscription}
+                  loading={isRedeemingSubscription}
+                >
+                  {t('兑换订阅')}
+                </Button>
+              </div>
+            }
+            showClear
+            style={{ width: '100%' }}
+            extraText={
+              <Text type='tertiary'>
+                {t('输入订阅兑换码，即可激活对应的订阅套餐')}
+              </Text>
             }
           />
         </Form>

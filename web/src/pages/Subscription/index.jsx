@@ -17,13 +17,47 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Tabs, TabPane } from '@douyinfe/semi-ui';
+import { useTranslation } from 'react-i18next';
+import { Sparkles, Ticket } from 'lucide-react';
 import SubscriptionsPage from '../../components/table/subscriptions';
+import SubscriptionRedemptionsPage from '../../components/table/subscription-redemptions';
 
 const Subscription = () => {
+  const { t } = useTranslation();
+  const [activeTab, setActiveTab] = useState('plans');
+
   return (
     <div className='mt-[60px] px-2'>
-      <SubscriptionsPage />
+      <Tabs
+        type='line'
+        activeKey={activeTab}
+        onChange={setActiveTab}
+      >
+        <TabPane
+          tab={
+            <div className='flex items-center gap-2'>
+              <Sparkles size={16} />
+              {t('套餐管理')}
+            </div>
+          }
+          itemKey='plans'
+        >
+          <SubscriptionsPage />
+        </TabPane>
+        <TabPane
+          tab={
+            <div className='flex items-center gap-2'>
+              <Ticket size={16} />
+              {t('订阅兑换码')}
+            </div>
+          }
+          itemKey='redemptions'
+        >
+          <SubscriptionRedemptionsPage />
+        </TabPane>
+      </Tabs>
     </div>
   );
 };

@@ -91,6 +91,7 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/creem/pay", middleware.CriticalRateLimit(), controller.RequestCreemPay)
 				selfRoute.POST("/aff_transfer", controller.TransferAffQuota)
 				selfRoute.PUT("/setting", controller.UpdateUserSetting)
+				selfRoute.POST("/subscription/redeem", middleware.CriticalRateLimit(), controller.RedeemSubscriptionCode)
 
 				// 2FA routes
 				selfRoute.GET("/2fa/status", controller.Get2FAStatus)
@@ -274,6 +275,18 @@ func SetApiRouter(router *gin.Engine) {
 			redemptionRoute.PUT("/", controller.UpdateRedemption)
 			redemptionRoute.DELETE("/invalid", controller.DeleteInvalidRedemption)
 			redemptionRoute.DELETE("/:id", controller.DeleteRedemption)
+		}
+
+		subRedemptionRoute := apiRouter.Group("/subscription_redemption")
+		subRedemptionRoute.Use(middleware.AdminAuth())
+		{
+			subRedemptionRoute.GET("/", controller.GetAllSubscriptionRedemptions)
+			subRedemptionRoute.GET("/search", controller.SearchSubscriptionRedemptions)
+			subRedemptionRoute.GET("/:id", controller.GetSubscriptionRedemption)
+			subRedemptionRoute.POST("/", controller.AddSubscriptionRedemption)
+			subRedemptionRoute.PUT("/", controller.UpdateSubscriptionRedemption)
+			subRedemptionRoute.DELETE("/invalid", controller.DeleteInvalidSubscriptionRedemption)
+			subRedemptionRoute.DELETE("/:id", controller.DeleteSubscriptionRedemption)
 		}
 		logRoute := apiRouter.Group("/log")
 		logRoute.GET("/", middleware.AdminAuth(), controller.GetAllLogs)
