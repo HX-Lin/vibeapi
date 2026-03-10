@@ -378,6 +378,17 @@ function tryWrapHtmlCode(text) {
     );
 }
 
+function getHeadingId(children) {
+  const text = React.Children.toArray(children)
+    .map((child) => (typeof child === 'string' ? child : child?.props?.children ? getHeadingId(child.props.children) : ''))
+    .join('');
+  return text
+    .toLowerCase()
+    .replace(/[^\w\u4e00-\u9fff\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+$/, '');
+}
+
 function _MarkdownContent(props) {
   const {
     content,
@@ -446,12 +457,24 @@ function _MarkdownContent(props) {
               </video>
             );
           }
-          const isInternal = /^\/#/i.test(href);
+          const isAnchor = /^#/.test(href);
+          const isInternal = isAnchor || /^\/#/i.test(href);
           const target = isInternal ? '_self' : (aProps.target ?? '_blank');
+          const handleClick = isAnchor
+            ? (e) => {
+                e.preventDefault();
+                const id = href.slice(1);
+                const el = document.getElementById(id);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }
+            : undefined;
           return (
             <a
               {...aProps}
               target={target}
+              onClick={handleClick}
               style={{
                 color: isUserMessage ? '#87CEEB' : 'var(--semi-color-primary)',
                 textDecoration: 'none',
@@ -468,6 +491,7 @@ function _MarkdownContent(props) {
         h1: (props) => (
           <h1
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '24px',
               fontWeight: 'bold',
@@ -479,6 +503,7 @@ function _MarkdownContent(props) {
         h2: (props) => (
           <h2
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '20px',
               fontWeight: 'bold',
@@ -490,6 +515,7 @@ function _MarkdownContent(props) {
         h3: (props) => (
           <h3
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '18px',
               fontWeight: 'bold',
@@ -501,6 +527,7 @@ function _MarkdownContent(props) {
         h4: (props) => (
           <h4
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '16px',
               fontWeight: 'bold',
@@ -512,6 +539,7 @@ function _MarkdownContent(props) {
         h5: (props) => (
           <h5
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '14px',
               fontWeight: 'bold',
@@ -523,6 +551,7 @@ function _MarkdownContent(props) {
         h6: (props) => (
           <h6
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '13px',
               fontWeight: 'bold',

@@ -101,18 +101,10 @@ const RechargeCard = ({
 }) => {
   const onlineFormApiRef = useRef(null);
   const redeemFormApiRef = useRef(null);
-  const initialTabSetRef = useRef(false);
   const showAmountSkeleton = useMinimumLoadingTime(amountLoading);
   const [activeTab, setActiveTab] = useState('topup');
   const shouldShowSubscription =
     !subscriptionLoading && subscriptionPlans.length > 0;
-
-  useEffect(() => {
-    if (initialTabSetRef.current) return;
-    if (subscriptionLoading) return;
-    setActiveTab(shouldShowSubscription ? 'subscription' : 'topup');
-    initialTabSetRef.current = true;
-  }, [shouldShowSubscription, subscriptionLoading]);
 
   useEffect(() => {
     if (!shouldShowSubscription && activeTab !== 'topup') {
