@@ -133,12 +133,22 @@ const renderStatistics = (text, record, showEnableDisableModal, t) => {
   );
 };
 
-// Render separate quota usage column
+// Render separate quota usage column (wallet only, excluding subscription usage)
 const renderQuotaUsage = (text, record, t) => {
   const { Paragraph } = Typography;
-  const used = parseInt(record.used_quota) || 0;
+  const totalUsed = parseInt(record.used_quota) || 0;
+  const subUsed = parseInt(record.sub_quota_used) || 0;
+  // Wallet-only used = total used minus subscription used
+  const used = Math.max(totalUsed - subUsed, 0);
   const remain = parseInt(record.quota) || 0;
   const total = used + remain;
+  if (total === 0 && used === 0) {
+    return (
+      <Tag color='white' shape='circle'>
+        <span className='text-xs text-gray-400'>-</span>
+      </Tag>
+    );
+  }
   const percent = total > 0 ? (remain / total) * 100 : 0;
   const popoverContent = (
     <div className='text-xs p-2'>
