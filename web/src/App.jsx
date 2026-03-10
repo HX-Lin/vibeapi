@@ -346,7 +346,7 @@ function App() {
           }
         />
         <Route
-          path='/pricing'
+          path='/console/pricing'
           element={
             pricingRequireAuth ? (
               <PrivateRoute>
@@ -364,6 +364,7 @@ function App() {
             )
           }
         />
+        <Route path='/pricing' element={<Navigate to='/console/pricing' replace />} />
         <Route
           path='/about'
           element={

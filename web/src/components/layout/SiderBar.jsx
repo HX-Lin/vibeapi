@@ -45,7 +45,7 @@ const baseRouterMap = {
   task: '/console/task',
   setting: '/console/setting',
   detail: '/console',
-  pricing: '/pricing',
+  pricing: '/console/pricing',
   models: '/console/models',
   deployment: '/console/deployment',
   playground: '/console/playground',
@@ -77,7 +77,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
       {
         text: t('模型广场'),
         itemKey: 'pricing',
-        to: '/pricing',
+        to: '/console/pricing',
       },
       {
         text: t('网页聊天'),
