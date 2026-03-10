@@ -378,15 +378,23 @@ function tryWrapHtmlCode(text) {
     );
 }
 
-function getHeadingId(children) {
-  const text = React.Children.toArray(children)
-    .map((child) => (typeof child === 'string' ? child : child?.props?.children ? getHeadingId(child.props.children) : ''))
+function getHeadingText(children) {
+  return React.Children.toArray(children)
+    .map((child) => (typeof child === 'string' ? child : child?.props?.children ? getHeadingText(child.props.children) : ''))
     .join('');
+}
+
+// Generate heading ID following GitHub-flavored markdown slug rules:
+// lowercase, remove punctuation (keep CJK/letters/digits/spaces/hyphens),
+// spaces become hyphens, collapse consecutive hyphens, trim hyphens.
+function getHeadingId(children) {
+  const text = getHeadingText(children);
   return text
     .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fff\s-]/g, '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
     .replace(/\s+/g, '-')
-    .replace(/-+$/, '');
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 function _MarkdownContent(props) {
@@ -463,7 +471,14 @@ function _MarkdownContent(props) {
           const handleClick = isAnchor
             ? (e) => {
                 e.preventDefault();
-                const id = href.slice(1);
+                const rawId = href.slice(1);
+                // Decode URL-encoded anchors (e.g. %E6%96%B9%E5%BC%8F -> 方式)
+                let id;
+                try {
+                  id = decodeURIComponent(rawId);
+                } catch {
+                  id = rawId;
+                }
                 const el = document.getElementById(id);
                 if (el) {
                   el.scrollIntoView({ behavior: 'smooth' });
