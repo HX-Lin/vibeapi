@@ -158,7 +158,7 @@ const TopUp = () => {
     }
     setIsRedeemingSubscription(true);
     try {
-      const res = await API.post('/api/user/self/subscription/redeem', {
+      const res = await API.post('/api/user/subscription/redeem', {
         key: subscriptionRedemptionCode,
       });
       const { success, message, data } = res.data;
