@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { getRelativeTime } from '../../helpers';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
@@ -57,6 +57,9 @@ const Dashboard = () => {
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState, statusDispatch] = useContext(StatusContext);
 
+  // ========== 账户数据切换 ==========
+  const [showHistoryQuota, setShowHistoryQuota] = useState(false);
+
   // ========== 主要数据管理 ==========
   const dashboardData = useDashboardData(userState, userDispatch, statusState);
 
@@ -84,6 +87,7 @@ const Dashboard = () => {
     dashboardData.navigate,
     dashboardData.t,
     dashboardData.activeSubscriptions,
+    showHistoryQuota,
   );
 
   // ========== 数据处理 ==========
@@ -184,6 +188,7 @@ const Dashboard = () => {
         getTrendSpec={getTrendSpec}
         CARD_PROPS={CARD_PROPS}
         CHART_CONFIG={CHART_CONFIG}
+        onToggleAccountItem={() => setShowHistoryQuota((v) => !v)}
       />
 
       {/* API信息和图表面板 */}

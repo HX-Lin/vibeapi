@@ -42,6 +42,7 @@ export const useDashboardStats = (
   navigate,
   t,
   activeSubscriptions = [],
+  showHistoryQuota = false,
 ) => {
   const subscriptionQuota = useMemo(() => {
     if (!activeSubscriptions || activeSubscriptions.length === 0) {
@@ -68,14 +69,27 @@ export const useDashboardStats = (
       },
     ];
     if (subscriptionQuota) {
-      items.push({
-        title: t('订阅剩余额度'),
-        value: renderQuota(subscriptionQuota.remain),
-        icon: <Sparkles size={14} />,
-        avatarColor: 'violet',
-        trendData: [],
-        trendColor: '#8b5cf6',
-      });
+      if (showHistoryQuota) {
+        items.push({
+          title: t('历史消耗'),
+          value: renderQuota(userState?.user?.used_quota),
+          icon: <IconHistogram />,
+          avatarColor: 'purple',
+          trendData: [],
+          trendColor: '#8b5cf6',
+          toggleable: true,
+        });
+      } else {
+        items.push({
+          title: t('订阅剩余额度'),
+          value: renderQuota(subscriptionQuota.remain),
+          icon: <Sparkles size={14} />,
+          avatarColor: 'violet',
+          trendData: [],
+          trendColor: '#8b5cf6',
+          toggleable: true,
+        });
+      }
     } else {
       items.push({
         title: t('历史消耗'),
@@ -87,7 +101,7 @@ export const useDashboardStats = (
       });
     }
     return items;
-  }, [userState?.user?.quota, userState?.user?.used_quota, subscriptionQuota, t]);
+  }, [userState?.user?.quota, userState?.user?.used_quota, subscriptionQuota, showHistoryQuota, t]);
 
   const groupedStatsData = useMemo(
     () => [

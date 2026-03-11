@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/QuantumNous/new-api/common"
-	"github.com/QuantumNous/new-api/logger"
 
 	"gorm.io/gorm"
 )
@@ -171,7 +170,7 @@ func RedeemSubscription(key string, userId int) (planTitle string, err error) {
 		_ = UpdateUserGroupCache(userId, plan.UpgradeGroup)
 	}
 
-	return logger.LogQuota(0), nil
+	return logPlanTitle, nil
 }
 
 func (r *SubscriptionRedemption) Insert() error {
