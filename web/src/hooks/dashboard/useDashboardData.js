@@ -81,6 +81,9 @@ export const useDashboardData = (userState, userDispatch, statusState) => {
   const [uptimeLoading, setUptimeLoading] = useState(false);
   const [activeUptimeTab, setActiveUptimeTab] = useState('');
 
+  // ========== 订阅数据 ==========
+  const [activeSubscriptions, setActiveSubscriptions] = useState([]);
+
   // ========== 常量 ==========
   const now = new Date();
   const isAdminUser = isAdmin();
@@ -223,6 +226,17 @@ export const useDashboardData = (userState, userDispatch, statusState) => {
     }
   }, [userDispatch]);
 
+  const loadSubscriptionData = useCallback(async () => {
+    try {
+      const res = await API.get('/api/subscription/self');
+      if (res.data?.success) {
+        setActiveSubscriptions(res.data.data?.subscriptions || []);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const refresh = useCallback(async () => {
     const data = await loadQuotaData();
     await loadUptimeData();
@@ -251,9 +265,10 @@ export const useDashboardData = (userState, userDispatch, statusState) => {
   useEffect(() => {
     if (!initialized.current) {
       getUserData();
+      loadSubscriptionData();
       initialized.current = true;
     }
-  }, [getUserData]);
+  }, [getUserData, loadSubscriptionData]);
 
   return {
     // 基础状态
@@ -293,6 +308,9 @@ export const useDashboardData = (userState, userDispatch, statusState) => {
     uptimeLoading,
     activeUptimeTab,
     setActiveUptimeTab,
+
+    // 订阅数据
+    activeSubscriptions,
 
     // 计算值
     timeOptions,

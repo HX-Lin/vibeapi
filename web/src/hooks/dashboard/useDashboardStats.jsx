@@ -18,7 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import { useMemo } from 'react';
-import { Wallet, Activity, Zap, Gauge } from 'lucide-react';
+import { Wallet, Activity, Zap, Gauge, Sparkles } from 'lucide-react';
 import {
   IconMoneyExchangeStroked,
   IconHistogram,
@@ -41,30 +41,60 @@ export const useDashboardStats = (
   performanceMetrics,
   navigate,
   t,
+  activeSubscriptions = [],
 ) => {
+  const subscriptionQuota = useMemo(() => {
+    if (!activeSubscriptions || activeSubscriptions.length === 0) {
+      return null;
+    }
+    let total = 0;
+    let used = 0;
+    for (const sub of activeSubscriptions) {
+      total += parseInt(sub.amount_total) || 0;
+      used += parseInt(sub.amount_used) || 0;
+    }
+    return { total, used, remain: total - used };
+  }, [activeSubscriptions]);
+
+  const accountItems = useMemo(() => {
+    const items = [
+      {
+        title: t('当前余额'),
+        value: renderQuota(userState?.user?.quota),
+        icon: <IconMoneyExchangeStroked />,
+        avatarColor: 'blue',
+        trendData: [],
+        trendColor: '#3b82f6',
+      },
+    ];
+    if (subscriptionQuota) {
+      items.push({
+        title: t('订阅剩余额度'),
+        value: renderQuota(subscriptionQuota.remain),
+        icon: <Sparkles size={14} />,
+        avatarColor: 'violet',
+        trendData: [],
+        trendColor: '#8b5cf6',
+      });
+    } else {
+      items.push({
+        title: t('历史消耗'),
+        value: renderQuota(userState?.user?.used_quota),
+        icon: <IconHistogram />,
+        avatarColor: 'purple',
+        trendData: [],
+        trendColor: '#8b5cf6',
+      });
+    }
+    return items;
+  }, [userState?.user?.quota, userState?.user?.used_quota, subscriptionQuota, t]);
+
   const groupedStatsData = useMemo(
     () => [
       {
         title: createSectionTitle(Wallet, t('账户数据')),
         color: 'bg-blue-50',
-        items: [
-          {
-            title: t('当前余额'),
-            value: renderQuota(userState?.user?.quota),
-            icon: <IconMoneyExchangeStroked />,
-            avatarColor: 'blue',
-            trendData: [],
-            trendColor: '#3b82f6',
-          },
-          {
-            title: t('历史消耗'),
-            value: renderQuota(userState?.user?.used_quota),
-            icon: <IconHistogram />,
-            avatarColor: 'purple',
-            trendData: [],
-            trendColor: '#8b5cf6',
-          },
-        ],
+        items: accountItems,
       },
       {
         title: createSectionTitle(Activity, t('使用统计')),
@@ -134,8 +164,7 @@ export const useDashboardStats = (
       },
     ],
     [
-      userState?.user?.quota,
-      userState?.user?.used_quota,
+      accountItems,
       userState?.user?.request_count,
       times,
       consumeQuota,
