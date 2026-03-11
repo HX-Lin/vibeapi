@@ -51,8 +51,9 @@ export const useDashboardStats = (
     let total = 0;
     let used = 0;
     for (const sub of activeSubscriptions) {
-      total += parseInt(sub.amount_total) || 0;
-      used += parseInt(sub.amount_used) || 0;
+      const s = sub.subscription || sub;
+      total += parseInt(s.amount_total) || 0;
+      used += parseInt(s.amount_used) || 0;
     }
     return { total, used, remain: total - used };
   }, [activeSubscriptions]);
