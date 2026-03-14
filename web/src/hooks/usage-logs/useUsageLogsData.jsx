@@ -457,6 +457,7 @@ export const useLogsData = () => {
           Boolean(other?.violation_fee_marker);
 
         let content = '';
+        const gm = isAdminUser ? (other?.admin_info?.global_quota_multiplier || 0) : 0;
         if (!isViolationFeeLog) {
           if (other?.ws || other?.audio) {
             content = renderAudioModelPrice(
@@ -473,6 +474,7 @@ export const useLogsData = () => {
               other?.user_group_ratio,
               other?.cache_tokens || 0,
               other?.cache_ratio || 1.0,
+              gm,
             );
           } else if (other?.claude) {
             content = renderClaudeModelPrice(
@@ -495,6 +497,7 @@ export const useLogsData = () => {
               other.cache_creation_ratio_1h ||
                 other.cache_creation_ratio ||
                 1.0,
+              gm,
             );
           } else {
             content = renderModelPrice(
@@ -521,6 +524,7 @@ export const useLogsData = () => {
               other?.audio_input_price || 0,
               other?.image_generation_call || false,
               other?.image_generation_call_price || 0,
+              gm,
             );
           }
           expandDataLocal.push({

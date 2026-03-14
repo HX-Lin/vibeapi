@@ -720,6 +720,7 @@ export function renderModelPrice(
   audioInputPrice = 0,
   imageGenerationCall = false,
   imageGenerationCallPrice = 0,
+  globalQuotaMultiplier = 0,
 ) {
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
     groupRatio,
@@ -729,17 +730,27 @@ export function renderModelPrice(
 
   // 获取货币配置
   const { symbol, rate } = getCurrencyConfig();
+  const hasGlobalMultiplier = globalQuotaMultiplier && globalQuotaMultiplier !== 1;
 
   if (modelPrice !== -1) {
     const displayPrice = (modelPrice * rate).toFixed(6);
-    const displayTotal = (modelPrice * groupRatio * rate).toFixed(6);
+    const finalTotal = hasGlobalMultiplier
+      ? modelPrice * groupRatio * globalQuotaMultiplier
+      : modelPrice * groupRatio;
+    const displayTotal = (finalTotal * rate).toFixed(6);
+    if (hasGlobalMultiplier) {
+      return i18next.t(
+        '模型价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}} * 全局扣费倍率：{{gm}} = {{symbol}}{{total}}',
+        {
+          symbol, price: displayPrice, ratio: groupRatio, total: displayTotal,
+          ratioType: ratioLabel, gm: globalQuotaMultiplier,
+        },
+      );
+    }
     return i18next.t(
       '模型价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}} = {{symbol}}{{total}}',
       {
-        symbol: symbol,
-        price: displayPrice,
-        ratio: groupRatio,
-        total: displayTotal,
+        symbol, price: displayPrice, ratio: groupRatio, total: displayTotal,
         ratioType: ratioLabel,
       },
     );
@@ -770,6 +781,9 @@ export function renderModelPrice(
       (webSearchCallCount / 1000) * webSearchPrice * groupRatio +
       (fileSearchCallCount / 1000) * fileSearchPrice * groupRatio +
       imageGenerationCallPrice * groupRatio;
+    if (hasGlobalMultiplier) {
+      price = price * globalQuotaMultiplier;
+    }
 
     return (
       <>
@@ -947,12 +961,17 @@ export function renderModelPrice(
                   : '',
               ].join('');
 
+              const gmText = hasGlobalMultiplier
+                ? ' * ' + i18next.t('全局扣费倍率') + ' ' + globalQuotaMultiplier
+                : '';
+
               return i18next.t(
-                '{{inputDesc}} + {{outputDesc}}{{extraServices}} = {{symbol}}{{total}}',
+                '{{inputDesc}} + {{outputDesc}}{{extraServices}}{{gmText}} = {{symbol}}{{total}}',
                 {
                   inputDesc,
                   outputDesc,
                   extraServices,
+                  gmText,
                   symbol: symbol,
                   total: (price * rate).toFixed(6),
                 },
@@ -1089,6 +1108,7 @@ export function renderAudioModelPrice(
   user_group_ratio,
   cacheTokens = 0,
   cacheRatio = 1.0,
+  globalQuotaMultiplier = 0,
 ) {
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
     groupRatio,
@@ -1098,17 +1118,27 @@ export function renderAudioModelPrice(
 
   // 获取货币配置
   const { symbol, rate } = getCurrencyConfig();
+  const hasGlobalMultiplier = globalQuotaMultiplier && globalQuotaMultiplier !== 1;
 
   // 1 ratio = $0.002 / 1K tokens
   if (modelPrice !== -1) {
+    const finalTotal = hasGlobalMultiplier
+      ? modelPrice * groupRatio * globalQuotaMultiplier
+      : modelPrice * groupRatio;
+    if (hasGlobalMultiplier) {
+      return i18next.t(
+        '模型价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}} * 全局扣费倍率：{{gm}} = {{symbol}}{{total}}',
+        {
+          symbol, price: (modelPrice * rate).toFixed(6), ratio: groupRatio,
+          total: (finalTotal * rate).toFixed(6), ratioType: ratioLabel, gm: globalQuotaMultiplier,
+        },
+      );
+    }
     return i18next.t(
       '模型价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}} = {{symbol}}{{total}}',
       {
-        symbol: symbol,
-        price: (modelPrice * rate).toFixed(6),
-        ratio: groupRatio,
-        total: (modelPrice * groupRatio * rate).toFixed(6),
-        ratioType: ratioLabel,
+        symbol, price: (modelPrice * rate).toFixed(6), ratio: groupRatio,
+        total: (finalTotal * rate).toFixed(6), ratioType: ratioLabel,
       },
     );
   } else {
@@ -1138,6 +1168,9 @@ export function renderAudioModelPrice(
         audioCompletionRatio *
         groupRatio;
     let price = textPrice + audioPrice;
+    if (hasGlobalMultiplier) {
+      price = price * globalQuotaMultiplier;
+    }
     return (
       <>
         <article>
@@ -1249,15 +1282,24 @@ export function renderAudioModelPrice(
             )}
           </p>
           <p>
-            {i18next.t(
-              '总价：文字价格 {{textPrice}} + 音频价格 {{audioPrice}} = {{symbol}}{{total}}',
-              {
-                symbol: symbol,
-                total: (price * rate).toFixed(6),
-                textPrice: (textPrice * rate).toFixed(6),
-                audioPrice: (audioPrice * rate).toFixed(6),
-              },
-            )}
+            {hasGlobalMultiplier
+              ? i18next.t(
+                  '总价：(文字价格 {{textPrice}} + 音频价格 {{audioPrice}}) * 全局扣费倍率 {{gm}} = {{symbol}}{{total}}',
+                  {
+                    symbol, total: (price * rate).toFixed(6),
+                    textPrice: (textPrice * rate).toFixed(6),
+                    audioPrice: (audioPrice * rate).toFixed(6),
+                    gm: globalQuotaMultiplier,
+                  },
+                )
+              : i18next.t(
+                  '总价：文字价格 {{textPrice}} + 音频价格 {{audioPrice}} = {{symbol}}{{total}}',
+                  {
+                    symbol, total: (price * rate).toFixed(6),
+                    textPrice: (textPrice * rate).toFixed(6),
+                    audioPrice: (audioPrice * rate).toFixed(6),
+                  },
+                )}
           </p>
           <p>{i18next.t('仅供参考，以实际扣费为准')}</p>
         </article>
@@ -1290,6 +1332,7 @@ export function renderClaudeModelPrice(
   cacheCreationRatio5m = 1.0,
   cacheCreationTokens1h = 0,
   cacheCreationRatio1h = 1.0,
+  globalQuotaMultiplier = 0,
 ) {
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
     groupRatio,
@@ -1299,16 +1342,26 @@ export function renderClaudeModelPrice(
 
   // 获取货币配置
   const { symbol, rate } = getCurrencyConfig();
+  const hasGlobalMultiplier = globalQuotaMultiplier && globalQuotaMultiplier !== 1;
 
   if (modelPrice !== -1) {
+    const finalTotal = hasGlobalMultiplier
+      ? modelPrice * groupRatio * globalQuotaMultiplier
+      : modelPrice * groupRatio;
+    if (hasGlobalMultiplier) {
+      return i18next.t(
+        '模型价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}} * 全局扣费倍率：{{gm}} = {{symbol}}{{total}}',
+        {
+          symbol, price: (modelPrice * rate).toFixed(6), ratioType: ratioLabel,
+          ratio: groupRatio, total: (finalTotal * rate).toFixed(6), gm: globalQuotaMultiplier,
+        },
+      );
+    }
     return i18next.t(
       '模型价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}} = {{symbol}}{{total}}',
       {
-        symbol: symbol,
-        price: (modelPrice * rate).toFixed(6),
-        ratioType: ratioLabel,
-        ratio: groupRatio,
-        total: (modelPrice * groupRatio * rate).toFixed(6),
+        symbol, price: (modelPrice * rate).toFixed(6), ratioType: ratioLabel,
+        ratio: groupRatio, total: (finalTotal * rate).toFixed(6),
       },
     );
   } else {
@@ -1350,6 +1403,9 @@ export function renderClaudeModelPrice(
     let price =
       (effectiveInputTokens / 1000000) * inputRatioPrice * groupRatio +
       (completionTokens / 1000000) * completionRatioPrice * groupRatio;
+    if (hasGlobalMultiplier) {
+      price = price * globalQuotaMultiplier;
+    }
 
     const inputUnitPrice = inputRatioPrice * rate;
     const completionUnitPrice = completionRatioPrice * rate;
@@ -1528,16 +1584,28 @@ export function renderClaudeModelPrice(
           )}
           <p></p>
           <p>
-            {i18next.t(
-              '{{breakdown}} * {{ratioType}} {{ratio}} = {{symbol}}{{total}}',
-              {
-                breakdown: breakdownText,
-                ratioType: ratioLabel,
-                ratio: groupRatio,
-                symbol: symbol,
-                total: (price * rate).toFixed(6),
-              },
-            )}
+            {hasGlobalMultiplier
+              ? i18next.t(
+                  '{{breakdown}} * {{ratioType}} {{ratio}} * 全局扣费倍率 {{gm}} = {{symbol}}{{total}}',
+                  {
+                    breakdown: breakdownText,
+                    ratioType: ratioLabel,
+                    ratio: groupRatio,
+                    gm: globalQuotaMultiplier,
+                    symbol: symbol,
+                    total: (price * rate).toFixed(6),
+                  },
+                )
+              : i18next.t(
+                  '{{breakdown}} * {{ratioType}} {{ratio}} = {{symbol}}{{total}}',
+                  {
+                    breakdown: breakdownText,
+                    ratioType: ratioLabel,
+                    ratio: groupRatio,
+                    symbol: symbol,
+                    total: (price * rate).toFixed(6),
+                  },
+                )}
           </p>
           <p>{i18next.t('仅供参考，以实际扣费为准')}</p>
         </article>
