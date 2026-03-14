@@ -789,6 +789,7 @@ export const getLogsColumns = ({
           );
         }
 
+        const gm = isAdminUser ? (other?.admin_info?.global_quota_multiplier || 0) : 0;
         let content = other?.claude
           ? renderModelPriceSimple(
               other.model_ratio,
@@ -811,6 +812,7 @@ export const getLogsColumns = ({
               1.0,
               other?.is_system_prompt_overwritten,
               'claude',
+              gm,
             )
           : renderModelPriceSimple(
               other.model_ratio,
@@ -829,11 +831,8 @@ export const getLogsColumns = ({
               1.0,
               other?.is_system_prompt_overwritten,
               'openai',
+              gm,
             );
-        // 管理员可见：全局扣费倍率
-        if (isAdminUser && other?.admin_info?.global_quota_multiplier) {
-          content += '\n' + t('全局扣费倍率') + ': ' + other.admin_info.global_quota_multiplier;
-        }
         return (
             <Typography.Paragraph
                 ellipsis={{

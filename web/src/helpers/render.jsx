@@ -607,6 +607,7 @@ function renderPriceSimpleCore({
   image = false,
   imageRatio = 1.0,
   isSystemPromptOverride = false,
+  globalQuotaMultiplier = 0,
 }) {
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
     groupRatio,
@@ -616,13 +617,16 @@ function renderPriceSimpleCore({
 
   const { symbol, rate } = getCurrencyConfig();
   if (modelPrice !== -1) {
-    const displayPrice = (modelPrice * rate).toFixed(6);
-    return i18next.t('价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}}', {
+    let priceResult = i18next.t('价格：{{symbol}}{{price}} * {{ratioType}}：{{ratio}}', {
       symbol: symbol,
-      price: displayPrice,
+      price: (modelPrice * rate).toFixed(6),
       ratioType: ratioLabel,
       ratio: finalGroupRatio,
     });
+    if (globalQuotaMultiplier && globalQuotaMultiplier !== 1) {
+      priceResult += ' * ' + i18next.t('全局扣费倍率') + ': ' + globalQuotaMultiplier;
+    }
+    return priceResult;
   }
 
   const hasSplitCacheCreation =
@@ -669,6 +673,10 @@ function renderPriceSimpleCore({
 
   parts.push(`{{ratioType}}: {{groupRatio}}`);
 
+  if (globalQuotaMultiplier && globalQuotaMultiplier !== 1) {
+    parts.push(i18next.t('全局扣费倍率') + ': {{globalQuotaMultiplier}}');
+  }
+
   let result = i18next.t(parts.join(' * '), {
     ratio: modelRatio,
     ratioType: ratioLabel,
@@ -678,6 +686,7 @@ function renderPriceSimpleCore({
     cacheCreationRatio5m: cacheCreationRatio5m,
     cacheCreationRatio1h: cacheCreationRatio1h,
     imageRatio: imageRatio,
+    globalQuotaMultiplier: globalQuotaMultiplier,
   });
 
   if (isSystemPromptOverride) {
@@ -1044,6 +1053,7 @@ export function renderModelPriceSimple(
   imageRatio = 1.0,
   isSystemPromptOverride = false,
   provider = 'openai',
+  globalQuotaMultiplier = 0,
 ) {
   return renderPriceSimpleCore({
     modelRatio,
@@ -1061,6 +1071,7 @@ export function renderModelPriceSimple(
     image,
     imageRatio,
     isSystemPromptOverride,
+    globalQuotaMultiplier,
   });
 }
 
