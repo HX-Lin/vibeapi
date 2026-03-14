@@ -404,6 +404,13 @@ func postConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, usage 
 		}
 	}
 
+	// 应用全局倍率乘数
+	globalMultiplier := operation_setting.GetGlobalQuotaMultiplier()
+	if globalMultiplier != 1.0 {
+		dGlobalMultiplier := decimal.NewFromFloat(globalMultiplier)
+		quotaCalculateDecimal = quotaCalculateDecimal.Mul(dGlobalMultiplier)
+	}
+
 	quota := int(quotaCalculateDecimal.Round(0).IntPart())
 	totalTokens := promptTokens + completionTokens
 

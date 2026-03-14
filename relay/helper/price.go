@@ -115,6 +115,12 @@ func ModelPriceHelper(c *gin.Context, info *relaycommon.RelayInfo, promptTokens 
 		}
 	}
 
+	// 应用全局倍率乘数到预扣费
+	globalMultiplier := operation_setting.GetGlobalQuotaMultiplier()
+	if globalMultiplier != 1.0 {
+		preConsumedQuota = int(float64(preConsumedQuota) * globalMultiplier)
+	}
+
 	priceData := types.PriceData{
 		FreeModel:            freeModel,
 		ModelPrice:           modelPrice,
@@ -154,6 +160,11 @@ func ModelPriceHelperPerCall(c *gin.Context, info *relaycommon.RelayInfo) types.
 		}
 	}
 	quota := int(modelPrice * common.QuotaPerUnit * groupRatioInfo.GroupRatio)
+
+	// 应用全局倍率乘数
+	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+		quota = int(float64(quota) * gm)
+	}
 
 	// 免费模型检测（与 ModelPriceHelper 对齐）
 	freeModel := false

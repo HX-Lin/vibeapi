@@ -49,6 +49,7 @@ export default function GeneralSettings(props) {
     'general_setting.quota_display_type': 'USD',
     'general_setting.custom_currency_symbol': '¤',
     'general_setting.custom_currency_exchange_rate': '',
+    'general_setting.global_quota_multiplier': 1,
     QuotaPerUnit: '',
     RetryTimes: '',
     USDExchangeRate: '',
@@ -310,6 +311,17 @@ export default function GeneralSettings(props) {
                   extraText={t('每个用户最多可创建的令牌数量，默认 1000，设置过大可能会影响性能')}
                   placeholder={'1000'}
                   onChange={handleFieldChange('token_setting.max_user_tokens')}
+                />
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.InputNumber
+                  label={t('全局扣费倍率')}
+                  field={'general_setting.global_quota_multiplier'}
+                  step={0.1}
+                  min={0.1}
+                  extraText={t('所有模型扣费统一乘以此倍率，默认1.0，不影响余额显示')}
+                  placeholder={'1'}
+                  onChange={handleFieldChange('general_setting.global_quota_multiplier')}
                 />
               </Col>
             </Row>

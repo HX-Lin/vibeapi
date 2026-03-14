@@ -20,6 +20,8 @@ type GeneralSetting struct {
 	CustomCurrencySymbol string `json:"custom_currency_symbol"`
 	// 自定义货币与美元汇率（1 USD = X Custom）
 	CustomCurrencyExchangeRate float64 `json:"custom_currency_exchange_rate"`
+	// 全局倍率乘数，应用于所有模型的扣费计算（不影响余额显示）
+	GlobalQuotaMultiplier float64 `json:"global_quota_multiplier"`
 }
 
 // 默认配置
@@ -30,6 +32,7 @@ var generalSetting = GeneralSetting{
 	QuotaDisplayType:           QuotaDisplayTypeUSD,
 	CustomCurrencySymbol:       "¤",
 	CustomCurrencyExchangeRate: 1.0,
+	GlobalQuotaMultiplier:      1.0,
 }
 
 func init() {
@@ -71,6 +74,14 @@ func GetCurrencySymbol() string {
 	default:
 		return ""
 	}
+}
+
+// GetGlobalQuotaMultiplier 返回全局倍率乘数（默认1.0，不影响余额显示，只影响扣费）
+func GetGlobalQuotaMultiplier() float64 {
+	if generalSetting.GlobalQuotaMultiplier <= 0 {
+		return 1.0
+	}
+	return generalSetting.GlobalQuotaMultiplier
 }
 
 // GetUsdToCurrencyRate 返回 1 USD = X <currency> 的 X（TOKENS 不适用）
