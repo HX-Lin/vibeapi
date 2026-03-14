@@ -157,6 +157,13 @@ export default function GeneralSettings(props) {
       currentInputs['general_setting.custom_currency_exchange_rate'] =
         props.options['general_setting.custom_currency_exchange_rate'];
     }
+    // 回填全局扣费倍率（默认1）
+    if (props.options['general_setting.global_quota_multiplier'] !== undefined) {
+      currentInputs['general_setting.global_quota_multiplier'] =
+        parseFloat(props.options['general_setting.global_quota_multiplier']) || 1;
+    } else {
+      currentInputs['general_setting.global_quota_multiplier'] = 1;
+    }
     setInputs(currentInputs);
     setInputsRow(structuredClone(currentInputs));
     refForm.current.setValues(currentInputs);
