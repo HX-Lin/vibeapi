@@ -727,6 +727,9 @@ export const getLogsColumns = ({
       dataIndex: 'content',
       fixed: 'right',
       render: (text, record, index) => {
+        if (!isAdminUser) {
+          return <></>;
+        }
         let other = getLogOther(record.other);
         if (record.type === 6) {
           return (
@@ -827,6 +830,10 @@ export const getLogsColumns = ({
               other?.is_system_prompt_overwritten,
               'openai',
             );
+        // 管理员可见：全局扣费倍率
+        if (isAdminUser && other?.admin_info?.global_quota_multiplier) {
+          content += '\n' + t('全局扣费倍率') + ': ' + other.admin_info.global_quota_multiplier;
+        }
         return (
             <Typography.Paragraph
                 ellipsis={{
