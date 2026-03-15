@@ -14,6 +14,7 @@ import (
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 	"github.com/QuantumNous/new-api/setting/system_setting"
 	"github.com/QuantumNous/new-api/types"
@@ -54,6 +55,10 @@ func calculateAudioQuota(info QuotaInfo) int {
 		groupRatio := decimal.NewFromFloat(info.GroupRatio)
 
 		quota := modelPrice.Mul(quotaPerUnit).Mul(groupRatio)
+		// 应用全局倍率乘数
+		if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+			quota = quota.Mul(decimal.NewFromFloat(gm))
+		}
 		return int(quota.IntPart())
 	}
 
@@ -81,6 +86,11 @@ func calculateAudioQuota(info QuotaInfo) int {
 	// If ratio is not zero and quota is less than or equal to zero, set quota to 1
 	if !ratio.IsZero() && quota.LessThanOrEqual(decimal.Zero) {
 		quota = decimal.NewFromInt(1)
+	}
+
+	// 应用全局倍率乘数
+	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+		quota = quota.Mul(decimal.NewFromFloat(gm))
 	}
 
 	return int(quota.Round(0).IntPart())
@@ -290,6 +300,11 @@ func PostClaudeConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, 
 
 	if modelRatio != 0 && calculateQuota <= 0 {
 		calculateQuota = 1
+	}
+
+	// 应用全局倍率乘数
+	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+		calculateQuota = calculateQuota * gm
 	}
 
 	quota := int(calculateQuota)
