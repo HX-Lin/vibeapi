@@ -398,6 +398,21 @@ export const getUsersColumns = ({
       },
     },
     {
+      title: t('倍率增益'),
+      dataIndex: 'quota_multiplier_offset',
+      render: (text) => {
+        const val = parseFloat(text) || 0;
+        if (val === 0) return <span className='text-xs text-gray-400'>-</span>;
+        const color = val > 0 ? 'red' : 'green';
+        const prefix = val > 0 ? '+' : '';
+        return (
+          <Tag color={color} shape='circle' size='small'>
+            {prefix}{val.toFixed(2)}
+          </Tag>
+        );
+      },
+    },
+    {
       title: t('角色'),
       dataIndex: 'role',
       render: (text, record, index) => {

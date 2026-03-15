@@ -84,6 +84,21 @@ func GetGlobalQuotaMultiplier() float64 {
 	return generalSetting.GlobalQuotaMultiplier
 }
 
+// GetEffectiveQuotaMultiplier 返回叠加用户个人倍率增益后的有效倍率
+// effectiveMultiplier = globalMultiplier + userOffset
+// 如果结果 <= 0，返回全局倍率（防止负倍率）
+func GetEffectiveQuotaMultiplier(userOffset float64) float64 {
+	gm := GetGlobalQuotaMultiplier()
+	if userOffset == 0 {
+		return gm
+	}
+	effective := gm + userOffset
+	if effective <= 0 {
+		return gm
+	}
+	return effective
+}
+
 // GetUsdToCurrencyRate 返回 1 USD = X <currency> 的 X（TOKENS 不适用）
 func GetUsdToCurrencyRate(usdToCny float64) float64 {
 	switch generalSetting.QuotaDisplayType {

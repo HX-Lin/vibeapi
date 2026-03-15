@@ -72,10 +72,11 @@ func SearchSubscriptionRedemptions(keyword string, startIdx int, num int) (redem
 
 	query := tx.Model(&SubscriptionRedemption{})
 
+	keyCol := commonKeyCol
 	if id, err := strconv.Atoi(keyword); err == nil {
-		query = query.Where("id = ? OR name LIKE ?", id, keyword+"%")
+		query = query.Where("id = ? OR name LIKE ? OR "+keyCol+" LIKE ?", id, keyword+"%", keyword+"%")
 	} else {
-		query = query.Where("name LIKE ?", keyword+"%")
+		query = query.Where("name LIKE ? OR "+keyCol+" LIKE ?", keyword+"%", keyword+"%")
 	}
 
 	err = query.Count(&total).Error

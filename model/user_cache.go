@@ -178,6 +178,11 @@ func getUserSettingCache(userId int) (dto.UserSetting, error) {
 	return cache.GetSetting(), nil
 }
 
+// GetUserSettingById returns user setting by userId (from cache or DB)
+func GetUserSettingById(userId int) (dto.UserSetting, error) {
+	return getUserSettingCache(userId)
+}
+
 // New functions for individual field updates
 func updateUserStatusCache(userId int, status bool) error {
 	if !common.RedisEnabled {

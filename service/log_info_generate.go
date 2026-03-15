@@ -62,6 +62,10 @@ func GenerateTextOtherInfo(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, m
 	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
 		adminInfo["global_quota_multiplier"] = gm
 	}
+	if offset := relayInfo.UserSetting.QuotaMultiplierOffset; offset != 0 {
+		adminInfo["user_quota_multiplier_offset"] = offset
+		adminInfo["effective_quota_multiplier"] = operation_setting.GetEffectiveQuotaMultiplier(offset)
+	}
 	isMultiKey := common.GetContextKeyBool(ctx, constant.ContextKeyChannelIsMultiKey)
 	if isMultiKey {
 		adminInfo["is_multi_key"] = true

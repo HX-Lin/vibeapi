@@ -49,6 +49,8 @@ type User struct {
 	Setting          string         `json:"setting" gorm:"type:text;column:setting"`
 	Remark           string         `json:"remark,omitempty" gorm:"type:varchar(255)" validate:"max=255"`
 	StripeCustomer   string         `json:"stripe_customer" gorm:"type:varchar(64);column:stripe_customer;index"`
+	// Transport-only field: per-user quota multiplier offset (stored in Setting JSON, not a DB column)
+	QuotaMultiplierOffset *float64 `json:"quota_multiplier_offset,omitempty" gorm:"-:all"`
 }
 
 func (user *User) ToBaseUser() *UserBase {
@@ -551,6 +553,14 @@ func (user *User) Edit(updatePassword bool) error {
 	}
 
 	// Update cache
+	return updateUserCache(*user)
+}
+
+// UpdateSetting saves only the setting field to DB and refreshes cache
+func (user *User) UpdateSetting() error {
+	if err := DB.Model(user).Update("setting", user.Setting).Error; err != nil {
+		return err
+	}
 	return updateUserCache(*user)
 }
 

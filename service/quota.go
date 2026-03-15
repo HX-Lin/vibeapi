@@ -31,13 +31,14 @@ type TokenDetails struct {
 }
 
 type QuotaInfo struct {
-	InputDetails  TokenDetails
-	OutputDetails TokenDetails
-	ModelName     string
-	UsePrice      bool
-	ModelPrice    float64
-	ModelRatio    float64
-	GroupRatio    float64
+	InputDetails          TokenDetails
+	OutputDetails         TokenDetails
+	ModelName             string
+	UsePrice              bool
+	ModelPrice            float64
+	ModelRatio            float64
+	GroupRatio            float64
+	QuotaMultiplierOffset float64
 }
 
 func hasCustomModelRatio(modelName string, currentRatio float64) bool {
@@ -55,8 +56,8 @@ func calculateAudioQuota(info QuotaInfo) int {
 		groupRatio := decimal.NewFromFloat(info.GroupRatio)
 
 		quota := modelPrice.Mul(quotaPerUnit).Mul(groupRatio)
-		// 应用全局倍率乘数
-		if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+		// 应用全局倍率乘数（叠加用户个人倍率增益）
+		if gm := operation_setting.GetEffectiveQuotaMultiplier(info.QuotaMultiplierOffset); gm != 1.0 {
 			quota = quota.Mul(decimal.NewFromFloat(gm))
 		}
 		return int(quota.IntPart())
@@ -88,8 +89,8 @@ func calculateAudioQuota(info QuotaInfo) int {
 		quota = decimal.NewFromInt(1)
 	}
 
-	// 应用全局倍率乘数
-	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+	// 应用全局倍率乘数（叠加用户个人倍率增益）
+	if gm := operation_setting.GetEffectiveQuotaMultiplier(info.QuotaMultiplierOffset); gm != 1.0 {
 		quota = quota.Mul(decimal.NewFromFloat(gm))
 	}
 
@@ -140,10 +141,11 @@ func PreWssConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, usag
 			TextTokens:  textOutTokens,
 			AudioTokens: audioOutTokens,
 		},
-		ModelName:  modelName,
-		UsePrice:   relayInfo.UsePrice,
-		ModelRatio: modelRatio,
-		GroupRatio: actualGroupRatio,
+		ModelName:             modelName,
+		UsePrice:              relayInfo.UsePrice,
+		ModelRatio:            modelRatio,
+		GroupRatio:            actualGroupRatio,
+		QuotaMultiplierOffset: relayInfo.UserSetting.QuotaMultiplierOffset,
 	}
 
 	quota := calculateAudioQuota(quotaInfo)
@@ -193,10 +195,11 @@ func PostWssConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, mod
 			TextTokens:  textOutTokens,
 			AudioTokens: audioOutTokens,
 		},
-		ModelName:  modelName,
-		UsePrice:   usePrice,
-		ModelRatio: modelRatio,
-		GroupRatio: groupRatio,
+		ModelName:             modelName,
+		UsePrice:              usePrice,
+		ModelRatio:            modelRatio,
+		GroupRatio:            groupRatio,
+		QuotaMultiplierOffset: relayInfo.UserSetting.QuotaMultiplierOffset,
 	}
 
 	quota := calculateAudioQuota(quotaInfo)
@@ -302,8 +305,8 @@ func PostClaudeConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, 
 		calculateQuota = 1
 	}
 
-	// 应用全局倍率乘数
-	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+	// 应用全局倍率乘数（叠加用户个人倍率增益）
+	if gm := operation_setting.GetEffectiveQuotaMultiplier(relayInfo.UserSetting.QuotaMultiplierOffset); gm != 1.0 {
 		calculateQuota = calculateQuota * gm
 	}
 
@@ -401,10 +404,11 @@ func PostAudioConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, u
 			TextTokens:  textOutTokens,
 			AudioTokens: audioOutTokens,
 		},
-		ModelName:  relayInfo.OriginModelName,
-		UsePrice:   usePrice,
-		ModelRatio: modelRatio,
-		GroupRatio: groupRatio,
+		ModelName:             relayInfo.OriginModelName,
+		UsePrice:              usePrice,
+		ModelRatio:            modelRatio,
+		GroupRatio:            groupRatio,
+		QuotaMultiplierOffset: relayInfo.UserSetting.QuotaMultiplierOffset,
 	}
 
 	quota := calculateAudioQuota(quotaInfo)

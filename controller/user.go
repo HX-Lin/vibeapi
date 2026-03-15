@@ -264,8 +264,9 @@ func enrichUsersWithSubscriptionQuota(users []*model.User) []map[string]interfac
 			"inviter_id":       u.InviterId,
 			"DeletedAt":        u.DeletedAt,
 			"linux_do_id":      u.LinuxDOId,
-			"remark":           u.Remark,
-			"stripe_customer":  u.StripeCustomer,
+			"remark":                    u.Remark,
+			"stripe_customer":           u.StripeCustomer,
+			"quota_multiplier_offset":   u.GetSetting().QuotaMultiplierOffset,
 		}
 		if summary, ok := subQuotaMap[u.Id]; ok {
 			item["sub_quota_total"] = summary.AmountTotal
@@ -326,6 +327,9 @@ func GetUser(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionSameLevel)
 		return
 	}
+	// 填充 transport-only 字段
+	offset := user.GetSetting().QuotaMultiplierOffset
+	user.QuotaMultiplierOffset = &offset
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"message": "",
@@ -627,6 +631,21 @@ func UpdateUser(c *gin.Context) {
 	}
 	if originUser.Quota != updatedUser.Quota {
 		model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户额度从 %s修改为 %s", logger.LogQuota(originUser.Quota), logger.LogQuota(updatedUser.Quota)))
+	}
+	// 更新用户个人全局倍率增益（存储在 setting JSON 中）
+	if updatedUser.QuotaMultiplierOffset != nil {
+		setting := originUser.GetSetting()
+		oldOffset := setting.QuotaMultiplierOffset
+		newOffset := *updatedUser.QuotaMultiplierOffset
+		if oldOffset != newOffset {
+			setting.QuotaMultiplierOffset = newOffset
+			originUser.SetSetting(setting)
+			if err := originUser.UpdateSetting(); err != nil {
+				common.ApiError(c, err)
+				return
+			}
+			model.RecordLog(originUser.Id, model.LogTypeManage, fmt.Sprintf("管理员将用户全局倍率增益从 %.2f 修改为 %.2f", oldOffset, newOffset))
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
@@ -1186,12 +1205,14 @@ func UpdateUserSetting(c *gin.Context) {
 		return
 	}
 
-	// 构建设置
+	// 构建设置（保留管理员专属字段）
+	existingSetting := user.GetSetting()
 	settings := dto.UserSetting{
 		NotifyType:            req.QuotaWarningType,
 		QuotaWarningThreshold: req.QuotaWarningThreshold,
 		AcceptUnsetRatioModel: req.AcceptUnsetModelRatioModel,
 		RecordIpLog:           req.RecordIpLog,
+		QuotaMultiplierOffset: existingSetting.QuotaMultiplierOffset,
 	}
 
 	// 如果是webhook类型,添加webhook相关设置

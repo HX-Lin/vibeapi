@@ -404,8 +404,8 @@ func postConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, usage 
 		}
 	}
 
-	// 应用全局倍率乘数
-	globalMultiplier := operation_setting.GetGlobalQuotaMultiplier()
+	// 应用全局倍率乘数（叠加用户个人倍率增益）
+	globalMultiplier := operation_setting.GetEffectiveQuotaMultiplier(relayInfo.UserSetting.QuotaMultiplierOffset)
 	if globalMultiplier != 1.0 {
 		dGlobalMultiplier := decimal.NewFromFloat(globalMultiplier)
 		quotaCalculateDecimal = quotaCalculateDecimal.Mul(dGlobalMultiplier)

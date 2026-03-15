@@ -258,10 +258,17 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 
 	// 获取用户和组的倍率信息
 	group := task.Group
+	var userQuotaMultiplierOffset float64
 	if group == "" {
 		user, err := model.GetUserById(task.UserId, false)
 		if err == nil {
 			group = user.Group
+			userQuotaMultiplierOffset = user.GetSetting().QuotaMultiplierOffset
+		}
+	} else {
+		userSetting, err := model.GetUserSettingById(task.UserId)
+		if err == nil {
+			userQuotaMultiplierOffset = userSetting.QuotaMultiplierOffset
 		}
 	}
 	if group == "" {
@@ -281,8 +288,8 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 	// 计算实际应扣费额度: totalTokens * modelRatio * groupRatio
 	actualQuota := int(float64(totalTokens) * modelRatio * finalGroupRatio)
 
-	// 应用全局倍率乘数
-	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+	// 应用全局倍率乘数（叠加用户个人倍率增益）
+	if gm := operation_setting.GetEffectiveQuotaMultiplier(userQuotaMultiplierOffset); gm != 1.0 {
 		actualQuota = int(float64(actualQuota) * gm)
 	}
 
