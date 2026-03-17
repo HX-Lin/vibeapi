@@ -50,6 +50,10 @@ export default function GeneralSettings(props) {
     'general_setting.custom_currency_symbol': '¤',
     'general_setting.custom_currency_exchange_rate': '',
     'general_setting.global_quota_multiplier': 1,
+    'general_setting.concurrency_multiplier_enabled': false,
+    'general_setting.concurrency_multiplier_max': 0.5,
+    'general_setting.concurrency_multiplier_rpm_min': 5,
+    'general_setting.concurrency_multiplier_rpm_max': 30,
     QuotaPerUnit: '',
     RetryTimes: '',
     USDExchangeRate: '',
@@ -163,6 +167,21 @@ export default function GeneralSettings(props) {
         parseFloat(props.options['general_setting.global_quota_multiplier']) || 1;
     } else {
       currentInputs['general_setting.global_quota_multiplier'] = 1;
+    }
+    // 回填并发倍率设置
+    const concurrencyKeys = [
+      'general_setting.concurrency_multiplier_enabled',
+      'general_setting.concurrency_multiplier_max',
+      'general_setting.concurrency_multiplier_rpm_min',
+      'general_setting.concurrency_multiplier_rpm_max',
+    ];
+    for (const key of concurrencyKeys) {
+      if (props.options[key] !== undefined) {
+        const val = props.options[key];
+        currentInputs[key] = key.includes('enabled')
+          ? val === true || val === 'true'
+          : parseFloat(val) || inputs[key];
+      }
     }
     setInputs(currentInputs);
     setInputsRow(structuredClone(currentInputs));
@@ -332,6 +351,63 @@ export default function GeneralSettings(props) {
                 />
               </Col>
             </Row>
+
+            <Form.Section text={t('并发倍率设置')}>
+              <Banner
+                type='info'
+                description={t('根据用户每分钟请求数(RPM)动态增加扣费倍率，并发越高倍率越高。用户不可见，仅影响扣费。')}
+                style={{ marginBottom: 16 }}
+              />
+              <Row gutter={16}>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.Switch
+                    field={'general_setting.concurrency_multiplier_enabled'}
+                    label={t('启用并发倍率')}
+                    size='default'
+                    checkedText='｜'
+                    uncheckedText='〇'
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_enabled')}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.InputNumber
+                    label={t('最大倍率增益')}
+                    field={'general_setting.concurrency_multiplier_max'}
+                    step={0.05}
+                    min={0.01}
+                    max={5}
+                    extraText={t('RPM达到上限时的额外倍率，如0.5表示最多额外收费50%')}
+                    placeholder={'0.5'}
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_max')}
+                    disabled={!inputs['general_setting.concurrency_multiplier_enabled']}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.InputNumber
+                    label={t('RPM下限')}
+                    field={'general_setting.concurrency_multiplier_rpm_min'}
+                    step={1}
+                    min={1}
+                    extraText={t('低于此RPM不加倍率')}
+                    placeholder={'5'}
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_rpm_min')}
+                    disabled={!inputs['general_setting.concurrency_multiplier_enabled']}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.InputNumber
+                    label={t('RPM上限')}
+                    field={'general_setting.concurrency_multiplier_rpm_max'}
+                    step={1}
+                    min={2}
+                    extraText={t('达到此RPM时倍率增益到最大值')}
+                    placeholder={'30'}
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_rpm_max')}
+                    disabled={!inputs['general_setting.concurrency_multiplier_enabled']}
+                  />
+                </Col>
+              </Row>
+            </Form.Section>
             <Row>
               <Button size='default' onClick={onSubmit}>
                 {t('保存通用设置')}

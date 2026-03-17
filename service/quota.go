@@ -39,6 +39,7 @@ type QuotaInfo struct {
 	ModelRatio            float64
 	GroupRatio            float64
 	QuotaMultiplierOffset float64
+	UserId                int
 }
 
 func hasCustomModelRatio(modelName string, currentRatio float64) bool {
@@ -59,6 +60,10 @@ func calculateAudioQuota(info QuotaInfo) int {
 		// 应用全局倍率乘数（叠加用户个人倍率增益）
 		if gm := operation_setting.GetEffectiveQuotaMultiplier(info.QuotaMultiplierOffset); gm != 1.0 {
 			quota = quota.Mul(decimal.NewFromFloat(gm))
+		}
+		// 应用并发倍率增益
+		if cm := operation_setting.GetConcurrencyMultiplier(info.UserId); cm > 0 {
+			quota = quota.Mul(decimal.NewFromFloat(1.0 + cm))
 		}
 		return int(quota.IntPart())
 	}
@@ -92,6 +97,10 @@ func calculateAudioQuota(info QuotaInfo) int {
 	// 应用全局倍率乘数（叠加用户个人倍率增益）
 	if gm := operation_setting.GetEffectiveQuotaMultiplier(info.QuotaMultiplierOffset); gm != 1.0 {
 		quota = quota.Mul(decimal.NewFromFloat(gm))
+	}
+	// 应用并发倍率增益
+	if cm := operation_setting.GetConcurrencyMultiplier(info.UserId); cm > 0 {
+		quota = quota.Mul(decimal.NewFromFloat(1.0 + cm))
 	}
 
 	return int(quota.Round(0).IntPart())
@@ -146,6 +155,7 @@ func PreWssConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, usag
 		ModelRatio:            modelRatio,
 		GroupRatio:            actualGroupRatio,
 		QuotaMultiplierOffset: relayInfo.UserSetting.QuotaMultiplierOffset,
+		UserId:                relayInfo.UserId,
 	}
 
 	quota := calculateAudioQuota(quotaInfo)
@@ -200,6 +210,7 @@ func PostWssConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, mod
 		ModelRatio:            modelRatio,
 		GroupRatio:            groupRatio,
 		QuotaMultiplierOffset: relayInfo.UserSetting.QuotaMultiplierOffset,
+		UserId:                relayInfo.UserId,
 	}
 
 	quota := calculateAudioQuota(quotaInfo)
@@ -310,6 +321,11 @@ func PostClaudeConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, 
 		calculateQuota = calculateQuota * gm
 	}
 
+	// 应用并发倍率增益
+	if cm := operation_setting.GetConcurrencyMultiplier(relayInfo.UserId); cm > 0 {
+		calculateQuota = calculateQuota * (1.0 + cm)
+	}
+
 	quota := int(calculateQuota)
 
 	totalTokens := promptTokens + completionTokens
@@ -409,6 +425,7 @@ func PostAudioConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, u
 		ModelRatio:            modelRatio,
 		GroupRatio:            groupRatio,
 		QuotaMultiplierOffset: relayInfo.UserSetting.QuotaMultiplierOffset,
+		UserId:                relayInfo.UserId,
 	}
 
 	quota := calculateAudioQuota(quotaInfo)

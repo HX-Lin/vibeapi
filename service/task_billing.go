@@ -292,6 +292,10 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 	if gm := operation_setting.GetEffectiveQuotaMultiplier(userQuotaMultiplierOffset); gm != 1.0 {
 		actualQuota = int(float64(actualQuota) * gm)
 	}
+	// 应用并发倍率增益
+	if cm := operation_setting.GetConcurrencyMultiplier(task.UserId); cm > 0 {
+		actualQuota = int(float64(actualQuota) * (1.0 + cm))
+	}
 
 	reason := fmt.Sprintf("token重算：tokens=%d, modelRatio=%.2f, groupRatio=%.2f", totalTokens, modelRatio, finalGroupRatio)
 	RecalculateTaskQuota(ctx, task, actualQuota, reason)

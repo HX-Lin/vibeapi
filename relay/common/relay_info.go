@@ -496,6 +496,9 @@ func genBaseRelayInfo(c *gin.Context, request dto.Request) *RelayInfo {
 		info.UserSetting = userSetting
 	}
 
+	// 记录用户请求用于并发倍率计算
+	common.RecordUserRequest(info.UserId)
+
 	return info
 }
 

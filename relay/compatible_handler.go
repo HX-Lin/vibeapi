@@ -411,6 +411,14 @@ func postConsumeQuota(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, usage 
 		quotaCalculateDecimal = quotaCalculateDecimal.Mul(dGlobalMultiplier)
 	}
 
+	// 应用并发倍率增益
+	concurrencyMultiplier := operation_setting.GetConcurrencyMultiplier(relayInfo.UserId)
+	if concurrencyMultiplier > 0 {
+		dConcurrencyFactor := decimal.NewFromFloat(1.0 + concurrencyMultiplier)
+		quotaCalculateDecimal = quotaCalculateDecimal.Mul(dConcurrencyFactor)
+		extraContent = append(extraContent, fmt.Sprintf("并发倍率增益: +%.2f", concurrencyMultiplier))
+	}
+
 	quota := int(quotaCalculateDecimal.Round(0).IntPart())
 	totalTokens := promptTokens + completionTokens
 

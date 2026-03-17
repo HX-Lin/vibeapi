@@ -66,6 +66,10 @@ func GenerateTextOtherInfo(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, m
 		adminInfo["user_quota_multiplier_offset"] = offset
 		adminInfo["effective_quota_multiplier"] = operation_setting.GetEffectiveQuotaMultiplier(offset)
 	}
+	if cm := operation_setting.GetConcurrencyMultiplier(relayInfo.UserId); cm > 0 {
+		adminInfo["concurrency_multiplier"] = cm
+		adminInfo["user_rpm"] = common.GetUserRPM(relayInfo.UserId)
+	}
 	isMultiKey := common.GetContextKeyBool(ctx, constant.ContextKeyChannelIsMultiKey)
 	if isMultiKey {
 		adminInfo["is_multi_key"] = true
