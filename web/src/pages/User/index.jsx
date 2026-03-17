@@ -17,13 +17,54 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { lazy, Suspense, useState } from 'react';
+import { TabPane, Tabs } from '@douyinfe/semi-ui';
+import { useTranslation } from 'react-i18next';
+import { Users, BarChart3 } from 'lucide-react';
 import UsersTable from '../../components/table/users';
+import Loading from '../../components/common/ui/Loading';
+
+const UserStats = lazy(() =>
+  import('../../components/table/users/UserStats'),
+);
 
 const User = () => {
+  const { t } = useTranslation();
+  const [activeKey, setActiveKey] = useState('users');
+
   return (
     <div className='mt-[60px] px-2'>
-      <UsersTable />
+      <Tabs
+        activeKey={activeKey}
+        onChange={setActiveKey}
+        type='line'
+        style={{ marginBottom: 16 }}
+      >
+        <TabPane
+          tab={
+            <span className='flex items-center gap-1'>
+              <Users size={16} />
+              {t('用户列表')}
+            </span>
+          }
+          itemKey='users'
+        >
+          <UsersTable />
+        </TabPane>
+        <TabPane
+          tab={
+            <span className='flex items-center gap-1'>
+              <BarChart3 size={16} />
+              {t('统计分析')}
+            </span>
+          }
+          itemKey='stats'
+        >
+          <Suspense fallback={<Loading />}>
+            <UserStats />
+          </Suspense>
+        </TabPane>
+      </Tabs>
     </div>
   );
 };

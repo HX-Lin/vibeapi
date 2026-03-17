@@ -302,6 +302,13 @@ func SetApiRouter(router *gin.Engine) {
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)
 		dataRoute.GET("/self", middleware.UserAuth(), controller.GetUserQuotaDates)
 
+		statsRoute := apiRouter.Group("/stats")
+		statsRoute.Use(middleware.AdminAuth())
+		{
+			statsRoute.GET("/user_rank", controller.GetUserQuotaRank)
+			statsRoute.GET("/usage", controller.GetUserUsageStats)
+		}
+
 		logRoute.Use(middleware.CORS(), middleware.CriticalRateLimit())
 		{
 			logRoute.GET("/token", middleware.TokenAuthReadOnly(), controller.GetLogByKey)
