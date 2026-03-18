@@ -298,6 +298,27 @@ func (info *RelayInfo) ToString() string {
 	return b.String()
 }
 
+// 定义支持 response_format 参数的通道类型
+var ResponseFormatSupportedChannels = map[int]bool{
+	constant.ChannelTypeOpenAI:      true,
+	constant.ChannelTypeAzure:       true,
+	constant.ChannelTypeDeepSeek:    true,
+	constant.ChannelTypeOpenRouter:  true,
+	constant.ChannelTypeXai:         true,
+	constant.ChannelTypeMistral:     true,
+	constant.ChannelTypeMoonshot:    true,
+	constant.ChannelTypeZhipu_v4:   true,
+	constant.ChannelTypeMiniMax:     true,
+	constant.ChannelTypeSiliconFlow: true,
+	constant.ChannelTypeAli:         true,
+	constant.ChannelTypeLingYiWanWu: true,
+	constant.ChannelTypeVolcEngine:  true,
+	constant.ChannelTypeGemini:      true,
+	constant.ChannelTypeBaiduV2:     true,
+	constant.ChannelTypePerplexity:  true,
+	constant.ChannelTypeSubmodel:    true,
+}
+
 // 定义支持流式选项的通道类型
 var streamSupportedChannels = map[int]bool{
 	constant.ChannelTypeOpenAI:      true,
