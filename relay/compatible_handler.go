@@ -221,4 +221,3 @@ func TextHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *types
 	}
 	return nil
 }
-
