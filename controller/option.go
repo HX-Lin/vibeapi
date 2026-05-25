@@ -342,3 +342,35 @@ func UpdateOption(c *gin.Context) {
 		"message": "",
 	})
 }
+
+func UpdateHelpDocs(c *gin.Context) {
+	var req OptionUpdateRequest
+	err := json.NewDecoder(c.Request.Body).Decode(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "无效的参数",
+		})
+		return
+	}
+
+	value := fmt.Sprintf("%v", req.Value)
+	err = console_setting.ValidateConsoleSettings(value, "HelpDocs")
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	err = model.UpdateOption("console_setting.help_docs", value)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
+}

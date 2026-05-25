@@ -17,12 +17,13 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { getRelativeTime } from '../../helpers';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
 
 import DashboardHeader from './DashboardHeader';
+import QuickActions from './QuickActions';
 import StatsCards from './StatsCards';
 import ChartsPanel from './ChartsPanel';
 import ApiInfoPanel from './ApiInfoPanel';
@@ -39,7 +40,6 @@ import {
   CHART_CONFIG,
   CARD_PROPS,
   FLEX_CENTER_GAP2,
-  ILLUSTRATION_SIZE,
   ANNOUNCEMENT_LEGEND_DATA,
   UPTIME_STATUS_MAP,
 } from '../../constants/dashboard.constants';
@@ -56,6 +56,9 @@ const Dashboard = () => {
   // ========== Context ==========
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState, statusDispatch] = useContext(StatusContext);
+
+  // ========== 账户数据切换 ==========
+  const [showHistoryQuota, setShowHistoryQuota] = useState(false);
 
   // ========== 主要数据管理 ==========
   const dashboardData = useDashboardData(userState, userDispatch, statusState);
@@ -83,6 +86,8 @@ const Dashboard = () => {
     dashboardData.performanceMetrics,
     dashboardData.navigate,
     dashboardData.t,
+    dashboardData.activeSubscriptions,
+    showHistoryQuota,
   );
 
   // ========== 数据处理 ==========
@@ -150,6 +155,19 @@ const Dashboard = () => {
     initChart();
   }, []);
 
+  // Auto-refresh every 60 seconds
+  const refreshRef = useRef(dashboardData.refresh);
+  useEffect(() => {
+    refreshRef.current = dashboardData.refresh;
+  }, [dashboardData.refresh]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      refreshRef.current();
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <div className='h-full'>
       <DashboardHeader
@@ -174,12 +192,15 @@ const Dashboard = () => {
         t={dashboardData.t}
       />
 
+      <QuickActions />
+
       <StatsCards
         groupedStatsData={groupedStatsData}
         loading={dashboardData.loading}
         getTrendSpec={getTrendSpec}
         CARD_PROPS={CARD_PROPS}
         CHART_CONFIG={CHART_CONFIG}
+        onToggleAccountItem={() => setShowHistoryQuota((v) => !v)}
       />
 
       {/* API信息和图表面板 */}
@@ -211,7 +232,6 @@ const Dashboard = () => {
               handleSpeedTest={handleSpeedTest}
               CARD_PROPS={CARD_PROPS}
               FLEX_CENTER_GAP2={FLEX_CENTER_GAP2}
-              ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
               t={dashboardData.t}
             />
           )}
@@ -233,7 +253,6 @@ const Dashboard = () => {
                   }),
                 )}
                 CARD_PROPS={CARD_PROPS}
-                ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
                 t={dashboardData.t}
               />
             )}
@@ -244,7 +263,6 @@ const Dashboard = () => {
                 faqData={faqData}
                 CARD_PROPS={CARD_PROPS}
                 FLEX_CENTER_GAP2={FLEX_CENTER_GAP2}
-                ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
                 t={dashboardData.t}
               />
             )}
@@ -272,7 +290,6 @@ const Dashboard = () => {
                   )
                 }
                 CARD_PROPS={CARD_PROPS}
-                ILLUSTRATION_SIZE={ILLUSTRATION_SIZE}
                 t={dashboardData.t}
               />
             )}

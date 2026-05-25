@@ -31,10 +31,10 @@ import {
   renderQuota,
   stringToColor,
   getLogOther,
-  renderModelTag,
   renderModelPriceSimple,
   renderTieredModelPriceSimple,
 } from '../../../helpers';
+import { renderModelTag } from '../../../helpers/icons';
 import { IconHelpCircle } from '@douyinfe/semi-icons';
 import { CircleAlert, Route, Sparkles } from 'lucide-react';
 

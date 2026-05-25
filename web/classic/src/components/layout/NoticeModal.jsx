@@ -21,18 +21,15 @@ import React, { useEffect, useState, useContext, useMemo } from 'react';
 import {
   Button,
   Modal,
-  Empty,
   Tabs,
   TabPane,
   Timeline,
 } from '@douyinfe/semi-ui';
 import { useTranslation } from 'react-i18next';
-import { API, showError, getRelativeTime } from '../../helpers';
+import { API } from '../../helpers/api';
+import { showError, getRelativeTime } from '../../helpers/utils';
 import { marked } from 'marked';
-import {
-  IllustrationNoContent,
-  IllustrationNoContentDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../common/ui/EmptyState';
 import { StatusContext } from '../../context/Status';
 import { Bell, Megaphone } from 'lucide-react';
 
@@ -120,7 +117,7 @@ const NoticeModal = ({
     if (loading) {
       return (
         <div className='py-12'>
-          <Empty description={t('加载中...')} />
+          <EmptyState preset='noResult' size='small' description={t('加载中...')} />
         </div>
       );
     }
@@ -128,15 +125,7 @@ const NoticeModal = ({
     if (!noticeContent) {
       return (
         <div className='py-12'>
-          <Empty
-            image={
-              <IllustrationNoContent style={{ width: 150, height: 150 }} />
-            }
-            darkModeImage={
-              <IllustrationNoContentDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无公告')}
-          />
+          <EmptyState preset='noResult' size='medium' description={t('暂无公告')} />
         </div>
       );
     }
@@ -153,15 +142,7 @@ const NoticeModal = ({
     if (processedAnnouncements.length === 0) {
       return (
         <div className='py-12'>
-          <Empty
-            image={
-              <IllustrationNoContent style={{ width: 150, height: 150 }} />
-            }
-            darkModeImage={
-              <IllustrationNoContentDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无系统公告')}
-          />
+          <EmptyState preset='noResult' size='medium' description={t('暂无系统公告')} />
         </div>
       );
     }

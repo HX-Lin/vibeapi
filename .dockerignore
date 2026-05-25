@@ -13,3 +13,15 @@ docs
 /web/classic/node_modules
 /web/classic/dist
 !THIRD-PARTY-LICENSES.md
+.claude
+
+# Frontend — only needed in Stage 1 (bun builder), not in Stage 2 (go builder)
+/web/dist
+/web/.cache
+/web/.vite
+
+# Build artifacts
+/data
+/logs
+*.exe
+*.test

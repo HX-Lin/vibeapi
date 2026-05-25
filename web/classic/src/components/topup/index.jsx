@@ -64,6 +64,8 @@ const TopUp = () => {
   const [statusState] = useContext(StatusContext);
 
   const [redemptionCode, setRedemptionCode] = useState('');
+  const [subscriptionRedemptionCode, setSubscriptionRedemptionCode] = useState('');
+  const [isRedeemingSubscription, setIsRedeemingSubscription] = useState(false);
   const [amount, setAmount] = useState(0.0);
   const [minTopUp, setMinTopUp] = useState(statusState?.status?.min_topup || 1);
   const [topUpCount, setTopUpCount] = useState(
@@ -206,6 +208,36 @@ const TopUp = () => {
       return;
     }
     window.open(topUpLink, '_blank');
+  };
+
+  const redeemSubscription = async () => {
+    if (subscriptionRedemptionCode === '') {
+      showInfo(t('请输入订阅兑换码！'));
+      return;
+    }
+    setIsRedeemingSubscription(true);
+    try {
+      const res = await API.post('/api/user/subscription/redeem', {
+        key: subscriptionRedemptionCode,
+      });
+      const { success, message, data } = res.data;
+      if (success) {
+        showSuccess(t('兑换成功！'));
+        Modal.success({
+          title: t('订阅兑换成功！'),
+          content: t('已成功激活订阅套餐：') + (data || ''),
+          centered: true,
+        });
+        setSubscriptionRedemptionCode('');
+        getSubscriptionSelf();
+      } else {
+        showError(message);
+      }
+    } catch (err) {
+      showError(t('请求失败'));
+    } finally {
+      setIsRedeemingSubscription(false);
+    }
   };
 
   const preTopUp = async (payment) => {
@@ -1016,6 +1048,10 @@ const TopUp = () => {
           allSubscriptions={allSubscriptions}
           reloadSubscriptionSelf={getSubscriptionSelf}
           enableRedemption={topupInfo.enable_redemption !== false}
+          subscriptionRedemptionCode={subscriptionRedemptionCode}
+          setSubscriptionRedemptionCode={setSubscriptionRedemptionCode}
+          redeemSubscription={redeemSubscription}
+          isRedeemingSubscription={isRedeemingSubscription}
         />
         <InvitationCard
           t={t}

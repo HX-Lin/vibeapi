@@ -13,6 +13,8 @@ import (
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 	"github.com/QuantumNous/new-api/setting/system_setting"
 	"gorm.io/gorm"
+
+	"github.com/QuantumNous/new-api/setting/vibeapi_setting"
 )
 
 type Option struct {
@@ -71,9 +73,6 @@ func InitOptionMap() {
 	common.OptionMap["SystemName"] = common.SystemName
 	common.OptionMap["Logo"] = common.Logo
 	common.OptionMap["ServerAddress"] = ""
-	common.OptionMap["WorkerUrl"] = system_setting.WorkerUrl
-	common.OptionMap["WorkerValidKey"] = system_setting.WorkerValidKey
-	common.OptionMap["WorkerAllowHttpImageRequestEnabled"] = strconv.FormatBool(system_setting.WorkerAllowHttpImageRequestEnabled)
 	common.OptionMap["PayAddress"] = ""
 	common.OptionMap["CustomCallbackAddress"] = ""
 	common.OptionMap["EpayId"] = ""
@@ -164,6 +163,7 @@ func InitOptionMap() {
 	common.OptionMap["CheckSensitiveEnabled"] = strconv.FormatBool(setting.CheckSensitiveEnabled)
 	common.OptionMap["DemoSiteEnabled"] = strconv.FormatBool(operation_setting.DemoSiteEnabled)
 	common.OptionMap["SelfUseModeEnabled"] = strconv.FormatBool(operation_setting.SelfUseModeEnabled)
+	common.OptionMap["TokenGroupEnabled"] = strconv.FormatBool(operation_setting.TokenGroupEnabled)
 	common.OptionMap["ModelRequestRateLimitEnabled"] = strconv.FormatBool(setting.ModelRequestRateLimitEnabled)
 	common.OptionMap["CheckSensitiveOnPromptEnabled"] = strconv.FormatBool(setting.CheckSensitiveOnPromptEnabled)
 	common.OptionMap["StopOnSensitiveEnabled"] = strconv.FormatBool(setting.StopOnSensitiveEnabled)
@@ -173,6 +173,10 @@ func InitOptionMap() {
 	common.OptionMap["AutomaticDisableStatusCodes"] = operation_setting.AutomaticDisableStatusCodesToString()
 	common.OptionMap["AutomaticRetryStatusCodes"] = operation_setting.AutomaticRetryStatusCodesToString()
 	common.OptionMap["ExposeRatioEnabled"] = strconv.FormatBool(ratio_setting.IsExposeRatioEnabled())
+
+	common.OptionMap["VibeAPIUpstreamURL"] = vibeapi_setting.UpstreamURL
+	common.OptionMap["VibeAPIUpstreamAPIKey"] = vibeapi_setting.UpstreamAPIKey
+	common.OptionMap["VibeAPIUpstreamEnabled"] = strconv.FormatBool(vibeapi_setting.UpstreamEnabled)
 
 	// 自动添加所有注册的模型配置
 	modelConfigs := config.GlobalConfig.ExportAllConfigs()
@@ -342,6 +346,8 @@ func updateOptionMap(key string, value string) (err error) {
 			operation_setting.DemoSiteEnabled = boolValue
 		case "SelfUseModeEnabled":
 			operation_setting.SelfUseModeEnabled = boolValue
+		case "TokenGroupEnabled":
+			operation_setting.TokenGroupEnabled = boolValue
 		case "CheckSensitiveOnPromptEnabled":
 			setting.CheckSensitiveOnPromptEnabled = boolValue
 		case "ModelRequestRateLimitEnabled":
@@ -376,10 +382,6 @@ func updateOptionMap(key string, value string) (err error) {
 		common.SMTPToken = value
 	case "ServerAddress":
 		system_setting.ServerAddress = value
-	case "WorkerUrl":
-		system_setting.WorkerUrl = value
-	case "WorkerValidKey":
-		system_setting.WorkerValidKey = value
 	case "PayAddress":
 		operation_setting.PayAddress = value
 	case "Chats":
@@ -566,6 +568,12 @@ func updateOptionMap(key string, value string) (err error) {
 		// WaffoPayMethods is read directly from OptionMap via setting.GetWaffoPayMethods().
 		// The value is already stored in OptionMap at the top of this function (line: common.OptionMap[key] = value).
 		// No additional in-memory variable to update.
+	case "VibeAPIUpstreamURL":
+		vibeapi_setting.UpstreamURL = value
+	case "VibeAPIUpstreamAPIKey":
+		vibeapi_setting.UpstreamAPIKey = value
+	case "VibeAPIUpstreamEnabled":
+		vibeapi_setting.UpstreamEnabled = value == "true"
 	}
 	return err
 }

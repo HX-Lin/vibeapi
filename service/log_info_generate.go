@@ -9,6 +9,7 @@ import (
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/pkg/billingexpr"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/types"
 
 	"github.com/gin-gonic/gin"
@@ -59,6 +60,18 @@ func GenerateTextOtherInfo(ctx *gin.Context, relayInfo *relaycommon.RelayInfo, m
 
 	adminInfo := make(map[string]interface{})
 	adminInfo["use_channel"] = ctx.GetStringSlice("use_channel")
+	// 全局扣费倍率（仅管理员可见）
+	if gm := operation_setting.GetGlobalQuotaMultiplier(); gm != 1.0 {
+		adminInfo["global_quota_multiplier"] = gm
+	}
+	if offset := relayInfo.UserSetting.QuotaMultiplierOffset; offset != 0 {
+		adminInfo["user_quota_multiplier_offset"] = offset
+		adminInfo["effective_quota_multiplier"] = operation_setting.GetEffectiveQuotaMultiplier(offset)
+	}
+	if cm := operation_setting.GetConcurrencyMultiplier(relayInfo.UserId); cm > 0 {
+		adminInfo["concurrency_multiplier"] = cm
+		adminInfo["user_rpm"] = common.GetUserRPM(relayInfo.UserId)
+	}
 	isMultiKey := common.GetContextKeyBool(ctx, constant.ContextKeyChannelIsMultiKey)
 	if isMultiKey {
 		adminInfo["is_multi_key"] = true

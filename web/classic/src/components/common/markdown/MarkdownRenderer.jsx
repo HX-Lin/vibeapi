@@ -378,6 +378,25 @@ function tryWrapHtmlCode(text) {
     );
 }
 
+function getHeadingText(children) {
+  return React.Children.toArray(children)
+    .map((child) => (typeof child === 'string' ? child : child?.props?.children ? getHeadingText(child.props.children) : ''))
+    .join('');
+}
+
+// Generate heading ID following GitHub-flavored markdown slug rules:
+// lowercase, remove punctuation (keep CJK/letters/digits/spaces/hyphens),
+// spaces become hyphens, collapse consecutive hyphens, trim hyphens.
+function getHeadingId(children) {
+  const text = getHeadingText(children);
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 function _MarkdownContent(props) {
   const {
     content,
@@ -446,12 +465,31 @@ function _MarkdownContent(props) {
               </video>
             );
           }
-          const isInternal = /^\/#/i.test(href);
+          const isAnchor = /^#/.test(href);
+          const isInternal = isAnchor || /^\/#/i.test(href);
           const target = isInternal ? '_self' : (aProps.target ?? '_blank');
+          const handleClick = isAnchor
+            ? (e) => {
+                e.preventDefault();
+                const rawId = href.slice(1);
+                // Decode URL-encoded anchors (e.g. %E6%96%B9%E5%BC%8F -> 方式)
+                let id;
+                try {
+                  id = decodeURIComponent(rawId);
+                } catch {
+                  id = rawId;
+                }
+                const el = document.getElementById(id);
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }
+            : undefined;
           return (
             <a
               {...aProps}
               target={target}
+              onClick={handleClick}
               style={{
                 color: isUserMessage ? '#87CEEB' : 'var(--semi-color-primary)',
                 textDecoration: 'none',
@@ -468,6 +506,7 @@ function _MarkdownContent(props) {
         h1: (props) => (
           <h1
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '24px',
               fontWeight: 'bold',
@@ -479,6 +518,7 @@ function _MarkdownContent(props) {
         h2: (props) => (
           <h2
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '20px',
               fontWeight: 'bold',
@@ -490,6 +530,7 @@ function _MarkdownContent(props) {
         h3: (props) => (
           <h3
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '18px',
               fontWeight: 'bold',
@@ -501,6 +542,7 @@ function _MarkdownContent(props) {
         h4: (props) => (
           <h4
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '16px',
               fontWeight: 'bold',
@@ -512,6 +554,7 @@ function _MarkdownContent(props) {
         h5: (props) => (
           <h5
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '14px',
               fontWeight: 'bold',
@@ -523,6 +566,7 @@ function _MarkdownContent(props) {
         h6: (props) => (
           <h6
             {...props}
+            id={props.id || getHeadingId(props.children)}
             style={{
               fontSize: '13px',
               fontWeight: 'bold',

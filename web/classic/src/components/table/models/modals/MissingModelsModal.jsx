@@ -24,13 +24,9 @@ import {
   Spin,
   Button,
   Typography,
-  Empty,
   Input,
 } from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../common/ui/EmptyState';
 import { IconSearch } from '@douyinfe/semi-icons';
 import { API, showError } from '../../../../helpers';
 import { MODEL_TABLE_PAGE_SIZE } from '../../../../constants';
@@ -134,14 +130,7 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
     >
       <Spin spinning={loading}>
         {missingModels.length === 0 && !loading ? (
-          <Empty
-            image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-            darkModeImage={
-              <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-            }
-            description={t('暂无缺失模型')}
-            style={{ padding: 30 }}
-          />
+          <EmptyState preset='noResult' size='medium' description={t('暂无缺失模型')} />
         ) : (
           <div className='missing-models-content'>
             {/* 搜索框 */}
@@ -173,19 +162,12 @@ const MissingModelsModal = ({ visible, onClose, onConfigureModel, t }) => {
                 }}
               />
             ) : (
-              <Empty
-                image={
-                  <IllustrationNoResult style={{ width: 100, height: 100 }} />
-                }
-                darkModeImage={
-                  <IllustrationNoResultDark
-                    style={{ width: 100, height: 100 }}
-                  />
-                }
+              <EmptyState
+                preset='noResult'
+                size='small'
                 description={
                   searchKeyword ? t('未找到匹配的模型') : t('暂无缺失模型')
                 }
-                style={{ padding: 20 }}
               />
             )}
           </div>

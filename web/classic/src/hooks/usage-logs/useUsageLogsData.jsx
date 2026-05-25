@@ -468,13 +468,14 @@ export const useLogsData = () => {
           Boolean(other?.violation_fee_code) ||
           Boolean(other?.violation_fee_marker);
 
-        let content = '';
+        const gm = isAdminUser ? (other?.admin_info?.global_quota_multiplier || 0) : 0;
         if (!isViolationFeeLog && other?.billing_mode !== 'tiered_expr') {
           const logOpts = {
             ...other,
             prompt_tokens: logs[i].prompt_tokens,
             completion_tokens: logs[i].completion_tokens,
             displayMode: billingDisplayMode,
+            globalQuotaMultiplier: gm,
           };
           const isTaskLog = other?.is_task === true || other?.task_id != null;
           if (isTaskLog && other?.model_price === -1) {

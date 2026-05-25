@@ -50,6 +50,11 @@ export default function GeneralSettings(props) {
     'general_setting.quota_display_type': 'USD',
     'general_setting.custom_currency_symbol': '¤',
     'general_setting.custom_currency_exchange_rate': '',
+    'general_setting.global_quota_multiplier': 1,
+    'general_setting.concurrency_multiplier_enabled': false,
+    'general_setting.concurrency_multiplier_max': 0.5,
+    'general_setting.concurrency_multiplier_rpm_min': 5,
+    'general_setting.concurrency_multiplier_rpm_max': 30,
     QuotaPerUnit: '',
     RetryTimes: '',
     USDExchangeRate: '',
@@ -57,6 +62,7 @@ export default function GeneralSettings(props) {
     DefaultCollapseSidebar: false,
     DemoSiteEnabled: false,
     SelfUseModeEnabled: false,
+    TokenGroupEnabled: true,
     'token_setting.max_user_tokens': 1000,
   });
   const refForm = useRef();
@@ -227,6 +233,28 @@ export default function GeneralSettings(props) {
       currentInputs['general_setting.custom_currency_exchange_rate'] =
         props.options['general_setting.custom_currency_exchange_rate'];
     }
+    // 回填全局扣费倍率（默认1）
+    if (props.options['general_setting.global_quota_multiplier'] !== undefined) {
+      currentInputs['general_setting.global_quota_multiplier'] =
+        parseFloat(props.options['general_setting.global_quota_multiplier']) || 1;
+    } else {
+      currentInputs['general_setting.global_quota_multiplier'] = 1;
+    }
+    // 回填并发倍率设置
+    const concurrencyKeys = [
+      'general_setting.concurrency_multiplier_enabled',
+      'general_setting.concurrency_multiplier_max',
+      'general_setting.concurrency_multiplier_rpm_min',
+      'general_setting.concurrency_multiplier_rpm_max',
+    ];
+    for (const key of concurrencyKeys) {
+      if (props.options[key] !== undefined) {
+        const val = props.options[key];
+        currentInputs[key] = key.includes('enabled')
+          ? val === true || val === 'true'
+          : parseFloat(val) || inputs[key];
+      }
+    }
     setInputs(currentInputs);
     setInputsRow(structuredClone(currentInputs));
     refForm.current.setValues(currentInputs);
@@ -257,7 +285,7 @@ export default function GeneralSettings(props) {
                   field={'general_setting.docs_link'}
                   label={t('文档地址')}
                   initValue={''}
-                  placeholder={t('例如 https://docs.newapi.pro')}
+                  placeholder={t('例如 https://docs.vibeapi.com')}
                   onChange={handleFieldChange('general_setting.docs_link')}
                   showClear
                 />
@@ -390,6 +418,17 @@ export default function GeneralSettings(props) {
                   onChange={handleFieldChange('SelfUseModeEnabled')}
                 />
               </Col>
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.Switch
+                  field={'TokenGroupEnabled'}
+                  label={t('令牌分组选择')}
+                  extraText={t('开启后用户创建令牌时可以选择令牌分组')}
+                  size='default'
+                  checkedText='｜'
+                  uncheckedText='〇'
+                  onChange={handleFieldChange('TokenGroupEnabled')}
+                />
+              </Col>
             </Row>
             <Row gutter={16}>
               <Col xs={24} sm={12} md={8} lg={8} xl={8}>
@@ -403,7 +442,75 @@ export default function GeneralSettings(props) {
                   onChange={handleFieldChange('token_setting.max_user_tokens')}
                 />
               </Col>
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.InputNumber
+                  label={t('全局扣费倍率')}
+                  field={'general_setting.global_quota_multiplier'}
+                  step={0.1}
+                  min={0.1}
+                  extraText={t('所有模型扣费统一乘以此倍率，默认1.0，不影响余额显示')}
+                  placeholder={'1'}
+                  onChange={handleFieldChange('general_setting.global_quota_multiplier')}
+                />
+              </Col>
             </Row>
+
+            <Form.Section text={t('并发倍率设置')}>
+              <Banner
+                type='info'
+                description={t('根据用户每分钟请求数(RPM)动态增加扣费倍率，并发越高倍率越高。用户不可见，仅影响扣费。')}
+                style={{ marginBottom: 16 }}
+              />
+              <Row gutter={16}>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.Switch
+                    field={'general_setting.concurrency_multiplier_enabled'}
+                    label={t('启用并发倍率')}
+                    size='default'
+                    checkedText='｜'
+                    uncheckedText='〇'
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_enabled')}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.InputNumber
+                    label={t('最大倍率增益')}
+                    field={'general_setting.concurrency_multiplier_max'}
+                    step={0.05}
+                    min={0.01}
+                    max={5}
+                    extraText={t('RPM达到上限时的额外倍率，如0.5表示最多额外收费50%')}
+                    placeholder={'0.5'}
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_max')}
+                    disabled={!inputs['general_setting.concurrency_multiplier_enabled']}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.InputNumber
+                    label={t('RPM下限')}
+                    field={'general_setting.concurrency_multiplier_rpm_min'}
+                    step={1}
+                    min={1}
+                    extraText={t('低于此RPM不加倍率')}
+                    placeholder={'5'}
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_rpm_min')}
+                    disabled={!inputs['general_setting.concurrency_multiplier_enabled']}
+                  />
+                </Col>
+                <Col xs={24} sm={12} md={6} lg={6} xl={6}>
+                  <Form.InputNumber
+                    label={t('RPM上限')}
+                    field={'general_setting.concurrency_multiplier_rpm_max'}
+                    step={1}
+                    min={2}
+                    extraText={t('达到此RPM时倍率增益到最大值')}
+                    placeholder={'30'}
+                    onChange={handleFieldChange('general_setting.concurrency_multiplier_rpm_max')}
+                    disabled={!inputs['general_setting.concurrency_multiplier_enabled']}
+                  />
+                </Col>
+              </Row>
+            </Form.Section>
             <Row>
               <Button size='default' onClick={onSubmit}>
                 {t('保存通用设置')}

@@ -226,14 +226,14 @@ export const useTokensData = (openFluentNotification, openCCSwitchModal) => {
     let serverAddress = '';
     if (status) {
       status = JSON.parse(status);
-      serverAddress = status.server_address;
+      serverAddress = status.server_address || '';
     }
     if (serverAddress === '') {
       serverAddress = window.location.origin;
     }
     if (url.includes('{cherryConfig}') === true) {
       let cherryConfig = {
-        id: 'new-api',
+        id: 'vibeapi',
         baseUrl: serverAddress,
         apiKey: `sk-${fullKey}`,
       };

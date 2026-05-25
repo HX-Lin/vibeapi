@@ -220,7 +220,7 @@ func (a *Adaptor) SetupRequestHeader(c *gin.Context, header *http.Header, info *
 			header.Set("HTTP-Referer", "https://www.newapi.ai")
 		}
 		if header.Get("X-OpenRouter-Title") == "" {
-			header.Set("X-OpenRouter-Title", "New API")
+			header.Set("X-OpenRouter-Title", "Vibe API")
 		}
 	}
 	return nil
@@ -232,6 +232,10 @@ func (a *Adaptor) ConvertOpenAIRequest(c *gin.Context, info *relaycommon.RelayIn
 	}
 	if info.ChannelType != constant.ChannelTypeOpenAI && info.ChannelType != constant.ChannelTypeAzure {
 		request.StreamOptions = nil
+	}
+	// 对不支持 response_format 的渠道自动剥离该参数
+	if request.ResponseFormat != nil && !relaycommon.ResponseFormatSupportedChannels[info.ChannelType] {
+		request.ResponseFormat = nil
 	}
 	if info.ChannelType == constant.ChannelTypeOpenRouter {
 		if len(request.Usage) == 0 {

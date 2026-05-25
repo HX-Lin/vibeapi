@@ -73,6 +73,8 @@ func ValidateConsoleSettings(settingsStr string, settingType string) error {
 		return validateFAQ(settingsStr)
 	case "UptimeKumaGroups":
 		return validateUptimeKumaGroups(settingsStr)
+	case "HelpDocs":
+		return validateHelpDocs(settingsStr)
 	default:
 		return fmt.Errorf("未知的设置类型：%s", settingType)
 	}
@@ -301,4 +303,55 @@ func validateUptimeKumaGroups(groupsStr string) error {
 
 func GetUptimeKumaGroups() []map[string]interface{} {
 	return getJSONList(GetConsoleSetting().UptimeKumaGroups)
+}
+
+func GetHelpDocs() []map[string]interface{} {
+	return getJSONList(GetConsoleSetting().HelpDocs)
+}
+
+var helpDocSlugRegex = regexp.MustCompile(`^[a-z0-9-]+$`)
+
+func validateHelpDocs(docsStr string) error {
+	list, err := parseJSONArray(docsStr, "帮助文档")
+	if err != nil {
+		return err
+	}
+	if len(list) > 100 {
+		return fmt.Errorf("帮助文档数量不能超过100个")
+	}
+	slugSet := make(map[string]bool)
+	for i, doc := range list {
+		title, ok := doc["title"].(string)
+		if !ok || title == "" {
+			return fmt.Errorf("第%d个帮助文档缺少标题字段", i+1)
+		}
+		slug, ok := doc["slug"].(string)
+		if !ok || slug == "" {
+			return fmt.Errorf("第%d个帮助文档缺少路径标识字段", i+1)
+		}
+		content, ok := doc["content"].(string)
+		if !ok || content == "" {
+			return fmt.Errorf("第%d个帮助文档缺少内容字段", i+1)
+		}
+		if !helpDocSlugRegex.MatchString(slug) {
+			return fmt.Errorf("第%d个帮助文档的路径标识只允许小写字母、数字和连字符", i+1)
+		}
+		if slugSet[slug] {
+			return fmt.Errorf("第%d个帮助文档的路径标识与其他文档重复", i+1)
+		}
+		slugSet[slug] = true
+		if len(title) > 100 {
+			return fmt.Errorf("第%d个帮助文档的标题长度不能超过100字符", i+1)
+		}
+		if len(slug) > 100 {
+			return fmt.Errorf("第%d个帮助文档的路径标识长度不能超过100字符", i+1)
+		}
+		if len(content) > 50000 {
+			return fmt.Errorf("第%d个帮助文档的内容长度不能超过50000字符", i+1)
+		}
+		if err := checkDangerousContent(title, i+1, "帮助文档"); err != nil {
+			return err
+		}
+	}
+	return nil
 }

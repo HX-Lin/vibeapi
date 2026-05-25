@@ -34,8 +34,6 @@ export const FORM_FIELD_PROPS = {
 export const ICON_BUTTON_CLASS = 'text-white hover:bg-opacity-80 !rounded-full';
 export const FLEX_CENTER_GAP2 = 'flex items-center gap-2';
 
-export const ILLUSTRATION_SIZE = { width: 96, height: 96 };
-
 // ========== 时间相关常量 ==========
 export const TIME_OPTIONS = [
   { label: '小时', value: 'hour' },

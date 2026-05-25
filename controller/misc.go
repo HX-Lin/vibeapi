@@ -16,6 +16,7 @@ import (
 	"github.com/QuantumNous/new-api/setting/console_setting"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/setting/system_setting"
+	"github.com/QuantumNous/new-api/setting/vibeapi_setting"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,7 +68,6 @@ func GetStatus(c *gin.Context) {
 		"footer_html":                 common.Footer,
 		"wechat_qrcode":               common.WeChatAccountQRCodeImageURL,
 		"wechat_login":                common.WeChatAuthEnabled,
-		"server_address":              system_setting.ServerAddress,
 		"turnstile_check":             common.TurnstileCheckEnabled,
 		"turnstile_site_key":          common.TurnstileSiteKey,
 		"docs_link":                   operation_setting.GetGeneralSetting().DocsLink,
@@ -91,6 +91,7 @@ func GetStatus(c *gin.Context) {
 		"password_login_enabled":        common.PasswordLoginEnabled,
 		"password_register_enabled":     common.PasswordRegisterEnabled,
 		"default_use_auto_group":        setting.DefaultUseAutoGroup,
+		"token_group_enabled":           operation_setting.TokenGroupEnabled,
 
 		"usd_exchange_rate": operation_setting.USDExchangeRate,
 		"price":             operation_setting.Price,
@@ -120,6 +121,9 @@ func GetStatus(c *gin.Context) {
 		"user_agreement_enabled":      legalSetting.UserAgreement != "",
 		"privacy_policy_enabled":      legalSetting.PrivacyPolicy != "",
 		"checkin_enabled":             operation_setting.GetCheckinSetting().Enabled,
+		"help_docs":                   console_setting.GetHelpDocs(),
+		"vibeapi_upstream_enabled":    vibeapi_setting.UpstreamEnabled,
+		"_qn":                         "new-api",
 	}
 
 	// 根据启用状态注入可选内容

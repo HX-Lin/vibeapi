@@ -23,24 +23,20 @@ import {
   Tag,
   Tooltip,
   Checkbox,
-  Empty,
   Pagination,
   Button,
   Avatar,
 } from '@douyinfe/semi-ui';
 import { IconHelpCircle } from '@douyinfe/semi-icons';
 import { Copy } from 'lucide-react';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../../common/ui/EmptyState';
 import {
   stringToColor,
   calculateModelPrice,
   formatPriceInfo,
   formatDynamicPriceSummary,
-  getLobeHubIcon,
 } from '../../../../../helpers';
+import { getLobeHubIcon } from '../../../../../helpers/icons';
 import PricingCardSkeleton from './PricingCardSkeleton';
 import { useMinimumLoadingTime } from '../../../../../hooks/common/useMinimumLoadingTime';
 import { renderLimitedItems } from '../../../../common/ui/RenderUtils';
@@ -222,15 +218,7 @@ const PricingCardView = ({
 
   if (!filteredModels || filteredModels.length === 0) {
     return (
-      <div className='flex justify-center items-center py-20'>
-        <Empty
-          image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-          darkModeImage={
-            <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-          }
-          description={t('搜索无结果')}
-        />
-      </div>
+      <EmptyState preset='noResult' size='medium' description={t('搜索无结果')} />
     );
   }
 

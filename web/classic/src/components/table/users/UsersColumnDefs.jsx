@@ -140,12 +140,22 @@ const renderStatistics = (text, record, showEnableDisableModal, t) => {
   );
 };
 
-// Render separate quota usage column
+// Render separate quota usage column (wallet only, excluding subscription usage)
 const renderQuotaUsage = (text, record, t) => {
   const { Paragraph } = Typography;
-  const used = parseInt(record.used_quota) || 0;
+  const totalUsed = parseInt(record.used_quota) || 0;
+  const subUsed = parseInt(record.sub_quota_used) || 0;
+  // Wallet-only used = total used minus subscription used
+  const used = Math.max(totalUsed - subUsed, 0);
   const remain = parseInt(record.quota) || 0;
   const total = used + remain;
+  if (total === 0 && used === 0) {
+    return (
+      <Tag color='white' shape='circle'>
+        <span className='text-xs text-gray-400'>-</span>
+      </Tag>
+    );
+  }
   const percent = total > 0 ? (remain / total) * 100 : 0;
   const popoverContent = (
     <div className='text-xs p-2'>
@@ -168,6 +178,50 @@ const renderQuotaUsage = (text, record, t) => {
           <Progress
             percent={percent}
             aria-label='quota usage'
+            format={() => `${percent.toFixed(0)}%`}
+            style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
+          />
+        </div>
+      </Tag>
+    </Popover>
+  );
+};
+
+// Render subscription quota column
+const renderSubQuota = (text, record, t) => {
+  const { Paragraph } = Typography;
+  const subTotal = parseInt(record.sub_quota_total) || 0;
+  const subUsed = parseInt(record.sub_quota_used) || 0;
+  if (subTotal === 0 && subUsed === 0) {
+    return (
+      <Tag color='white' shape='circle'>
+        <span className='text-xs text-gray-400'>-</span>
+      </Tag>
+    );
+  }
+  const subRemain = subTotal - subUsed;
+  const percent = subTotal > 0 ? (subRemain / subTotal) * 100 : 0;
+  const popoverContent = (
+    <div className='text-xs p-2'>
+      <Paragraph copyable={{ content: renderQuota(subUsed) }}>
+        {t('已用额度')}: {renderQuota(subUsed)}
+      </Paragraph>
+      <Paragraph copyable={{ content: renderQuota(subRemain) }}>
+        {t('剩余额度')}: {renderQuota(subRemain)} ({percent.toFixed(0)}%)
+      </Paragraph>
+      <Paragraph copyable={{ content: renderQuota(subTotal) }}>
+        {t('总额度')}: {renderQuota(subTotal)}
+      </Paragraph>
+    </div>
+  );
+  return (
+    <Popover content={popoverContent} position='top'>
+      <Tag color='white' shape='circle'>
+        <div className='flex flex-col items-end'>
+          <span className='text-xs leading-none'>{`${renderQuota(subRemain)} / ${renderQuota(subTotal)}`}</span>
+          <Progress
+            percent={percent}
+            aria-label='subscription quota usage'
             format={() => `${percent.toFixed(0)}%`}
             style={{ width: '100%', marginTop: '1px', marginBottom: 0 }}
           />
@@ -339,10 +393,30 @@ export const getUsersColumns = ({
       render: (text, record) => renderQuotaUsage(text, record, t),
     },
     {
+      title: t('订阅剩余额度'),
+      key: 'sub_quota',
+      render: (text, record) => renderSubQuota(text, record, t),
+    },
+    {
       title: t('分组'),
       dataIndex: 'group',
       render: (text, record, index) => {
         return <div>{renderGroup(text)}</div>;
+      },
+    },
+    {
+      title: t('倍率增益'),
+      dataIndex: 'quota_multiplier_offset',
+      render: (text) => {
+        const val = parseFloat(text) || 0;
+        if (val === 0) return <span className='text-xs text-gray-400'>-</span>;
+        const color = val > 0 ? 'red' : 'green';
+        const prefix = val > 0 ? '+' : '';
+        return (
+          <Tag color={color} shape='circle' size='small'>
+            {prefix}{val.toFixed(2)}
+          </Tag>
+        );
       },
     },
     {

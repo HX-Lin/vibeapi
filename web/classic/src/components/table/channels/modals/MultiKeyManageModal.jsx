@@ -28,7 +28,6 @@ import {
   Space,
   Tooltip,
   Popconfirm,
-  Empty,
   Spin,
   Select,
   Row,
@@ -37,10 +36,7 @@ import {
   Progress,
   Card,
 } from '@douyinfe/semi-ui';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
+import EmptyState from '../../../common/ui/EmptyState';
 import {
   API,
   showError,
@@ -714,20 +710,11 @@ const MultiKeyManageModal = ({ visible, onCancel, channel, onRefresh }) => {
                 rowKey='index'
                 scroll={{ x: 'max-content' }}
                 empty={
-                  <Empty
-                    image={
-                      <IllustrationNoResult
-                        style={{ width: 140, height: 140 }}
-                      />
-                    }
-                    darkModeImage={
-                      <IllustrationNoResultDark
-                        style={{ width: 140, height: 140 }}
-                      />
-                    }
+                  <EmptyState
+                    preset='noResult'
+                    size='medium'
                     title={t('暂无密钥数据')}
                     description={t('请检查渠道配置或刷新重试')}
-                    style={{ padding: 30 }}
                   />
                 }
               />

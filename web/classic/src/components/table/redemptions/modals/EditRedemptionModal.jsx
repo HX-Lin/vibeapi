@@ -26,6 +26,8 @@ import {
   showSuccess,
   renderQuota,
   getCurrencyConfig,
+  renderQuotaWithPrompt,
+  getQuotaPresets,
 } from '../../../../helpers';
 import {
   quotaToDisplayAmount,

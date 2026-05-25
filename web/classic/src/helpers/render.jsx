@@ -1663,6 +1663,7 @@ export function renderModelPrice(opts) {
     image_generation_call: imageGenerationCall = false,
     image_generation_call_price: imageGenerationCallPrice = 0,
     displayMode = 'price',
+    globalQuotaMultiplier = 0,
   } = opts;
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
       _groupRatio,
@@ -1672,6 +1673,7 @@ export function renderModelPrice(opts) {
   const completionRatio = _completionRatio ?? 0;
 
   const { symbol, rate } = getCurrencyConfig();
+  const gm = globalQuotaMultiplier && globalQuotaMultiplier !== 1 ? globalQuotaMultiplier : null;
 
   if (!shouldUseRatioBillingProcess(modelPrice)) {
     if (modelPrice !== -1) {
@@ -1948,14 +1950,14 @@ export function renderModelPrice(opts) {
   const imageGenerationAmount = imageGenerationCallPrice * groupRatio;
 
   const totalAmount =
-      textInputAmount +
+      (textInputAmount +
       cacheInputAmount +
       imageInputAmount +
       audioInputAmount +
       completionAmount +
       webSearchAmount +
       fileSearchAmount +
-      imageGenerationAmount;
+      imageGenerationAmount) * (gm || 1);
 
   return renderBillingArticle([
     [
@@ -2087,6 +2089,7 @@ export function renderModelPrice(opts) {
     buildBillingText('合计：{{total}}', {
       total: renderDisplayAmountFromUsd(totalAmount),
     }),
+    gm ? buildBillingText('全局扣费倍率：{{gm}}', { gm }) : null,
   ]);
 }
 
@@ -2473,6 +2476,7 @@ export function renderAudioModelPrice(opts) {
     cache_tokens: cacheTokens = 0,
     cache_ratio: cacheRatio = 1.0,
     displayMode = 'price',
+    globalQuotaMultiplier = 0,
   } = opts;
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
       _groupRatio,
@@ -2485,6 +2489,7 @@ export function renderAudioModelPrice(opts) {
 
   // 获取货币配置
   const { symbol, rate } = getCurrencyConfig();
+  const gm = globalQuotaMultiplier && globalQuotaMultiplier !== 1 ? globalQuotaMultiplier : null;
 
   if (!shouldUseRatioBillingProcess(modelPrice)) {
     if (modelPrice !== -1) {
@@ -2522,10 +2527,9 @@ export function renderAudioModelPrice(opts) {
         audioRatio *
         audioCompletionRatio *
         groupRatio;
-    const totalPrice = textPrice + audioPrice;
+    const totalPrice = (textPrice + audioPrice) * (gm || 1);
 
     return renderBillingArticle([
-      buildBillingPriceText('输入价格：{{symbol}}{{price}} / 1M tokens', {
         symbol,
         usdAmount: inputRatioPrice,
         rate,
@@ -2620,7 +2624,7 @@ export function renderAudioModelPrice(opts) {
       audioRatioValue *
       audioCompletionRatioValue *
       groupRatio;
-  const totalPrice = textPrice + audioPrice;
+  const totalPrice = (textPrice + audioPrice) * (gm || 1);
 
   return renderBillingArticle([
     buildBillingText(
@@ -2728,6 +2732,7 @@ export function renderAudioModelPrice(opts) {
           total: renderDisplayAmountFromUsd(totalPrice),
         },
     ),
+    gm ? buildBillingText('全局扣费倍率：{{gm}}', { gm }) : null,
   ]);
 }
 
@@ -2757,6 +2762,7 @@ export function renderClaudeModelPrice(opts) {
     cache_creation_tokens_1h: cacheCreationTokens1h = 0,
     cache_creation_ratio_1h: cacheCreationRatio1h = 1.0,
     displayMode = 'price',
+    globalQuotaMultiplier = 0,
   } = opts;
   const { ratio: effectiveGroupRatio, label: ratioLabel } = getEffectiveRatio(
       _groupRatio,
@@ -2767,6 +2773,7 @@ export function renderClaudeModelPrice(opts) {
 
   // 获取货币配置
   const { symbol, rate } = getCurrencyConfig();
+  const gm = globalQuotaMultiplier && globalQuotaMultiplier !== 1 ? globalQuotaMultiplier : null;
 
   if (!shouldUseRatioBillingProcess(modelPrice)) {
     if (modelPrice !== -1) {
@@ -3004,8 +3011,8 @@ export function renderClaudeModelPrice(opts) {
       cacheCreationTokens1h * cacheCreationRatio1hValue;
 
   const totalAmount =
-      (effectiveInputTokens / 1000000) * inputRatioPrice * groupRatio +
-      (completionTokens / 1000000) * completionRatioPrice * groupRatio;
+      ((effectiveInputTokens / 1000000) * inputRatioPrice * groupRatio +
+      (completionTokens / 1000000) * completionRatioPrice * groupRatio) * (gm || 1);
 
   return renderBillingArticle([
     buildBillingText(
@@ -3139,6 +3146,7 @@ export function renderClaudeModelPrice(opts) {
     buildBillingText('合计：{{total}}', {
       total: renderDisplayAmountFromUsd(totalAmount),
     }),
+    gm ? buildBillingText('全局扣费倍率：{{gm}}', { gm }) : null,
   ]);
 }
 

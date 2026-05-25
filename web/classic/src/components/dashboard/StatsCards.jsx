@@ -22,6 +22,7 @@ import { Card, Avatar, Skeleton, Tag } from '@douyinfe/semi-ui';
 import { VChart } from '@visactor/react-vchart';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ArrowLeftRight } from 'lucide-react';
 
 const StatsCards = ({
   groupedStatsData,
@@ -29,6 +30,7 @@ const StatsCards = ({
   getTrendSpec,
   CARD_PROPS,
   CHART_CONFIG,
+  onToggleAccountItem,
 }) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -91,6 +93,20 @@ const StatsCards = ({
                       }}
                     >
                       {t('充值')}
+                    </Tag>
+                  ) : item.toggleable && onToggleAccountItem ? (
+                    <Tag
+                      color='white'
+                      shape='circle'
+                      size='large'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleAccountItem();
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <ArrowLeftRight size={12} className='mr-1 inline' />
+                      {t('切换')}
                     </Tag>
                   ) : (
                     (loading ||

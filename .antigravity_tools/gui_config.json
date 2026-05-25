@@ -1,0 +1,157 @@
+{
+  "language": "zh",
+  "theme": "system",
+  "auto_refresh": true,
+  "refresh_interval": 15,
+  "auto_sync": true,
+  "sync_interval": 10,
+  "default_export_path": null,
+  "proxy": {
+    "enabled": false,
+    "allow_lan_access": true,
+    "auth_mode": "all_except_health",
+    "port": 8046,
+    "api_key": "sk-cec58a0e6f3a4fc151a62767b3e1ea52dc5b0ced6bb8a5338a81ba22bd405ec8",
+    "admin_password": "13515664545",
+    "auto_start": true,
+    "custom_mapping": {},
+    "request_timeout": 120,
+    "enable_logging": true,
+    "debug_logging": {
+      "enabled": false,
+      "output_dir": null
+    },
+    "upstream_proxy": {
+      "enabled": false,
+      "url": ""
+    },
+    "zai": {
+      "enabled": false,
+      "base_url": "https://api.z.ai/api/anthropic",
+      "api_key": "",
+      "dispatch_mode": "off",
+      "model_mapping": {},
+      "models": {
+        "opus": "glm-4.7",
+        "sonnet": "glm-4.7",
+        "haiku": "glm-4.5-air"
+      },
+      "mcp": {
+        "enabled": false,
+        "web_search_enabled": false,
+        "web_reader_enabled": false,
+        "vision_enabled": false
+      }
+    },
+    "user_agent_override": null,
+    "scheduling": {
+      "mode": "PerformanceFirst",
+      "max_wait_seconds": 60
+    },
+    "experimental": {
+      "enable_signature_cache": true,
+      "enable_tool_loop_recovery": true,
+      "enable_cross_model_checks": true,
+      "enable_usage_scaling": false,
+      "context_compression_threshold_l1": 0.4,
+      "context_compression_threshold_l2": 0.55,
+      "context_compression_threshold_l3": 0.7
+    },
+    "security_monitor": {
+      "blacklist": {
+        "enabled": false,
+        "block_message": "Access denied"
+      },
+      "whitelist": {
+        "enabled": false,
+        "whitelist_priority": true
+      }
+    },
+    "preferred_account_id": null,
+    "saved_user_agent": null,
+    "thinking_budget": {
+      "mode": "auto",
+      "custom_value": 24576
+    },
+    "global_system_prompt": {
+      "enabled": true,
+      "content": "The assistant is Claude, made by Anthropic. The current model version is {{model}}."
+    },
+    "image_thinking_mode": null,
+    "proxy_pool": {
+      "enabled": false,
+      "proxies": [],
+      "health_check_interval": 300,
+      "auto_failover": true,
+      "strategy": "priority",
+      "account_bindings": {}
+    }
+  },
+  "antigravity_executable": null,
+  "antigravity_args": null,
+  "auto_launch": false,
+  "scheduled_warmup": {
+    "enabled": true,
+    "monitored_models": [
+      "gemini-3-flash",
+      "claude",
+      "gemini-3-pro-high",
+      "gemini-3-pro-image",
+      "claude-sonnet-4-6",
+      "gemini-3.1-pro-high",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-pro",
+      "gemini-3.1-pro-low"
+    ]
+  },
+  "quota_protection": {
+    "enabled": true,
+    "threshold_percentage": 30,
+    "monitored_models": [
+      "claude",
+      "gemini-3-pro-high",
+      "claude-sonnet-4-6",
+      "gemini-3.1-pro-high",
+      "gemini-3-flash",
+      "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-pro",
+      "gemini-3.1-pro-low",
+      "gemini-3-pro-image"
+    ]
+  },
+  "pinned_quota_models": {
+    "models": [
+      "gemini-3-pro-high",
+      "gemini-3-flash",
+      "gemini-3-pro-image",
+      "claude-sonnet-4-6-thinking",
+      "gpt-oss-120b-medium",
+      "claude-sonnet-4-6",
+      "gemini-3.1-pro-high",
+      "gemini-3.1-flash-image",
+      "gemini-2.5-flash-lite",
+      "gemini-2.5-flash",
+      "gemini-2.5-pro",
+      "gemini-3.1-pro-low"
+    ]
+  },
+  "circuit_breaker": {
+    "enabled": true,
+    "backoff_steps": [
+      60,
+      300,
+      1800,
+      7200
+    ]
+  },
+  "hidden_menu_items": [],
+  "cloudflared": {
+    "enabled": false,
+    "mode": "quick",
+    "port": 8045,
+    "token": null,
+    "use_http2": true
+  }
+}

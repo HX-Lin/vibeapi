@@ -22,7 +22,6 @@ import {
   Button,
   Table,
   Tag,
-  Empty,
   Checkbox,
   Form,
   Input,
@@ -32,7 +31,13 @@ import {
   Spin,
 } from '@douyinfe/semi-ui';
 import { IconSearch } from '@douyinfe/semi-icons';
-import { RefreshCcw, CheckSquare, AlertTriangle } from 'lucide-react';
+import EmptyState from '../../../components/common/ui/EmptyState';
+import {
+  RefreshCcw,
+  CheckSquare,
+  AlertTriangle,
+  CheckCircle,
+} from 'lucide-react';
 import {
   API,
   showError,
@@ -44,17 +49,13 @@ import {
 import { useIsMobile } from '../../../hooks/common/useIsMobile';
 import { DEFAULT_ENDPOINT } from '../../../constants';
 import { useTranslation } from 'react-i18next';
-import {
-  IllustrationNoResult,
-  IllustrationNoResultDark,
-} from '@douyinfe/semi-illustrations';
 import ChannelSelectorModal from '../../../components/settings/ChannelSelectorModal';
 
 const OFFICIAL_RATIO_PRESET_ID = -100;
 const OFFICIAL_RATIO_PRESET_NAME = '官方倍率预设';
 const OFFICIAL_RATIO_PRESET_BASE_URL = 'https://basellm.github.io';
 const OFFICIAL_RATIO_PRESET_ENDPOINT =
-  '/llm-metadata/api/newapi/ratio_config-v1-base.json';
+  '/llm-metadata/api/vibeapi/ratio_config-v1-base.json';
 const MODELS_DEV_PRESET_ID = -101;
 const MODELS_DEV_PRESET_NAME = 'models.dev 价格预设';
 const MODELS_DEV_PRESET_BASE_URL = 'https://models.dev';
@@ -891,11 +892,9 @@ export default function UpstreamRatioSync(props) {
       }
 
       return (
-        <Empty
-          image={<IllustrationNoResult style={{ width: 150, height: 150 }} />}
-          darkModeImage={
-            <IllustrationNoResultDark style={{ width: 150, height: 150 }} />
-          }
+        <EmptyState
+          preset='noResult'
+          size='medium'
           description={
             searchKeyword.trim()
               ? t('未找到匹配的模型')
@@ -905,7 +904,6 @@ export default function UpstreamRatioSync(props) {
                   : t('请先选择同步渠道')
                 : t('请先选择同步渠道')
           }
-          style={{ padding: 30 }}
         />
       );
     }

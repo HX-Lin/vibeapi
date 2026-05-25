@@ -20,9 +20,11 @@ For commercial licensing, please contact support@quantumnous.com
 import react from '@vitejs/plugin-react';
 import { defineConfig, transformWithEsbuild } from 'vite';
 import pkg from '@douyinfe/vite-plugin-semi';
+import compression from 'vite-plugin-compression';
 import path from 'path';
-import { codeInspectorPlugin } from 'code-inspector-plugin';
 const { vitePluginSemi } = pkg;
+
+const isDev = process.env.NODE_ENV !== 'production';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -32,9 +34,14 @@ export default defineConfig({
     },
   },
   plugins: [
-    codeInspectorPlugin({
-      bundler: 'vite',
-    }),
+    // code-inspector-plugin: dev-only, excluded from production builds
+    ...(isDev
+      ? [
+          import('code-inspector-plugin').then((m) =>
+            m.codeInspectorPlugin({ bundler: 'vite' }),
+          ),
+        ]
+      : []),
     {
       name: 'treat-js-files-as-jsx',
       async transform(code, id) {
@@ -54,9 +61,14 @@ export default defineConfig({
     vitePluginSemi({
       cssLayer: true,
     }),
+    // gzip 预压缩：构建时生成 .gz 文件，nginx 直接发送无需实时压缩
+    compression({
+      algorithm: 'gzip',
+      threshold: 1024,
+      ext: '.gz',
+    }),
   ],
   optimizeDeps: {
-    force: true,
     esbuildOptions: {
       loader: {
         '.js': 'jsx',
@@ -65,17 +77,24 @@ export default defineConfig({
     },
   },
   build: {
+    // 过滤掉懒加载 chunk 的 modulepreload，避免首屏抢占带宽
+    modulePreload: {
+      resolveDependencies: (filename, deps) => {
+        const lazyChunks = ['mermaid', 'katex', 'markdown', 'semi-illustrations', 'icons-extra', 'vchart'];
+        return deps.filter(dep => !lazyChunks.some(chunk => dep.includes(chunk)));
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: {
           'react-core': ['react', 'react-dom', 'react-router-dom'],
-          'semi-ui': ['@douyinfe/semi-icons', '@douyinfe/semi-ui'],
+          'semi-ui': ['@douyinfe/semi-ui'],
+          'semi-icons': ['@douyinfe/semi-icons'],
           tools: ['axios', 'history', 'marked'],
           'react-components': [
             'react-dropzone',
             'react-fireworks',
             'react-telegram-login',
-            'react-toastify',
             'react-turnstile',
           ],
           i18n: [
@@ -83,6 +102,22 @@ export default defineConfig({
             'react-i18next',
             'i18next-browser-languagedetector',
           ],
+          mermaid: ['mermaid'],
+          vchart: [
+            '@visactor/vchart',
+            '@visactor/react-vchart',
+            '@visactor/vchart-semi-theme',
+          ],
+          katex: ['katex', 'rehype-katex', 'remark-math'],
+          markdown: [
+            'react-markdown',
+            'rehype-highlight',
+            'remark-gfm',
+            'remark-breaks',
+          ],
+          'semi-illustrations': ['@douyinfe/semi-illustrations'],
+          'icons-lucide': ['lucide-react'],
+          'icons-extra': ['react-icons', '@lobehub/icons'],
         },
       },
     },

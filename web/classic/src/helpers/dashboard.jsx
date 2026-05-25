@@ -18,11 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Progress, Divider, Empty } from '@douyinfe/semi-ui';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
+import { Progress, Divider } from '@douyinfe/semi-ui';
 import {
   timestamp2string,
   timestamp2string1,
@@ -34,8 +30,8 @@ import {
   STORAGE_KEYS,
   DEFAULT_TIME_INTERVALS,
   DEFAULTS,
-  ILLUSTRATION_SIZE,
 } from '../constants/dashboard.constants';
+import EmptyState from '../components/common/ui/EmptyState';
 
 // ========== 时间相关工具函数 ==========
 export const getDefaultTime = () => {
@@ -176,15 +172,11 @@ export const renderMonitorList = (
 ) => {
   if (!monitors || monitors.length === 0) {
     return (
-      <div className='flex justify-center items-center py-4'>
-        <Empty
-          image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-          darkModeImage={
-            <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-          }
-          title={t('暂无监控数据')}
-        />
-      </div>
+      <EmptyState
+        preset='construction'
+        size='medium'
+        title={t('暂无监控数据')}
+      />
     );
   }
 

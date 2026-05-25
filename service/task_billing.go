@@ -10,6 +10,7 @@ import (
 	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/model"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
+	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 	"github.com/gin-gonic/gin"
 )
@@ -263,10 +264,17 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 
 	// 获取用户和组的倍率信息
 	group := task.Group
+	var userQuotaMultiplierOffset float64
 	if group == "" {
 		user, err := model.GetUserById(task.UserId, false)
 		if err == nil {
 			group = user.Group
+			userQuotaMultiplierOffset = user.GetSetting().QuotaMultiplierOffset
+		}
+	} else {
+		userSetting, err := model.GetUserSettingById(task.UserId)
+		if err == nil {
+			userQuotaMultiplierOffset = userSetting.QuotaMultiplierOffset
 		}
 	}
 	if group == "" {
@@ -295,6 +303,13 @@ func RecalculateTaskQuotaByTokens(ctx context.Context, task *model.Task, totalTo
 
 	// 计算实际应扣费额度: totalTokens * modelRatio * groupRatio * otherMultiplier
 	actualQuota := int(float64(totalTokens) * modelRatio * finalGroupRatio * otherMultiplier)
+
+	if gm := operation_setting.GetEffectiveQuotaMultiplier(userQuotaMultiplierOffset); gm != 1.0 {
+		actualQuota = int(float64(actualQuota) * gm)
+	}
+	if cm := operation_setting.GetConcurrencyMultiplier(task.UserId); cm > 0 {
+		actualQuota = int(float64(actualQuota) * (1.0 + cm))
+	}
 
 	reason := fmt.Sprintf("token重算：tokens=%d, modelRatio=%.2f, groupRatio=%.2f, otherMultiplier=%.4f", totalTokens, modelRatio, finalGroupRatio, otherMultiplier)
 	RecalculateTaskQuota(ctx, task, actualQuota, reason)

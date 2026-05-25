@@ -18,20 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
-import { Card, Tag, Timeline, Empty } from '@douyinfe/semi-ui';
+import { Card, Tag, Timeline } from '@douyinfe/semi-ui';
 import { Bell } from 'lucide-react';
 import { marked } from 'marked';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
 import ScrollableContainer from '../common/ui/ScrollableContainer';
+import EmptyState from '../common/ui/EmptyState';
 
 const AnnouncementsPanel = ({
   announcementData,
   announcementLegendData,
   CARD_PROPS,
-  ILLUSTRATION_SIZE,
   t,
 }) => {
   return (
@@ -107,16 +103,12 @@ const AnnouncementsPanel = ({
             })}
           </Timeline>
         ) : (
-          <div className='flex justify-center items-center py-8'>
-            <Empty
-              image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-              darkModeImage={
-                <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-              }
-              title={t('暂无系统公告')}
-              description={t('请联系管理员在系统设置中配置公告信息')}
-            />
-          </div>
+          <EmptyState
+            preset='construction'
+            size='medium'
+            title={t('暂无系统公告')}
+            description={t('请联系管理员在系统设置中配置公告信息')}
+          />
         )}
       </ScrollableContainer>
     </Card>

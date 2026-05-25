@@ -25,14 +25,10 @@ import {
   Tabs,
   TabPane,
   Tag,
-  Empty,
 } from '@douyinfe/semi-ui';
 import { Gauge, RefreshCw } from 'lucide-react';
-import {
-  IllustrationConstruction,
-  IllustrationConstructionDark,
-} from '@douyinfe/semi-illustrations';
 import ScrollableContainer from '../common/ui/ScrollableContainer';
+import EmptyState from '../common/ui/EmptyState';
 
 const UptimePanel = ({
   uptimeData,
@@ -43,7 +39,6 @@ const UptimePanel = ({
   uptimeLegendData,
   renderMonitorList,
   CARD_PROPS,
-  ILLUSTRATION_SIZE,
   t,
 }) => {
   return (
@@ -115,16 +110,12 @@ const UptimePanel = ({
               </Tabs>
             )
           ) : (
-            <div className='flex justify-center items-center py-8'>
-              <Empty
-                image={<IllustrationConstruction style={ILLUSTRATION_SIZE} />}
-                darkModeImage={
-                  <IllustrationConstructionDark style={ILLUSTRATION_SIZE} />
-                }
-                title={t('暂无监控数据')}
-                description={t('请联系管理员在系统设置中配置Uptime')}
-              />
-            </div>
+            <EmptyState
+              preset='construction'
+              size='medium'
+              title={t('暂无监控数据')}
+              description={t('请联系管理员在系统设置中配置Uptime')}
+            />
           )}
         </Spin>
       </div>

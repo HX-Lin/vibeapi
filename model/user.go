@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
@@ -50,9 +49,11 @@ type User struct {
 	LinuxDOId        string         `json:"linux_do_id" gorm:"column:linux_do_id;index"`
 	Setting          string         `json:"setting" gorm:"type:text;column:setting"`
 	Remark           string         `json:"remark,omitempty" gorm:"type:varchar(255)" validate:"max=255"`
-	StripeCustomer   string         `json:"stripe_customer" gorm:"type:varchar(64);column:stripe_customer;index"`
-	CreatedAt        int64          `json:"created_at" gorm:"autoCreateTime;column:created_at"`
-	LastLoginAt      int64          `json:"last_login_at" gorm:"default:0;column:last_login_at"`
+	StripeCustomer        string         `json:"stripe_customer" gorm:"type:varchar(64);column:stripe_customer;index"`
+	CreatedAt             int64          `json:"created_at" gorm:"autoCreateTime;column:created_at"`
+	LastLoginAt           int64          `json:"last_login_at" gorm:"default:0;column:last_login_at"`
+	// Transport-only field: per-user quota multiplier offset (stored in Setting JSON, not a DB column)
+	QuotaMultiplierOffset *float64 `json:"quota_multiplier_offset,omitempty" gorm:"-:all"`
 }
 
 func (user *User) ToBaseUser() *UserBase {
@@ -82,7 +83,7 @@ func (user *User) SetAccessToken(token string) {
 func (user *User) GetSetting() dto.UserSetting {
 	setting := dto.UserSetting{}
 	if user.Setting != "" {
-		err := json.Unmarshal([]byte(user.Setting), &setting)
+		err := common.Unmarshal([]byte(user.Setting), &setting)
 		if err != nil {
 			common.SysLog("failed to unmarshal setting: " + err.Error())
 		}
@@ -91,7 +92,7 @@ func (user *User) GetSetting() dto.UserSetting {
 }
 
 func (user *User) SetSetting(setting dto.UserSetting) {
-	settingBytes, err := json.Marshal(setting)
+	settingBytes, err := common.Marshal(setting)
 	if err != nil {
 		common.SysLog("failed to marshal setting: " + err.Error())
 		return
@@ -152,7 +153,7 @@ func generateDefaultSidebarConfigForRole(userRole int) string {
 	// 普通用户不包含admin区域
 
 	// 转换为JSON字符串
-	configBytes, err := json.Marshal(defaultConfig)
+	configBytes, err := common.Marshal(defaultConfig)
 	if err != nil {
 		common.SysLog("生成默认边栏配置失败: " + err.Error())
 		return ""
@@ -415,6 +416,17 @@ func (user *User) Insert(inviterId int) error {
 		}
 	}
 
+	if OnUserCreated != nil {
+		uid, uname := user.Id, user.Username
+		if uid == 0 {
+			uid = createdUser.Id
+		}
+		if uname == "" {
+			uname = createdUser.Username
+		}
+		gopool.Go(func() { OnUserCreated(uid, uname) })
+	}
+
 	if common.QuotaForNewUser > 0 {
 		RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", logger.LogQuota(common.QuotaForNewUser)))
 	}
@@ -476,6 +488,11 @@ func (user *User) FinalizeOAuthUserCreation(inviterId int) {
 		}
 	}
 
+	if OnUserCreated != nil {
+		uid, uname := user.Id, user.Username
+		gopool.Go(func() { OnUserCreated(uid, uname) })
+	}
+
 	if common.QuotaForNewUser > 0 {
 		RecordLog(user.Id, LogTypeSystem, fmt.Sprintf("新用户注册赠送 %s", logger.LogQuota(common.QuotaForNewUser)))
 	}
@@ -535,6 +552,14 @@ func (user *User) Edit(updatePassword bool) error {
 	}
 
 	// Update cache
+	return updateUserCache(*user)
+}
+
+// UpdateSetting saves only the setting field to DB and refreshes cache
+func (user *User) UpdateSetting() error {
+	if err := DB.Model(user).Update("setting", user.Setting).Error; err != nil {
+		return err
+	}
 	return updateUserCache(*user)
 }
 
@@ -1042,6 +1067,18 @@ func (user *User) FillUserByLinuxDOId() error {
 	}
 	err := DB.Where("linux_do_id = ?", user.LinuxDOId).First(user).Error
 	return err
+}
+
+// UpdateUserSettingField updates only the setting column for a user.
+func UpdateUserSettingField(userId int, setting string) error {
+	return DB.Model(&User{}).Where("id = ?", userId).Update("setting", setting).Error
+}
+
+// GetAllUsersBasicInfo returns all non-deleted users with basic info and billing fields.
+func GetAllUsersBasicInfo() ([]*User, error) {
+	var users []*User
+	err := DB.Omit("password").Order("id asc").Find(&users).Error
+	return users, err
 }
 
 func RootUserExists() bool {

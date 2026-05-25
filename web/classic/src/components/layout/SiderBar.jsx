@@ -17,21 +17,23 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getLucideIcon } from '../../helpers/render';
-import { ChevronLeft } from 'lucide-react';
+import { getLucideIcon } from '../../helpers/lucide-icons';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
 import { useSidebar } from '../../hooks/common/useSidebar';
+import { useSidebarSections } from '../../hooks/common/useSidebarSections';
 import { useMinimumLoadingTime } from '../../hooks/common/useMinimumLoadingTime';
-import { isAdmin, isRoot, showError } from '../../helpers';
+import { isAdmin, isRoot } from '../../helpers/utils';
+import { StatusContext } from '../../context/Status';
 import SkeletonWrapper from './components/SkeletonWrapper';
+import SidebarUserProfile from './SidebarUserProfile';
 
 import { Nav, Divider, Button } from '@douyinfe/semi-ui';
 
-const routerMap = {
-  home: '/',
+const baseRouterMap = {
   channel: '/console/channel',
   token: '/console/token',
   redemption: '/console/redemption',
@@ -40,36 +42,48 @@ const routerMap = {
   subscription: '/console/subscription',
   log: '/console/log',
   midjourney: '/console/midjourney',
-  setting: '/console/setting',
-  about: '/about',
-  detail: '/console',
-  pricing: '/pricing',
   task: '/console/task',
+  setting: '/console/setting',
+  detail: '/console',
+  pricing: '/console/pricing',
   models: '/console/models',
   deployment: '/console/deployment',
   playground: '/console/playground',
   personal: '/console/personal',
+  vibeapi: '/console/vibeapi',
 };
 
 const SiderBar = ({ onNavigate = () => {} }) => {
   const { t } = useTranslation();
   const [collapsed, toggleCollapsed] = useSidebarCollapsed();
+  const [statusState] = useContext(StatusContext);
   const {
     isModuleVisible,
     hasSectionVisibleModules,
     loading: sidebarLoading,
   } = useSidebar();
 
+  const { isSectionCollapsed, toggleSection } = useSidebarSections();
   const showSkeleton = useMinimumLoadingTime(sidebarLoading, 200);
 
-  const [selectedKeys, setSelectedKeys] = useState(['home']);
-  const [chatItems, setChatItems] = useState([]);
+  const vibeapiUpstreamEnabled = statusState?.status?.vibeapi_upstream_enabled || false;
+
+  const [selectedKeys, setSelectedKeys] = useState(['detail']);
   const [openedKeys, setOpenedKeys] = useState([]);
   const location = useLocation();
-  const [routerMapState, setRouterMapState] = useState(routerMap);
 
   const workspaceItems = useMemo(() => {
     const items = [
+      {
+        text: t('模型广场'),
+        itemKey: 'pricing',
+        to: '/console/pricing',
+      },
+      {
+        text: t('网页聊天'),
+        itemKey: 'playground',
+        to: '/console/playground',
+      },
       {
         text: t('数据看板'),
         itemKey: 'detail',
@@ -93,17 +107,11 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('绘图日志'),
         itemKey: 'midjourney',
         to: '/midjourney',
-        className:
-          localStorage.getItem('enable_drawing') === 'true'
-            ? ''
-            : 'tableHiddle',
       },
       {
         text: t('任务日志'),
         itemKey: 'task',
         to: '/task',
-        className:
-          localStorage.getItem('enable_task') === 'true' ? '' : 'tableHiddle',
       },
     ];
 
@@ -116,8 +124,6 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     return filteredItems;
   }, [
     localStorage.getItem('enable_data_export'),
-    localStorage.getItem('enable_drawing'),
-    localStorage.getItem('enable_task'),
     t,
     isModuleVisible,
   ]);
@@ -144,6 +150,34 @@ const SiderBar = ({ onNavigate = () => {} }) => {
 
     return filteredItems;
   }, [t, isModuleVisible]);
+
+  const helpDocs = statusState?.status?.help_docs;
+
+  // 动态构建 routerMap，包含帮助文档路由
+  const routerMap = useMemo(() => {
+    const map = { ...baseRouterMap };
+    if (Array.isArray(helpDocs)) {
+      helpDocs.forEach((doc) => {
+        map['help-' + doc.slug] = '/console/help/' + doc.slug;
+      });
+    }
+    return map;
+  }, [helpDocs]);
+
+  const helpItems = useMemo(() => {
+    if (!Array.isArray(helpDocs) || helpDocs.length === 0) return [];
+
+    const items = helpDocs
+      .slice()
+      .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+      .map((doc) => ({
+        text: doc.title,
+        itemKey: 'help-' + doc.slug,
+        to: '/console/help/' + doc.slug,
+      }));
+
+    return items;
+  }, [helpDocs]);
 
   const adminItems = useMemo(() => {
     const items = [
@@ -184,10 +218,16 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {
+        text: t('VibeAPI 管理'),
+        itemKey: 'vibeapi',
+        to: '/vibeapi',
+        className: isAdmin() && vibeapiUpstreamEnabled ? '' : 'tableHiddle',
+      },
+      {
         text: t('系统设置'),
         itemKey: 'setting',
         to: '/setting',
-        className: isRoot() ? '' : 'tableHiddle',
+        className: isAdmin() ? '' : 'tableHiddle',
       },
     ];
 
@@ -198,105 +238,20 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     });
 
     return filteredItems;
-  }, [isAdmin(), isRoot(), t, isModuleVisible]);
-
-  const chatMenuItems = useMemo(() => {
-    const items = [
-      {
-        text: t('操练场'),
-        itemKey: 'playground',
-        to: '/playground',
-      },
-      {
-        text: t('聊天'),
-        itemKey: 'chat',
-        items: chatItems,
-      },
-    ];
-
-    // 根据配置过滤项目
-    const filteredItems = items.filter((item) => {
-      const configVisible = isModuleVisible('chat', item.itemKey);
-      return configVisible;
-    });
-
-    return filteredItems;
-  }, [chatItems, t, isModuleVisible]);
-
-  // 更新路由映射，添加聊天路由
-  const updateRouterMapWithChats = (chats) => {
-    const newRouterMap = { ...routerMap };
-
-    if (Array.isArray(chats) && chats.length > 0) {
-      for (let i = 0; i < chats.length; i++) {
-        newRouterMap['chat' + i] = '/console/chat/' + i;
-      }
-    }
-
-    setRouterMapState(newRouterMap);
-    return newRouterMap;
-  };
-
-  // 加载聊天项
-  useEffect(() => {
-    let chats = localStorage.getItem('chats');
-    if (chats) {
-      try {
-        chats = JSON.parse(chats);
-        if (Array.isArray(chats)) {
-          let chatItems = [];
-          for (let i = 0; i < chats.length; i++) {
-            let shouldSkip = false;
-            let chat = {};
-            for (let key in chats[i]) {
-              let link = chats[i][key];
-              if (typeof link !== 'string') continue; // 确保链接是字符串
-              if (
-                link.startsWith('fluent') ||
-                link.startsWith('ccswitch') ||
-                link.startsWith('deepchat')
-              ) {
-                shouldSkip = true;
-                break;
-              }
-              chat.text = key;
-              chat.itemKey = 'chat' + i;
-              chat.to = '/console/chat/' + i;
-            }
-            if (shouldSkip || !chat.text) continue; // 避免推入空项
-            chatItems.push(chat);
-          }
-          setChatItems(chatItems);
-          updateRouterMapWithChats(chats);
-        }
-      } catch (e) {
-        showError('聊天数据解析失败');
-      }
-    }
-  }, []);
+  }, [isAdmin(), isRoot(), t, isModuleVisible, vibeapiUpstreamEnabled]);
 
   // 根据当前路径设置选中的菜单项
   useEffect(() => {
     const currentPath = location.pathname;
-    let matchingKey = Object.keys(routerMapState).find(
-      (key) => routerMapState[key] === currentPath,
+    const matchingKey = Object.keys(routerMap).find(
+      (key) => routerMap[key] === currentPath,
     );
-
-    // 处理聊天路由
-    if (!matchingKey && currentPath.startsWith('/console/chat/')) {
-      const chatIndex = currentPath.split('/').pop();
-      if (!isNaN(chatIndex)) {
-        matchingKey = 'chat' + chatIndex;
-      } else {
-        matchingKey = 'chat';
-      }
-    }
 
     // 如果找到匹配的键，更新选中的键
     if (matchingKey) {
       setSelectedKeys([matchingKey]);
     }
-  }, [location.pathname, routerMapState]);
+  }, [location.pathname]);
 
   // 监控折叠状态变化以更新 body class
   useEffect(() => {
@@ -340,54 +295,44 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     );
   };
 
-  // 渲染子菜单项
-  const renderSubItem = (item) => {
-    if (item.items && item.items.length > 0) {
-      const isSelected = selectedKeys.includes(item.itemKey);
-      const textColor = isSelected ? SELECTED_COLOR : 'inherit';
+  // 渲染可折叠的区域
+  const renderSection = (sectionKey, label, items, isFirst = false) => {
+    const sectionFolded = isSectionCollapsed(sectionKey);
 
-      return (
-        <Nav.Sub
-          key={item.itemKey}
-          itemKey={item.itemKey}
-          text={
-            <span
-              className='truncate font-medium text-sm'
-              style={{ color: textColor }}
+    return (
+      <>
+        {!isFirst && <Divider className='sidebar-divider' />}
+        <div className={isFirst ? 'sidebar-section' : ''}>
+          {!collapsed && (
+            <div
+              className='sidebar-section-header'
+              onClick={() => toggleSection(sectionKey)}
             >
-              {item.text}
-            </span>
-          }
-          icon={
-            <div className='sidebar-icon-container flex-shrink-0'>
-              {getLucideIcon(item.itemKey, isSelected)}
-            </div>
-          }
-        >
-          {item.items.map((subItem) => {
-            const isSubSelected = selectedKeys.includes(subItem.itemKey);
-            const subTextColor = isSubSelected ? SELECTED_COLOR : 'inherit';
-
-            return (
-              <Nav.Item
-                key={subItem.itemKey}
-                itemKey={subItem.itemKey}
-                text={
-                  <span
-                    className='truncate font-medium text-sm'
-                    style={{ color: subTextColor }}
-                  >
-                    {subItem.text}
-                  </span>
-                }
+              <div className='sidebar-group-label'>{label}</div>
+              <ChevronDown
+                size={12}
+                strokeWidth={2}
+                color='var(--semi-color-text-2)'
+                className={`sidebar-fold-icon${sectionFolded ? ' sidebar-fold-icon-visible' : ''}`}
+                style={{
+                  transform: sectionFolded ? 'rotate(-90deg)' : 'rotate(0deg)',
+                }}
               />
-            );
-          })}
-        </Nav.Sub>
-      );
-    } else {
-      return renderNavItem(item);
-    }
+            </div>
+          )}
+          <div
+            className={`sidebar-section-content${sectionFolded && !collapsed ? ' sidebar-section-content-collapsed' : ' sidebar-section-content-expanded'}`}
+            style={
+              !sectionFolded || collapsed
+                ? { maxHeight: `${items.length * 48 + 20}px` }
+                : undefined
+            }
+          >
+            {items.map((item) => renderNavItem(item))}
+          </div>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -414,8 +359,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
           hoverStyle='sidebar-nav-item:hover'
           selectedStyle='sidebar-nav-item-selected'
           renderWrapper={({ itemElement, props }) => {
-            const to =
-              routerMapState[props.itemKey] || routerMap[props.itemKey];
+            const to = routerMap[props.itemKey];
 
             // 如果没有路由，直接返回元素
             if (!to) return itemElement;
@@ -443,58 +387,27 @@ const SiderBar = ({ onNavigate = () => {} }) => {
             setOpenedKeys(data.openKeys);
           }}
         >
-          {/* 聊天区域 */}
-          {hasSectionVisibleModules('chat') && (
-            <div className='sidebar-section'>
-              {!collapsed && (
-                <div className='sidebar-group-label'>{t('聊天')}</div>
-              )}
-              {chatMenuItems.map((item) => renderSubItem(item))}
-            </div>
-          )}
-
-          {/* 控制台区域 */}
-          {hasSectionVisibleModules('console') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('控制台')}</div>
-                )}
-                {workspaceItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+          {/* 工作台区域 */}
+          {hasSectionVisibleModules('console') &&
+            renderSection('console', t('工作台'), workspaceItems, true)}
 
           {/* 个人中心区域 */}
-          {hasSectionVisibleModules('personal') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('个人中心')}</div>
-                )}
-                {financeItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+          {hasSectionVisibleModules('personal') &&
+            renderSection('personal', t('个人中心'), financeItems)}
+
+          {/* 帮助中心区域 */}
+          {helpItems.length > 0 &&
+            renderSection('help', t('帮助中心'), helpItems)}
 
           {/* 管理员区域 - 只在管理员时显示且配置允许时显示 */}
-          {isAdmin() && hasSectionVisibleModules('admin') && (
-            <>
-              <Divider className='sidebar-divider' />
-              <div>
-                {!collapsed && (
-                  <div className='sidebar-group-label'>{t('管理员')}</div>
-                )}
-                {adminItems.map((item) => renderNavItem(item))}
-              </div>
-            </>
-          )}
+          {isAdmin() &&
+            hasSectionVisibleModules('admin') &&
+            renderSection('admin', t('管理员'), adminItems)}
         </Nav>
       </SkeletonWrapper>
 
-      {/* 底部折叠按钮 */}
+      {/* 底部用户信息 + 折叠按钮 */}
+      <SidebarUserProfile collapsed={collapsed} />
       <div className='sidebar-collapse-button'>
         <SkeletonWrapper
           loading={showSkeleton}

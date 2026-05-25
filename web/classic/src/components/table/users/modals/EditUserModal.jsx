@@ -94,6 +94,7 @@ const EditUserModal = (props) => {
     quota_amount: 0,
     group: 'default',
     remark: '',
+    quota_multiplier_offset: 0,
   });
 
   const fetchGroups = async () => {
@@ -410,6 +411,18 @@ const EditUserModal = (props) => {
                             readonly
                           />
                         </div>
+                      </Col>
+
+                      <Col span={24}>
+                        <Form.InputNumber
+                          field='quota_multiplier_offset'
+                          label={t('全局倍率增益')}
+                          placeholder='0'
+                          step={0.1}
+                          precision={2}
+                          extraText={t('叠加到全局倍率上，如 +0.5 或 -0.5，0 表示不调整')}
+                          style={{ width: '100%' }}
+                        />
                       </Col>
                     </Row>
                   </Card>

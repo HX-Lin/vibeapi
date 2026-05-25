@@ -98,23 +98,19 @@ const RechargeCard = ({
   allSubscriptions = [],
   reloadSubscriptionSelf,
   enableRedemption = true,
+  subscriptionRedemptionCode = '',
+  setSubscriptionRedemptionCode,
+  redeemSubscription,
+  isRedeemingSubscription = false,
 }) => {
   const onlineFormApiRef = useRef(null);
   const redeemFormApiRef = useRef(null);
-  const initialTabSetRef = useRef(false);
   const showAmountSkeleton = useMinimumLoadingTime(amountLoading);
   const actualTheme = useActualTheme();
   const [activeTab, setActiveTab] = useState('topup');
   const shouldShowSubscription =
     !subscriptionLoading && subscriptionPlans.length > 0;
   const regularPayMethods = payMethods || [];
-
-  useEffect(() => {
-    if (initialTabSetRef.current) return;
-    if (subscriptionLoading) return;
-    setActiveTab(shouldShowSubscription ? 'subscription' : 'topup');
-    initialTabSetRef.current = true;
-  }, [shouldShowSubscription, subscriptionLoading]);
 
   useEffect(() => {
     if (!shouldShowSubscription && activeTab !== 'topup') {
@@ -638,6 +634,48 @@ const RechargeCard = ({
           className='!rounded-xl'
         />
       )}
+
+      {/* 订阅兑换码 */}
+      <Card
+        className='!rounded-xl w-full'
+        title={
+          <Text type='tertiary' strong>
+            {t('订阅兑换码')}
+          </Text>
+        }
+      >
+        <Form
+          initValues={{ subscriptionRedemptionCode: subscriptionRedemptionCode }}
+        >
+          <Form.Input
+            field='subscriptionRedemptionCode'
+            noLabel={true}
+            placeholder={t('请输入订阅兑换码')}
+            value={subscriptionRedemptionCode}
+            onChange={(value) => setSubscriptionRedemptionCode(value)}
+            prefix={<IconGift />}
+            suffix={
+              <div className='flex items-center gap-2'>
+                <Button
+                  type='primary'
+                  theme='solid'
+                  onClick={redeemSubscription}
+                  loading={isRedeemingSubscription}
+                >
+                  {t('兑换订阅')}
+                </Button>
+              </div>
+            }
+            showClear
+            style={{ width: '100%' }}
+            extraText={
+              <Text type='tertiary'>
+                {t('输入订阅兑换码，即可激活对应的订阅套餐')}
+              </Text>
+            }
+          />
+        </Form>
+      </Card>
     </Space>
   );
 

@@ -4,6 +4,7 @@ import "strings"
 
 var DemoSiteEnabled = false
 var SelfUseModeEnabled = false
+var TokenGroupEnabled = true // 默认开启，保持向后兼容
 
 var AutomaticDisableKeywords = []string{
 	"Your credit balance is too low",

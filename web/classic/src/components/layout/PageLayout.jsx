@@ -20,6 +20,8 @@ For commercial licensing, please contact support@quantumnous.com
 import HeaderBar from './headerbar';
 import { Layout } from '@douyinfe/semi-ui';
 import SiderBar from './SiderBar';
+import Breadcrumb from './Breadcrumb';
+import CommandPalette from './CommandPalette';
 import App from '../../App';
 import FooterBar from './Footer';
 import { ToastContainer } from 'react-toastify';
@@ -28,13 +30,9 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
 import { useSidebarCollapsed } from '../../hooks/common/useSidebarCollapsed';
 import { useTranslation } from 'react-i18next';
-import {
-  API,
-  getLogo,
-  getSystemName,
-  showError,
-  setStatusData,
-} from '../../helpers';
+import { API } from '../../helpers/api';
+import { getLogo, getSystemName, showError } from '../../helpers/utils';
+import { setStatusData } from '../../helpers/data';
 import { UserContext } from '../../context/User';
 import { StatusContext } from '../../context/Status';
 import { useLocation } from 'react-router-dom';
@@ -53,20 +51,19 @@ const PageLayout = () => {
   const cardProPages = [
     '/console/channel',
     '/console/log',
+    '/console/midjourney',
+    '/console/task',
     '/console/redemption',
     '/console/user',
     '/console/token',
-    '/console/midjourney',
-    '/console/task',
     '/console/models',
-    '/pricing',
+    '/console/pricing',
   ];
 
   const shouldHideFooter = cardProPages.includes(location.pathname);
 
   const shouldInnerPadding =
     location.pathname.includes('/console') &&
-    !location.pathname.startsWith('/console/chat') &&
     location.pathname !== '/console/playground';
 
   const isConsoleRoute = location.pathname.startsWith('/console');
@@ -217,6 +214,7 @@ const PageLayout = () => {
               position: 'relative',
             }}
           >
+            {shouldInnerPadding && !isMobile && <Breadcrumb />}
             <ErrorBoundary>
               <App />
             </ErrorBoundary>
@@ -233,7 +231,7 @@ const PageLayout = () => {
           )}
         </Layout>
       </Layout>
-      <ToastContainer />
+      <CommandPalette />
     </Layout>
   );
 };

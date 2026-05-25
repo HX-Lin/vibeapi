@@ -40,6 +40,9 @@ const ActionButtons = ({
   navigate,
   t,
 }) => {
+  // Check if user is logged in (logged-in users use sidebar logout)
+  const isLoggedIn = !!userState?.user;
+
   return (
     <div className='flex items-center gap-2 md:gap-3'>
       <NewYearButton isNewYear={isNewYear} />
@@ -58,15 +61,18 @@ const ActionButtons = ({
         t={t}
       />
 
-      <UserArea
-        userState={userState}
-        isLoading={isLoading}
-        isMobile={isMobile}
-        isSelfUseMode={isSelfUseMode}
-        logout={logout}
-        navigate={navigate}
-        t={t}
-      />
+      {/* Only show UserArea (login/register) when not logged in */}
+      {!isLoggedIn && (
+        <UserArea
+          userState={userState}
+          isLoading={isLoading}
+          isMobile={isMobile}
+          isSelfUseMode={isSelfUseMode}
+          logout={logout}
+          navigate={navigate}
+          t={t}
+        />
+      )}
     </div>
   );
 };

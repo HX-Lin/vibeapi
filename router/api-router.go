@@ -106,6 +106,7 @@ func SetApiRouter(router *gin.Engine) {
 				selfRoute.POST("/waffo-pancake/pay", middleware.CriticalRateLimit(), controller.RequestWaffoPancakePay)
 				selfRoute.POST("/aff_transfer", controller.TransferAffQuota)
 				selfRoute.PUT("/setting", controller.UpdateUserSetting)
+				selfRoute.POST("/subscription/redeem", middleware.CriticalRateLimit(), controller.RedeemSubscriptionCode)
 
 				// 2FA routes
 				selfRoute.GET("/2fa/status", controller.Get2FAStatus)
@@ -226,6 +227,10 @@ func SetApiRouter(router *gin.Engine) {
 		channelRoute := apiRouter.Group("/channel")
 		channelRoute.Use(middleware.AdminAuth())
 		{
+			// Help docs management (admin level)
+			apiRouter.PUT("/help-docs", middleware.AdminAuth(), controller.UpdateHelpDocs)
+			apiRouter.POST("/upload", middleware.AdminAuth(), controller.UploadFile)
+
 			channelRoute.GET("/", controller.GetAllChannels)
 			channelRoute.GET("/search", controller.SearchChannels)
 			channelRoute.GET("/models", controller.ChannelListModels)
@@ -301,6 +306,18 @@ func SetApiRouter(router *gin.Engine) {
 			redemptionRoute.DELETE("/invalid", controller.DeleteInvalidRedemption)
 			redemptionRoute.DELETE("/:id", controller.DeleteRedemption)
 		}
+
+		subRedemptionRoute := apiRouter.Group("/subscription_redemption")
+		subRedemptionRoute.Use(middleware.AdminAuth())
+		{
+			subRedemptionRoute.GET("/", controller.GetAllSubscriptionRedemptions)
+			subRedemptionRoute.GET("/search", controller.SearchSubscriptionRedemptions)
+			subRedemptionRoute.GET("/:id", controller.GetSubscriptionRedemption)
+			subRedemptionRoute.POST("/", controller.AddSubscriptionRedemption)
+			subRedemptionRoute.PUT("/", controller.UpdateSubscriptionRedemption)
+			subRedemptionRoute.DELETE("/invalid", controller.DeleteInvalidSubscriptionRedemption)
+			subRedemptionRoute.DELETE("/:id", controller.DeleteSubscriptionRedemption)
+		}
 		logRoute := apiRouter.Group("/log")
 		logRoute.GET("/", middleware.AdminAuth(), controller.GetAllLogs)
 		logRoute.DELETE("/", middleware.AdminAuth(), controller.DeleteHistoryLogs)
@@ -315,6 +332,13 @@ func SetApiRouter(router *gin.Engine) {
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)
 		dataRoute.GET("/users", middleware.AdminAuth(), controller.GetQuotaDatesByUser)
 		dataRoute.GET("/self", middleware.UserAuth(), controller.GetUserQuotaDates)
+
+		statsRoute := apiRouter.Group("/stats")
+		statsRoute.Use(middleware.AdminAuth())
+		{
+			statsRoute.GET("/user_rank", controller.GetUserQuotaRank)
+			statsRoute.GET("/usage", controller.GetUserUsageStats)
+		}
 
 		logRoute.Use(middleware.CORS(), middleware.CriticalRateLimit())
 		{
@@ -394,6 +418,16 @@ func SetApiRouter(router *gin.Engine) {
 			deploymentsRoute.PUT("/:id/name", controller.UpdateDeploymentName)
 			deploymentsRoute.POST("/:id/extend", controller.ExtendDeployment)
 			deploymentsRoute.DELETE("/:id", controller.DeleteDeployment)
+		}
+
+		vibeapiRoute := apiRouter.Group("/vibeapi")
+		vibeapiRoute.Use(middleware.AdminAuth())
+		{
+			vibeapiRoute.GET("/status", controller.VibeAPIStatus)
+			vibeapiRoute.GET("/user-usage", controller.VibeAPIUserUsage)
+			vibeapiRoute.POST("/provision/:userId", controller.VibeAPIProvisionUser)
+			vibeapiRoute.POST("/provision-all", controller.VibeAPIProvisionAll)
+			vibeapiRoute.Any("/proxy/*path", controller.VibeAPIProxy)
 		}
 	}
 }

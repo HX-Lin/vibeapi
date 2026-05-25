@@ -139,6 +139,12 @@ func ModelPriceHelper(c *gin.Context, info *relaycommon.RelayInfo, promptTokens 
 		}
 	}
 
+	// 应用全局倍率乘数到预扣费（叠加用户个人倍率增益）
+	globalMultiplier := operation_setting.GetEffectiveQuotaMultiplier(info.UserSetting.QuotaMultiplierOffset)
+	if globalMultiplier != 1.0 {
+		preConsumedQuota = int(float64(preConsumedQuota) * globalMultiplier)
+	}
+
 	priceData := types.PriceData{
 		FreeModel:            freeModel,
 		ModelPrice:           modelPrice,
@@ -211,6 +217,10 @@ func ModelPriceHelperPerCall(c *gin.Context, info *relaycommon.RelayInfo) (types
 				freeModel = true
 			}
 		}
+	}
+
+	if gm := operation_setting.GetEffectiveQuotaMultiplier(info.UserSetting.QuotaMultiplierOffset); gm != 1.0 {
+		quota = int(float64(quota) * gm)
 	}
 
 	priceData := types.PriceData{
