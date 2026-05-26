@@ -30,4 +30,4 @@ export * from './boolean';
 export * from './dashboard';
 export * from './passkey';
 export * from './statusCodeRules';
-export * from './quota';
+export { quotaToDisplayAmount, displayAmountToQuota, getQuotaPresets } from './quota';
