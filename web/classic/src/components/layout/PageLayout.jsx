@@ -24,7 +24,6 @@ import Breadcrumb from './Breadcrumb';
 import CommandPalette from './CommandPalette';
 import App from '../../App';
 import FooterBar from './Footer';
-import { ToastContainer } from 'react-toastify';
 import ErrorBoundary from '../common/ErrorBoundary';
 import React, { useContext, useEffect, useState } from 'react';
 import { useIsMobile } from '../../hooks/common/useIsMobile';
