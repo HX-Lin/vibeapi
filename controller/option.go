@@ -345,7 +345,7 @@ func UpdateOption(c *gin.Context) {
 
 func UpdateHelpDocs(c *gin.Context) {
 	var req OptionUpdateRequest
-	err := json.NewDecoder(c.Request.Body).Decode(&req)
+	err := common.DecodeJson(c.Request.Body, &req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,
