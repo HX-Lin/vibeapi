@@ -2530,6 +2530,7 @@ export function renderAudioModelPrice(opts) {
     const totalPrice = (textPrice + audioPrice) * (gm || 1);
 
     return renderBillingArticle([
+      buildBillingPriceText('输入价格：{{symbol}}{{price}} / 1M tokens', {
         symbol,
         usdAmount: inputRatioPrice,
         rate,
