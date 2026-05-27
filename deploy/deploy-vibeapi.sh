@@ -73,24 +73,48 @@ fi
 echo "[4/6] 创建部署目录..."
 mkdir -p ${DEPLOY_DIR}/{data,logs}
 
-# 生成随机密码
-DB_PASSWORD=$(openssl rand -hex 16)
-SESSION_SECRET=$(openssl rand -hex 32)
+# 校验外部云数据库与 Redis 配置
+if [ -z "${SQL_DSN}" ]; then
+    echo "请先通过环境变量提供外部 PostgreSQL 连接串，例如："
+    echo "  export SQL_DSN='postgresql://user:password@pgm-xxxx.pg.rds.aliyuncs.com:5432/vibeapi?sslmode=disable'"
+    exit 1
+fi
+
+REDIS_MODE=${REDIS_MODE:-single}
+if [ "${REDIS_MODE}" = "cluster" ]; then
+    if [ -z "${REDIS_CLUSTER_ADDRS}" ]; then
+        echo "REDIS_MODE=cluster 时必须提供 REDIS_CLUSTER_ADDRS"
+        exit 1
+    fi
+elif [ -z "${REDIS_CONN_STRING}" ]; then
+    echo "REDIS_MODE=single 时必须提供 REDIS_CONN_STRING，例如阿里云 Tair/Redis 代理地址"
+    exit 1
+fi
+
+SESSION_SECRET=${SESSION_SECRET:-$(openssl rand -hex 32)}
 
 # 写入 .env 文件
 cat > ${DEPLOY_DIR}/.env <<EOF
-SQL_DSN=postgresql://root:${DB_PASSWORD}@postgres:5432/vibeapi
-DB_PASSWORD=${DB_PASSWORD}
-REDIS_CONN_STRING=redis://redis
+SQL_DSN=${SQL_DSN}
+LOG_SQL_DSN=${LOG_SQL_DSN}
+REDIS_MODE=${REDIS_MODE}
+REDIS_CONN_STRING=${REDIS_CONN_STRING}
+REDIS_CLUSTER_ADDRS=${REDIS_CLUSTER_ADDRS}
+REDIS_USERNAME=${REDIS_USERNAME}
+REDIS_PASSWORD=${REDIS_PASSWORD}
+REDIS_TLS_ENABLED=${REDIS_TLS_ENABLED:-false}
+REDIS_POOL_SIZE=${REDIS_POOL_SIZE:-10}
 TZ=Asia/Shanghai
 SESSION_SECRET=${SESSION_SECRET}
 ERROR_LOG_ENABLED=true
 BATCH_UPDATE_ENABLED=true
-SYNC_FREQUENCY=60
+SYNC_FREQUENCY=${SYNC_FREQUENCY:-60}
+NODE_TYPE=${NODE_TYPE:-master}
+NODE_NAME=${NODE_NAME:-vibeapi-node-1}
 EOF
 
 echo "环境变量已生成 ✓"
-echo "  DB 密码: ${DB_PASSWORD}"
+echo "  Redis 模式: ${REDIS_MODE}"
 echo "  Session Secret: ${SESSION_SECRET}"
 
 # 写入 nginx.conf
@@ -155,9 +179,6 @@ services:
       - ./data:/data
       - ./logs:/app/logs
     env_file: .env
-    depends_on:
-      - redis
-      - postgres
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\\\s*true' || exit 1"]
       interval: 30s
@@ -179,24 +200,6 @@ services:
     depends_on:
       - vibeapi
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    restart: always
-
-  postgres:
-    image: postgres:15-alpine
-    container_name: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: \${DB_PASSWORD}
-      POSTGRES_DB: vibeapi
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-
-volumes:
-  pg_data:
 COMPOSEEOF
 
 # 启动服务

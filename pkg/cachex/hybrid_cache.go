@@ -17,11 +17,16 @@ const (
 	defaultRedisDelTimeout  = 10 * time.Second
 )
 
+type RedisClient interface {
+	redis.UniversalClient
+	Pipeline() redis.Pipeliner
+}
+
 type HybridCacheConfig[V any] struct {
 	Namespace Namespace
 
 	// Redis is used when RedisEnabled returns true (or RedisEnabled is nil) and Redis is not nil.
-	Redis        *redis.Client
+	Redis        RedisClient
 	RedisCodec   ValueCodec[V]
 	RedisEnabled func() bool
 
@@ -33,7 +38,7 @@ type HybridCacheConfig[V any] struct {
 type HybridCache[V any] struct {
 	ns Namespace
 
-	redis        *redis.Client
+	redis        RedisClient
 	redisCodec   ValueCodec[V]
 	redisEnabled func() bool
 
@@ -140,10 +145,27 @@ func (c *HybridCache[V]) scanKeys(match string) ([]string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), defaultRedisScanTimeout)
 	defer cancel()
 
+	if cluster, ok := c.redis.(*redis.ClusterClient); ok {
+		keys := make([]string, 0, 1024)
+		err := cluster.ForEachMaster(ctx, func(ctx context.Context, client *redis.Client) error {
+			nodeKeys, err := scanRedisClient(ctx, client, match)
+			if err != nil {
+				return err
+			}
+			keys = append(keys, nodeKeys...)
+			return nil
+		})
+		return keys, err
+	}
+
+	return scanRedisClient(ctx, c.redis, match)
+}
+
+func scanRedisClient(ctx context.Context, client redis.UniversalClient, match string) ([]string, error) {
 	var cursor uint64
 	keys := make([]string, 0, 1024)
 	for {
-		k, next, err := c.redis.Scan(ctx, cursor, match, 1000).Result()
+		k, next, err := client.Scan(ctx, cursor, match, 1000).Result()
 		if err != nil {
 			return keys, err
 		}

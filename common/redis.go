@@ -2,18 +2,31 @@ package common
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
-var RDB *redis.Client
+const (
+	RedisModeSingle  = "single"
+	RedisModeCluster = "cluster"
+)
+
+type RedisClient interface {
+	redis.UniversalClient
+	Pipeline() redis.Pipeliner
+	TxPipeline() redis.Pipeliner
+}
+
+var RDB RedisClient
 var RedisEnabled = true
 
 func RedisKeyCacheSeconds() int {
@@ -22,7 +35,11 @@ func RedisKeyCacheSeconds() int {
 
 // InitRedisClient This function is called after init()
 func InitRedisClient() (err error) {
-	if os.Getenv("REDIS_CONN_STRING") == "" {
+	mode := strings.ToLower(GetEnvOrDefaultString("REDIS_MODE", RedisModeSingle))
+	if mode == "" {
+		mode = RedisModeSingle
+	}
+	if mode != RedisModeCluster && os.Getenv("REDIS_CONN_STRING") == "" {
 		RedisEnabled = false
 		SysLog("REDIS_CONN_STRING not set, Redis is not enabled")
 		return nil
@@ -31,13 +48,17 @@ func InitRedisClient() (err error) {
 		SysLog("SYNC_FREQUENCY not set, use default value 60")
 		SyncFrequency = 60
 	}
-	SysLog("Redis is enabled")
-	opt, err := redis.ParseURL(os.Getenv("REDIS_CONN_STRING"))
-	if err != nil {
-		FatalLog("failed to parse Redis connection string: " + err.Error())
+
+	switch mode {
+	case RedisModeSingle:
+		RDB = newSingleRedisClient()
+		SysLog("Redis is enabled, mode=single")
+	case RedisModeCluster:
+		RDB = newClusterRedisClient()
+		SysLog(fmt.Sprintf("Redis is enabled, mode=cluster, addrs=%d", len(parseRedisClusterAddrs())))
+	default:
+		FatalLog("unsupported REDIS_MODE: " + mode)
 	}
-	opt.PoolSize = GetEnvOrDefault("REDIS_POOL_SIZE", 10)
-	RDB = redis.NewClient(opt)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -46,11 +67,55 @@ func InitRedisClient() (err error) {
 	if err != nil {
 		FatalLog("Redis ping test failed: " + err.Error())
 	}
+	return err
+}
+
+func newSingleRedisClient() RedisClient {
+	opt, err := redis.ParseURL(os.Getenv("REDIS_CONN_STRING"))
+	if err != nil {
+		FatalLog("failed to parse Redis connection string: " + err.Error())
+	}
+	opt.PoolSize = GetEnvOrDefault("REDIS_POOL_SIZE", 10)
+	if GetEnvOrDefaultBool("REDIS_TLS_ENABLED", false) {
+		opt.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+	}
 	if DebugEnabled {
 		SysLog(fmt.Sprintf("Redis connected to %s", opt.Addr))
 		SysLog(fmt.Sprintf("Redis database: %d", opt.DB))
 	}
-	return err
+	return redis.NewClient(opt)
+}
+
+func newClusterRedisClient() RedisClient {
+	addrs := parseRedisClusterAddrs()
+	if len(addrs) == 0 {
+		FatalLog("REDIS_CLUSTER_ADDRS is required when REDIS_MODE=cluster")
+	}
+	opt := &redis.ClusterOptions{
+		Addrs:    addrs,
+		Username: os.Getenv("REDIS_USERNAME"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		PoolSize: GetEnvOrDefault("REDIS_POOL_SIZE", 10),
+	}
+	if GetEnvOrDefaultBool("REDIS_TLS_ENABLED", false) {
+		opt.TLSConfig = &tls.Config{MinVersion: tls.VersionTLS12}
+	}
+	if DebugEnabled {
+		SysLog(fmt.Sprintf("Redis cluster seed addresses: %d", len(addrs)))
+	}
+	return redis.NewClusterClient(opt)
+}
+
+func parseRedisClusterAddrs() []string {
+	parts := strings.Split(os.Getenv("REDIS_CLUSTER_ADDRS"), ",")
+	addrs := make([]string, 0, len(parts))
+	for _, part := range parts {
+		addr := strings.TrimSpace(part)
+		if addr != "" {
+			addrs = append(addrs, addr)
+		}
+	}
+	return addrs
 }
 
 func ParseRedisOption() *redis.Options {
