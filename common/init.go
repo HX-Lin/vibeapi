@@ -83,6 +83,39 @@ func InitEnv() {
 	MemoryCacheEnabled = os.Getenv("MEMORY_CACHE_ENABLED") == "true"
 	IsMasterNode = os.Getenv("NODE_TYPE") != "slave"
 	NodeName = os.Getenv("NODE_NAME")
+	ClusterLeaderEnabled = GetEnvOrDefaultBool("CLUSTER_LEADER_ENABLED", false)
+	ClusterNodeID = strings.TrimSpace(os.Getenv("CLUSTER_NODE_ID"))
+	if ClusterNodeID == "" {
+		ClusterNodeID = strings.TrimSpace(NodeName)
+	}
+	if ClusterNodeID == "" {
+		if hostname, err := os.Hostname(); err == nil {
+			ClusterNodeID = hostname
+		}
+	}
+	if ClusterNodeID == "" {
+		ClusterNodeID = fmt.Sprintf("pid-%d", os.Getpid())
+	}
+	ClusterLeaseTTLSeconds = GetEnvOrDefault("CLUSTER_LEASE_TTL_SECONDS", 30)
+	if ClusterLeaseTTLSeconds < 3 {
+		ClusterLeaseTTLSeconds = 30
+	}
+	ClusterLeaseRenewIntervalSeconds = GetEnvOrDefault("CLUSTER_LEASE_RENEW_INTERVAL_SECONDS", 10)
+	if ClusterLeaseRenewIntervalSeconds <= 0 {
+		ClusterLeaseRenewIntervalSeconds = 10
+	}
+	if ClusterLeaseRenewIntervalSeconds >= ClusterLeaseTTLSeconds {
+		ClusterLeaseRenewIntervalSeconds = ClusterLeaseTTLSeconds / 3
+		if ClusterLeaseRenewIntervalSeconds < 1 {
+			ClusterLeaseRenewIntervalSeconds = 1
+		}
+	}
+	MigrationMode = strings.ToLower(strings.TrimSpace(GetEnvOrDefaultString("MIGRATION_MODE", MigrationModeAuto)))
+	switch MigrationMode {
+	case MigrationModeAuto, MigrationModeDisabled, MigrationModeRunAndExit:
+	default:
+		FatalLog("unsupported MIGRATION_MODE: " + MigrationMode)
+	}
 	TLSInsecureSkipVerify = GetEnvOrDefaultBool("TLS_INSECURE_SKIP_VERIFY", false)
 	if TLSInsecureSkipVerify {
 		if tr, ok := http.DefaultTransport.(*http.Transport); ok && tr != nil {

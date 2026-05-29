@@ -34,10 +34,6 @@ func shouldAutoRefreshCodexChannelStatus(status int) bool {
 
 func StartCodexCredentialAutoRefreshTask() {
 	codexCredentialRefreshOnce.Do(func() {
-		if !common.IsMasterNode {
-			return
-		}
-
 		gopool.Go(func() {
 			logger.LogInfo(context.Background(), fmt.Sprintf("codex credential auto-refresh task started: tick=%s threshold=%s", codexCredentialRefreshTickInterval, codexCredentialRefreshThreshold))
 
@@ -53,6 +49,9 @@ func StartCodexCredentialAutoRefreshTask() {
 }
 
 func runCodexCredentialAutoRefreshOnce() {
+	if !common.ShouldRunLeaderTasks() {
+		return
+	}
 	if !codexCredentialRefreshRunning.CompareAndSwap(false, true) {
 		return
 	}

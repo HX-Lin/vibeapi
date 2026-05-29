@@ -28,9 +28,6 @@ var (
 
 func StartSubscriptionQuotaResetTask() {
 	subscriptionResetOnce.Do(func() {
-		if !common.IsMasterNode {
-			return
-		}
 		gopool.Go(func() {
 			logger.LogInfo(context.Background(), fmt.Sprintf("subscription quota reset task started: tick=%s", subscriptionResetTickInterval))
 			ticker := time.NewTicker(subscriptionResetTickInterval)
@@ -45,6 +42,9 @@ func StartSubscriptionQuotaResetTask() {
 }
 
 func runSubscriptionQuotaResetOnce() {
+	if !common.ShouldRunLeaderTasks() {
+		return
+	}
 	if !subscriptionResetRunning.CompareAndSwap(false, true) {
 		return
 	}

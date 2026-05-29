@@ -3,7 +3,6 @@ package controller
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -25,6 +24,9 @@ func UpdateMidjourneyTaskBulk() {
 	ctx := context.TODO()
 	for {
 		time.Sleep(time.Duration(15) * time.Second)
+		if !common.ShouldRunLeaderTasks() {
+			continue
+		}
 
 		tasks := model.GetAllUnFinishTasks()
 		if len(tasks) == 0 {
@@ -79,9 +81,13 @@ func UpdateMidjourneyTaskBulk() {
 			}
 			requestUrl := fmt.Sprintf("%s/mj/task/list-by-condition", *midjourneyChannel.BaseURL)
 
-			body, _ := json.Marshal(map[string]any{
+			body, err := common.Marshal(map[string]any{
 				"ids": taskIds,
 			})
+			if err != nil {
+				logger.LogError(ctx, fmt.Sprintf("Get Task marshal body error: %v", err))
+				continue
+			}
 			req, err := http.NewRequest("POST", requestUrl, bytes.NewBuffer(body))
 			if err != nil {
 				logger.LogError(ctx, fmt.Sprintf("Get Task error: %v", err))
@@ -109,7 +115,7 @@ func UpdateMidjourneyTaskBulk() {
 				continue
 			}
 			var responseItems []dto.MidjourneyDto
-			err = json.Unmarshal(responseBody, &responseItems)
+			err = common.Unmarshal(responseBody, &responseItems)
 			if err != nil {
 				logger.LogError(ctx, fmt.Sprintf("Get Mjp Task parse body error2: %v, body: %s", err, string(responseBody)))
 				continue

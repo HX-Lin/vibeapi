@@ -70,6 +70,7 @@ func main() {
 			common.FatalLog("failed to close database: " + err.Error())
 		}
 	}()
+	defer service.ReleaseClusterLeaderLease()
 
 	if common.RedisEnabled {
 		// for compatibility with old versions
@@ -131,7 +132,7 @@ func main() {
 	// Channel upstream model update check task
 	controller.StartChannelUpstreamModelUpdateTask()
 
-	if common.IsMasterNode && constant.UpdateTask {
+	if constant.UpdateTask {
 		gopool.Go(func() {
 			controller.UpdateMidjourneyTaskBulk()
 		})
@@ -317,6 +318,15 @@ func InitResources() error {
 		return err
 	}
 
+	err = model.InitLogDB()
+	if err != nil {
+		return err
+	}
+	if common.MigrationMode == common.MigrationModeRunAndExit {
+		common.SysLog("database migration completed, exiting because MIGRATION_MODE=run-and-exit")
+		os.Exit(0)
+	}
+
 	model.CheckSetup()
 
 	// Initialize options, should after model.InitDB()
@@ -328,17 +338,13 @@ func InitResources() error {
 	// 初始化模型
 	model.GetPricing()
 
-	// Initialize SQL Database
-	err = model.InitLogDB()
-	if err != nil {
-		return err
-	}
-
 	// Initialize Redis
 	err = common.InitRedisClient()
 	if err != nil {
 		return err
 	}
+
+	service.StartClusterLeaderManager()
 
 	perfmetrics.Init()
 

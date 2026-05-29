@@ -651,9 +651,6 @@ func runChannelUpstreamModelUpdateTaskOnce() {
 
 func StartChannelUpstreamModelUpdateTask() {
 	channelUpstreamModelUpdateTaskOnce.Do(func() {
-		if !common.IsMasterNode {
-			return
-		}
 		if !common.GetEnvOrDefaultBool("CHANNEL_UPSTREAM_MODEL_UPDATE_TASK_ENABLED", true) {
 			common.SysLog("upstream model update task disabled by CHANNEL_UPSTREAM_MODEL_UPDATE_TASK_ENABLED")
 			return
@@ -670,11 +667,15 @@ func StartChannelUpstreamModelUpdateTask() {
 
 		go func() {
 			common.SysLog(fmt.Sprintf("upstream model update task started: interval=%s", interval))
-			runChannelUpstreamModelUpdateTaskOnce()
+			if common.ShouldRunLeaderTasks() {
+				runChannelUpstreamModelUpdateTaskOnce()
+			}
 			ticker := time.NewTicker(interval)
 			defer ticker.Stop()
 			for range ticker.C {
-				runChannelUpstreamModelUpdateTaskOnce()
+				if common.ShouldRunLeaderTasks() {
+					runChannelUpstreamModelUpdateTaskOnce()
+				}
 			}
 		}()
 	})
