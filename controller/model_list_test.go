@@ -58,14 +58,14 @@ func setupModelListControllerTestDB(t *testing.T) *gorm.DB {
 func initModelListColumnNames(t *testing.T) {
 	t.Helper()
 
-	originalIsMasterNode := common.IsMasterNode
+	originalMigrationMode := common.MigrationMode
 	originalSQLitePath := common.SQLitePath
 	originalUsingSQLite := common.UsingSQLite
 	originalUsingMySQL := common.UsingMySQL
 	originalUsingPostgreSQL := common.UsingPostgreSQL
 	originalSQLDSN, hadSQLDSN := os.LookupEnv("SQL_DSN")
 	defer func() {
-		common.IsMasterNode = originalIsMasterNode
+		common.MigrationMode = originalMigrationMode
 		common.SQLitePath = originalSQLitePath
 		common.UsingSQLite = originalUsingSQLite
 		common.UsingMySQL = originalUsingMySQL
@@ -77,7 +77,7 @@ func initModelListColumnNames(t *testing.T) {
 		}
 	}()
 
-	common.IsMasterNode = false
+	common.MigrationMode = common.MigrationModeDisabled
 	common.SQLitePath = fmt.Sprintf("file:%s_init?mode=memory&cache=shared", strings.ReplaceAll(t.Name(), "/", "_"))
 	common.UsingSQLite = false
 	common.UsingMySQL = false

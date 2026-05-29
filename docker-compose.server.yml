@@ -6,8 +6,8 @@
 #   3. docker compose -f docker-compose.server.yml up -d
 #
 # Multi-node deployment:
-#   - Use the same SQL_DSN, REDIS_* and SESSION_SECRET on every node.
-#   - Keep one node as NODE_TYPE=master; set other nodes to NODE_TYPE=slave.
+#   - Use the same SQL_DSN and SESSION_SECRET on every node.
+#   - Enable CLUSTER_LEADER_ENABLED=true on service nodes; use MIGRATION_MODE=disabled after running one migration job.
 
 services:
   vibeapi:

@@ -81,9 +81,8 @@ func InitEnv() {
 	// Initialize variables from constants.go that were using environment variables
 	DebugEnabled = os.Getenv("DEBUG") == "true"
 	MemoryCacheEnabled = os.Getenv("MEMORY_CACHE_ENABLED") == "true"
-	IsMasterNode = os.Getenv("NODE_TYPE") != "slave"
 	NodeName = os.Getenv("NODE_NAME")
-	ClusterLeaderEnabled = GetEnvOrDefaultBool("CLUSTER_LEADER_ENABLED", false)
+	ClusterLeaderEnabled = GetEnvOrDefaultBool("CLUSTER_LEADER_ENABLED", true)
 	ClusterNodeID = strings.TrimSpace(os.Getenv("CLUSTER_NODE_ID"))
 	if ClusterNodeID == "" {
 		ClusterNodeID = strings.TrimSpace(NodeName)

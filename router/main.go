@@ -6,7 +6,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/controller"
 	"github.com/QuantumNous/new-api/middleware"
 
@@ -21,10 +20,6 @@ func SetRouter(router *gin.Engine, assets ThemeAssets) {
 	// Serve uploaded files (public, no auth required, before SPA fallback)
 	router.GET("/uploads/:filename", controller.ServeUploadedFile)
 	frontendBaseUrl := os.Getenv("FRONTEND_BASE_URL")
-	if common.IsMasterNode && frontendBaseUrl != "" {
-		frontendBaseUrl = ""
-		common.SysLog("FRONTEND_BASE_URL is ignored on master node")
-	}
 	if frontendBaseUrl == "" {
 		SetWebRouter(router, assets)
 	} else {

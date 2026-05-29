@@ -39,10 +39,7 @@ func IsClusterLeader() bool {
 }
 
 func ShouldRunLeaderTasks() bool {
-	if ClusterLeaderEnabled {
-		return IsClusterLeader()
-	}
-	return IsMasterNode
+	return IsClusterLeader()
 }
 
 func ShouldRunMigrations() bool {
@@ -52,6 +49,6 @@ func ShouldRunMigrations() bool {
 	case MigrationModeRunAndExit:
 		return true
 	default:
-		return IsMasterNode
+		return true
 	}
 }
