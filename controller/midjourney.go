@@ -148,11 +148,11 @@ func UpdateMidjourneyTaskBulk() {
 				task.Status = responseItem.Status
 				task.FailReason = responseItem.FailReason
 				if responseItem.Properties != nil {
-					propertiesStr, _ := json.Marshal(responseItem.Properties)
+					propertiesStr, _ := common.Marshal(responseItem.Properties)
 					task.Properties = string(propertiesStr)
 				}
 				if responseItem.Buttons != nil {
-					buttonStr, _ := json.Marshal(responseItem.Buttons)
+					buttonStr, _ := common.Marshal(responseItem.Buttons)
 					task.Buttons = string(buttonStr)
 				}
 				// 映射 VideoUrl
@@ -160,7 +160,7 @@ func UpdateMidjourneyTaskBulk() {
 
 				// 映射 VideoUrls - 将数组序列化为 JSON 字符串
 				if responseItem.VideoUrls != nil && len(responseItem.VideoUrls) > 0 {
-					videoUrlsStr, err := json.Marshal(responseItem.VideoUrls)
+					videoUrlsStr, err := common.Marshal(responseItem.VideoUrls)
 					if err != nil {
 						logger.LogError(ctx, fmt.Sprintf("序列化 VideoUrls 失败: %v", err))
 						task.VideoUrls = "[]" // 失败时设置为空数组
@@ -248,7 +248,7 @@ func checkMjTaskNeedUpdate(oldTask *model.Midjourney, newTask dto.MidjourneyDto)
 	}
 	// 检查 VideoUrls 是否需要更新
 	if newTask.VideoUrls != nil && len(newTask.VideoUrls) > 0 {
-		newVideoUrlsStr, _ := json.Marshal(newTask.VideoUrls)
+		newVideoUrlsStr, _ := common.Marshal(newTask.VideoUrls)
 		if oldTask.VideoUrls != string(newVideoUrlsStr) {
 			return true
 		}
