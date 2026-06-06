@@ -18,6 +18,8 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React from 'react';
+import { Button } from '@douyinfe/semi-ui';
+import { LayoutDashboard } from 'lucide-react';
 import NewYearButton from './NewYearButton';
 import NotificationButton from './NotificationButton';
 import ThemeToggle from './ThemeToggle';
@@ -35,6 +37,7 @@ const ActionButtons = ({
   userState,
   isLoading,
   isMobile,
+  isConsoleRoute,
   isSelfUseMode,
   logout,
   navigate,
@@ -46,6 +49,17 @@ const ActionButtons = ({
   return (
     <div className='flex items-center gap-2 md:gap-3'>
       <NewYearButton isNewYear={isNewYear} />
+
+      {isLoggedIn && !isConsoleRoute && (
+        <Button
+          type='primary'
+          theme='light'
+          icon={<LayoutDashboard size={16} />}
+          onClick={() => navigate('/console')}
+        >
+          {!isMobile && t('数据看板')}
+        </Button>
+      )}
 
       {isLoggedIn && (
         <NotificationButton
@@ -63,8 +77,7 @@ const ActionButtons = ({
         t={t}
       />
 
-      {/* Only show UserArea (login/register) when not logged in */}
-      {!isLoggedIn && (
+      {(!isLoggedIn || !isConsoleRoute) && (
         <UserArea
           userState={userState}
           isLoading={isLoading}

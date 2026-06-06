@@ -25,8 +25,9 @@ const PATH_PREFIX_MAP = {
   '/about': '/about',
 };
 
-const HeaderNav = ({ headerNavModules, docsLink, t }) => {
+const HeaderNav = ({ headerNavModules, docsLink, userState, t }) => {
   const location = useLocation();
+  const isLoggedIn = !!userState?.user;
   const modules = headerNavModules || {
     home: true,
     docs: true,
@@ -41,6 +42,13 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
       to: '/',
       external: false,
       exactMatch: true, // 首页仅精确匹配 /
+    },
+    {
+      key: 'console',
+      label: t('数据看板'),
+      to: '/console',
+      external: false,
+      loggedInOnly: true,
     },
     {
       key: 'pricing',
@@ -78,7 +86,9 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
   const filteredItems = navItems
     .filter((item) => {
       const moduleConfig = modules[item.key];
+      if (item.loggedInOnly && !isLoggedIn) return false;
       if (
+        item.key === 'console' ||
         item.key === 'pricing' ||
         item.key === 'privacy-policy' ||
         item.key === 'user-agreement'
@@ -87,7 +97,8 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
       }
       if (moduleConfig === undefined || moduleConfig === null) return false;
       if (typeof moduleConfig === 'boolean') return moduleConfig;
-      if (typeof moduleConfig === 'object') return moduleConfig.enabled !== false;
+      if (typeof moduleConfig === 'object')
+        return moduleConfig.enabled !== false;
       return false;
     })
     .filter((item) => {

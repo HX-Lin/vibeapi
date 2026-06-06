@@ -22,16 +22,20 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Button, Card, Tag, Typography } from '@douyinfe/semi-ui';
 import {
+  Activity,
   BarChart3,
   CheckCircle2,
   CreditCard,
   KeyRound,
+  LayoutDashboard,
   Mail,
   Route,
+  Server,
   ShieldCheck,
 } from 'lucide-react';
 import { API, getLogo, getSystemName } from '../../helpers';
 import { StatusContext } from '../../context/Status';
+import { UserContext } from '../../context/User';
 import LazyMarkdownRenderer from '../../components/common/markdown/LazyMarkdownRenderer';
 import {
   PUBLIC_PRICING_ANCHOR,
@@ -130,11 +134,13 @@ const buildDefaultPricingRows = (t) => [
 const Landing = () => {
   const { t } = useTranslation();
   const [statusState] = useContext(StatusContext);
+  const [userState] = useContext(UserContext);
   const [homeContent, setHomeContent] = useState('');
   const [homeContentLoaded, setHomeContentLoaded] = useState(false);
   const status = statusState?.status || {};
   const systemName = getSystemName();
   const logo = getLogo();
+  const isLoggedIn = !!userState?.user;
   const supportEmail = getPublicSupportEmail(status);
   const supportMailto = getPublicSupportMailto(supportEmail);
   const canRegister =
@@ -165,6 +171,32 @@ const Landing = () => {
         title: t('用量分析与计费可见性'),
         desc: t('集中查看请求日志、Token 用量、模型成本和充值记录。'),
         icon: <BarChart3 size={22} />,
+      },
+    ],
+    [t],
+  );
+
+  const overviewStats = useMemo(
+    () => [
+      {
+        label: t('API 状态'),
+        value: t('正常'),
+        icon: <Activity size={18} />,
+      },
+      {
+        label: t('今日请求'),
+        value: t('实时'),
+        icon: <Route size={18} />,
+      },
+      {
+        label: t('预算消耗'),
+        value: t('可控'),
+        icon: <BarChart3 size={18} />,
+      },
+      {
+        label: t('上游供应商'),
+        value: t('多供应商'),
+        icon: <Server size={18} />,
       },
     ],
     [t],
@@ -244,22 +276,41 @@ const Landing = () => {
               )}
             </Text>
             <div className='mt-8 flex flex-wrap gap-3'>
-              {canRegister && (
-                <Link to='/register'>
-                  <Button type='primary' size='large'>
-                    {t('注册账号')}
+              {isLoggedIn ? (
+                <Link to='/console'>
+                  <Button
+                    type='primary'
+                    size='large'
+                    icon={<LayoutDashboard size={18} />}
+                  >
+                    {t('进入数据看板')}
                   </Button>
                 </Link>
+              ) : (
+                canRegister && (
+                  <Link to='/register'>
+                    <Button type='primary' size='large'>
+                      {t('注册账号')}
+                    </Button>
+                  </Link>
+                )
               )}
               <a href={`#${PUBLIC_PRICING_ANCHOR}`}>
                 <Button size='large'>{t('查看价格')}</Button>
               </a>
-              <Link to='/login'>
-                <Button theme='borderless' size='large'>
-                  {t('登录')}
-                </Button>
-              </Link>
+              {!isLoggedIn && (
+                <Link to='/login'>
+                  <Button theme='borderless' size='large'>
+                    {t('登录')}
+                  </Button>
+                </Link>
+              )}
             </div>
+            {isLoggedIn && (
+              <Text className='mt-4 block !text-sm !leading-6 !text-semi-color-text-2'>
+                {t('已登录用户可直接回到数据看板继续查看请求、用量和告警。')}
+              </Text>
+            )}
             <div className='mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-semi-color-text-2'>
               <a
                 href={supportMailto}
@@ -283,23 +334,86 @@ const Landing = () => {
             </div>
           </div>
 
-          <Card className='rounded-lg border border-semi-color-border shadow-sm'>
-            <div className='space-y-5'>
-              {featureItems.map((item) => (
-                <div key={item.title} className='flex gap-4'>
-                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-semi-color-primary-light-default text-semi-color-primary'>
-                    {item.icon}
-                  </div>
-                  <div>
-                    <div className='font-semibold text-semi-color-text-0'>
-                      {item.title}
-                    </div>
-                    <div className='mt-1 text-sm leading-6 text-semi-color-text-2'>
-                      {item.desc}
-                    </div>
-                  </div>
+          <Card className='rounded-lg border border-semi-color-border bg-semi-color-bg-1 shadow-sm'>
+            <div className='space-y-6'>
+              <div className='flex items-start justify-between gap-4'>
+                <div>
+                  <Text className='!text-xs !font-semibold !uppercase !tracking-wider !text-semi-color-text-2'>
+                    {t('运营概览')}
+                  </Text>
+                  <Title heading={3} className='!mb-2 !mt-2'>
+                    {t('一个控制台管住 API 运营')}
+                  </Title>
+                  <Text className='block !text-sm !leading-6 !text-semi-color-text-2'>
+                    {t('实时监控、路由、预算和计费都从一个控制台完成。')}
+                  </Text>
                 </div>
-              ))}
+                <div className='flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-semi-color-primary-light-default text-semi-color-primary'>
+                  <LayoutDashboard size={22} />
+                </div>
+              </div>
+
+              <div className='grid gap-3 sm:grid-cols-2'>
+                {overviewStats.map((item) => (
+                  <div
+                    key={item.label}
+                    className='rounded-lg border border-semi-color-border bg-semi-color-bg-0 p-4'
+                  >
+                    <div className='mb-3 flex items-center justify-between text-semi-color-text-2'>
+                      <span className='text-xs font-medium'>{item.label}</span>
+                      <span className='text-semi-color-primary'>
+                        {item.icon}
+                      </span>
+                    </div>
+                    <div className='text-xl font-semibold text-semi-color-text-0'>
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className='space-y-4 border-t border-semi-color-border pt-5'>
+                {featureItems.map((item) => (
+                  <div key={item.title} className='flex gap-3'>
+                    <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-semi-color-fill-0 text-semi-color-primary'>
+                      {item.icon}
+                    </div>
+                    <div>
+                      <div className='font-semibold text-semi-color-text-0'>
+                        {item.title}
+                      </div>
+                      <div className='mt-1 text-sm leading-6 text-semi-color-text-2'>
+                        {item.desc}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className='flex flex-wrap gap-3'>
+                {isLoggedIn ? (
+                  <Link to='/console'>
+                    <Button
+                      type='primary'
+                      theme='light'
+                      icon={<LayoutDashboard size={16} />}
+                    >
+                      {t('进入数据看板')}
+                    </Button>
+                  </Link>
+                ) : (
+                  canRegister && (
+                    <Link to='/register'>
+                      <Button type='primary' theme='light'>
+                        {t('注册账号')}
+                      </Button>
+                    </Link>
+                  )
+                )}
+                <a href={`#${PUBLIC_PRICING_ANCHOR}`}>
+                  <Button theme='borderless'>{t('查看价格')}</Button>
+                </a>
+              </div>
             </div>
           </Card>
         </div>
@@ -325,7 +439,7 @@ const Landing = () => {
             {pricingRows.map((row) => (
               <Card
                 key={row.name}
-                className='rounded-lg border border-semi-color-border'
+                className='rounded-lg border border-semi-color-border bg-semi-color-bg-1 shadow-sm'
               >
                 <div className='flex h-full flex-col'>
                   <div>
@@ -368,7 +482,7 @@ const Landing = () => {
 
       <section className='px-4 py-14'>
         <div className='mx-auto grid max-w-6xl gap-4 md:grid-cols-3'>
-          <Card className='rounded-lg border border-semi-color-border'>
+          <Card className='rounded-lg border border-semi-color-border bg-semi-color-bg-1 shadow-sm'>
             <KeyRound className='mb-3 text-semi-color-primary' size={24} />
             <Title heading={4}>{t('目标用户')}</Title>
             <Text className='block !text-sm !leading-6 !text-semi-color-text-2'>
@@ -377,7 +491,7 @@ const Landing = () => {
               )}
             </Text>
           </Card>
-          <Card className='rounded-lg border border-semi-color-border'>
+          <Card className='rounded-lg border border-semi-color-border bg-semi-color-bg-1 shadow-sm'>
             <CreditCard className='mb-3 text-semi-color-primary' size={24} />
             <Title heading={4}>{t('注册方式')}</Title>
             <Text className='block !text-sm !leading-6 !text-semi-color-text-2'>
@@ -386,7 +500,7 @@ const Landing = () => {
               )}
             </Text>
           </Card>
-          <Card className='rounded-lg border border-semi-color-border'>
+          <Card className='rounded-lg border border-semi-color-border bg-semi-color-bg-1 shadow-sm'>
             <Mail className='mb-3 text-semi-color-primary' size={24} />
             <Title heading={4}>{t('客服支持')}</Title>
             <Text className='block !text-sm !leading-6 !text-semi-color-text-2'>

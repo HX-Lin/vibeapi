@@ -25,6 +25,7 @@ import SkeletonWrapper from '../components/SkeletonWrapper';
 const HeaderLogo = ({
   isMobile,
   isConsoleRoute,
+  userState,
   logo,
   logoLoaded,
   isLoading,
@@ -33,13 +34,15 @@ const HeaderLogo = ({
   isDemoSiteMode,
   t,
 }) => {
+  const isLoggedIn = !!userState?.user;
+
   if (isMobile && isConsoleRoute) {
     return null;
   }
 
   return (
     <Link
-      to={isConsoleRoute ? '/console' : '/'}
+      to={isLoggedIn || isConsoleRoute ? '/console' : '/'}
       className='group flex items-center gap-2'
     >
       <div className='relative w-8 h-8 md:w-8 md:h-8'>

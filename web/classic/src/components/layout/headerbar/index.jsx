@@ -89,6 +89,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             <HeaderLogo
               isMobile={isMobile}
               isConsoleRoute={isConsoleRoute}
+              userState={userState}
               logo={logo}
               logoLoaded={logoLoaded}
               isLoading={isLoading}
@@ -102,6 +103,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
           <HeaderNav
             headerNavModules={headerNavModules}
             docsLink={docsLink}
+            userState={userState}
             t={t}
           />
 
@@ -116,6 +118,7 @@ const HeaderBar = ({ onMobileMenuToggle, drawerOpen }) => {
             userState={userState}
             isLoading={isLoading}
             isMobile={isMobile}
+            isConsoleRoute={isConsoleRoute}
             isSelfUseMode={isSelfUseMode}
             logout={logout}
             navigate={navigate}
