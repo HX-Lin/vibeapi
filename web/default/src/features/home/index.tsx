@@ -36,44 +36,28 @@ export function Home() {
   const { auth } = useAuthStore()
   const isAuthenticated = !!auth.user
   const { content, isLoaded, isUrl } = useHomePageContent()
-
-  if (!isLoaded) {
-    return (
-      <PublicLayout showMainContainer={false}>
-        <main className='flex min-h-screen items-center justify-center'>
-          <div className='text-muted-foreground'>{t('Loading...')}</div>
-        </main>
-      </PublicLayout>
-    )
-  }
-
-  if (content) {
-    return (
-      <PublicLayout showMainContainer={false}>
-        <main className='overflow-x-hidden'>
-          {isUrl ? (
-            <iframe
-              src={content}
-              className='h-screen w-full border-none'
-              title={t('Custom Home Page')}
-            />
-          ) : (
-            <div className='container mx-auto py-8'>
-              <Markdown className='custom-home-content'>{content}</Markdown>
-            </div>
-          )}
-          <PricingOverview />
-          <Footer />
-        </main>
-      </PublicLayout>
-    )
-  }
+  const showCustomContent = isLoaded && content.trim().length > 0
 
   return (
     <PublicLayout showMainContainer={false}>
       <Hero isAuthenticated={isAuthenticated} />
       <Stats />
       <PricingOverview />
+      {showCustomContent && (
+        <section className='relative z-10 px-6 py-16'>
+          <div className='mx-auto max-w-6xl'>
+            {isUrl ? (
+              <iframe
+                src={content}
+                className='border-border/50 h-[520px] w-full rounded-lg border'
+                title={t('Custom Home Page')}
+              />
+            ) : (
+              <Markdown className='custom-home-content'>{content}</Markdown>
+            )}
+          </div>
+        </section>
+      )}
       <Features />
       <HowItWorks />
       <CTA isAuthenticated={isAuthenticated} />

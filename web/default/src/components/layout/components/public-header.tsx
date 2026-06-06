@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { cn } from '@/lib/utils'
 import { useNotifications } from '@/hooks/use-notifications'
+import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 import { useTopNavLinks } from '@/hooks/use-top-nav-links'
 import { Button } from '@/components/ui/button'
@@ -93,13 +94,17 @@ export function PublicHeader(props: PublicHeaderProps) {
     loading,
     logoLoaded,
   } = useSystemConfig()
+  const { status } = useStatus()
   const dynamicLinks = useTopNavLinks()
-  const notifications = useNotifications()
   const routerState = useRouterState()
   const pathname = routerState.location.pathname
 
   const user = auth.user
   const isAuthenticated = !!user
+  const canRegister =
+    !status?.self_use_mode_enabled && status?.register_enabled !== false
+  const notificationsEnabled = showNotifications && isAuthenticated
+  const notifications = useNotifications(notificationsEnabled)
   const displaySiteName = customSiteName || systemName
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
 
@@ -263,13 +268,13 @@ export function PublicHeader(props: PublicHeaderProps) {
 
               {(showLanguageSwitcher ||
                 showThemeSwitch ||
-                showNotifications) && (
+                notificationsEnabled) && (
                 <div className='bg-border/40 mx-2 h-4 w-px' />
               )}
 
               {showLanguageSwitcher && <LanguageSwitcher />}
               {showThemeSwitch && <ThemeSwitch />}
-              {showNotifications && (
+              {notificationsEnabled && (
                 <NotificationPopover
                   open={notifications.popoverOpen}
                   onOpenChange={notifications.setPopoverOpen}
@@ -290,13 +295,25 @@ export function PublicHeader(props: PublicHeaderProps) {
                   ) : isAuthenticated ? (
                     <ProfileDropdown />
                   ) : (
-                    <Button
-                      size='sm'
-                      className='h-8 rounded-lg px-3.5 text-xs font-medium'
-                      render={<Link to='/sign-in' />}
-                    >
-                      {t('Sign in')}
-                    </Button>
+                    <div className='flex items-center gap-1.5'>
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        className='h-8 rounded-lg px-3 text-xs font-medium'
+                        render={<Link to='/sign-in' />}
+                      >
+                        {t('Sign in')}
+                      </Button>
+                      {canRegister && (
+                        <Button
+                          size='sm'
+                          className='h-8 rounded-lg px-3.5 text-xs font-medium'
+                          render={<Link to='/sign-up' />}
+                        >
+                          {t('Create an account')}
+                        </Button>
+                      )}
+                    </div>
                   )}
                 </>
               )}
@@ -407,15 +424,35 @@ export function PublicHeader(props: PublicHeaderProps) {
             )}
             style={{ transitionDelay: mobileOpen ? '250ms' : '0ms' }}
           >
-            {showAuthButtons && (
-              <Link
-                to={isAuthenticated ? '/dashboard' : '/sign-in'}
-                onClick={() => setMobileOpen(false)}
-                className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
-              >
-                {isAuthenticated ? t('Go to Dashboard') : t('Sign in')}
-              </Link>
-            )}
+            {showAuthButtons &&
+              (isAuthenticated ? (
+                <Link
+                  to='/dashboard'
+                  onClick={() => setMobileOpen(false)}
+                  className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                >
+                  {t('Go to Dashboard')}
+                </Link>
+              ) : (
+                <div className='grid gap-2'>
+                  <Link
+                    to='/sign-in'
+                    onClick={() => setMobileOpen(false)}
+                    className='border-border text-foreground inline-flex h-10 items-center justify-center rounded-lg border text-sm font-medium transition-colors hover:bg-muted/50'
+                  >
+                    {t('Sign in')}
+                  </Link>
+                  {canRegister && (
+                    <Link
+                      to='/sign-up'
+                      onClick={() => setMobileOpen(false)}
+                      className='bg-foreground text-background inline-flex h-10 items-center justify-center rounded-lg text-sm font-medium transition-opacity hover:opacity-90 active:opacity-80'
+                    >
+                      {t('Create an account')}
+                    </Link>
+                  )}
+                </div>
+              ))}
           </div>
         </div>
       </div>

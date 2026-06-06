@@ -48,6 +48,27 @@ import './styles/index.css'
 initializeFrontendCache()
 installBuildMetadata()
 
+function isPublicUnauthPath(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, '') || '/'
+  const publicPaths = [
+    '/',
+    '/about',
+    '/privacy-policy',
+    '/user-agreement',
+    '/sign-in',
+    '/sign-up',
+    '/register',
+    '/forgot-password',
+    '/reset-password-confirm',
+    '/oauth',
+    '/otp',
+  ]
+
+  return publicPaths.some(
+    (path) => normalized === path || normalized.startsWith(`${path}/`)
+  )
+}
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -82,8 +103,12 @@ const queryClient = new QueryClient({
     onError: (error) => {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
+          const { auth } = useAuthStore.getState()
+          auth.reset()
+          if (isPublicUnauthPath(router.history.location.pathname)) {
+            return
+          }
           toast.error(i18next.t('Session expired!'))
-          useAuthStore.getState().auth.reset()
           const redirect = `${router.history.location.href}`
           router.navigate({ to: '/sign-in', search: { redirect } })
         }

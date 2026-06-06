@@ -61,7 +61,7 @@ function getAnnouncementKey(item: Record<string, unknown>): string {
  * Hook to manage notifications (Notice + Announcements)
  * Provides unread counts and read status management
  */
-export function useNotifications() {
+export function useNotifications(enabled = true) {
   const [popoverOpen, setPopoverOpen] = useState(false)
   const [activeTab, setActiveTab] = useState<'notice' | 'announcements'>(
     'notice'
@@ -75,12 +75,14 @@ export function useNotifications() {
   } = useQuery({
     queryKey: ['notice'],
     queryFn: getNotice,
+    enabled,
     staleTime: 1000 * 60 * 5, // 5 minutes
   })
 
   // Fetch Announcements from status
   const { status, loading: statusLoading } = useStatus()
-  const announcementsEnabled = status?.announcements_enabled ?? false
+  const announcementsEnabled =
+    enabled && (status?.announcements_enabled ?? false)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const announcements: Record<string, unknown>[] = announcementsEnabled
     ? ((status?.announcements || []) as Record<string, unknown>[]).slice(0, 20)
@@ -165,7 +167,7 @@ export function useNotifications() {
     // Data
     notice: noticeContent,
     announcements,
-    loading: noticeLoading || statusLoading,
+    loading: enabled ? noticeLoading || statusLoading : false,
 
     // Unread counts
     unreadCount: unreadCounts.total,

@@ -107,7 +107,7 @@ export function AppHeader({
   const links = dynamicLinks.length > 0 ? dynamicLinks : navLinks
 
   // Notifications hook
-  const notifications = useNotifications()
+  const notifications = useNotifications(showNotifications)
 
   return (
     <>
