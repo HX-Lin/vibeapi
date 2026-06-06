@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
+import { DefaultPrivacyPolicy } from './default-documents'
 import { getPrivacyPolicy } from './api'
 import { LegalDocument } from './legal-document'
 
@@ -30,6 +31,7 @@ export function PrivacyPolicy() {
       emptyMessage={t(
         'The administrator has not configured a privacy policy yet.'
       )}
+      fallbackContent={<DefaultPrivacyPolicy />}
     />
   )
 }

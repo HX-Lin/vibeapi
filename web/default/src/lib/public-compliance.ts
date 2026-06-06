@@ -16,9 +16,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 For commercial licensing, please contact support@quantumnous.com
 */
-export { CTA } from './sections/cta'
-export { Features } from './sections/features'
-export { Hero } from './sections/hero'
-export { HowItWorks } from './sections/how-it-works'
-export { PricingOverview } from './sections/pricing-overview'
-export { Stats } from './sections/stats'
+
+export const PUBLIC_SUPPORT_EMAIL = 'support@quantumnous.com'
+export const PUBLIC_SUPPORT_MAILTO = `mailto:${PUBLIC_SUPPORT_EMAIL}`
+export const PUBLIC_PRICING_ANCHOR = 'pricing'

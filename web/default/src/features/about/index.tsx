@@ -17,8 +17,22 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
-import { Construction } from 'lucide-react'
+import {
+  ArrowRight,
+  BarChart3,
+  KeyRound,
+  Mail,
+  Route,
+  Users,
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import {
+  PUBLIC_PRICING_ANCHOR,
+  PUBLIC_SUPPORT_EMAIL,
+  PUBLIC_SUPPORT_MAILTO,
+} from '@/lib/public-compliance'
+import { useSystemConfig } from '@/hooks/use-system-config'
+import { Button } from '@/components/ui/button'
 import { Markdown } from '@/components/ui/markdown'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PublicLayout } from '@/components/layout'
@@ -39,83 +53,108 @@ function isLikelyHtml(value: string) {
 
 function EmptyAboutState() {
   const { t } = useTranslation()
-  const currentYear = new Date().getFullYear()
+  const { systemName } = useSystemConfig()
+  const audiences = [
+    {
+      title: t('Developers building AI apps'),
+      description: t(
+        'Use OpenAI-compatible routes to connect chat, agent, and automation clients without rewriting every integration.'
+      ),
+      icon: <Route className='size-5' />,
+    },
+    {
+      title: t('Platform operators'),
+      description: t(
+        'Manage channels, API keys, rate limits, quotas, and routing policies from one operational console.'
+      ),
+      icon: <KeyRound className='size-5' />,
+    },
+    {
+      title: t('Teams watching cost and reliability'),
+      description: t(
+        'Track model usage, request logs, billing records, and upstream health before costs drift.'
+      ),
+      icon: <BarChart3 className='size-5' />,
+    },
+  ]
 
   return (
-    <div className='flex min-h-[60vh] items-center justify-center p-8'>
-      <div className='max-w-2xl space-y-6 text-center'>
-        <div className='flex justify-center'>
-          <Construction className='text-muted-foreground h-24 w-24' />
+    <div className='mx-auto max-w-6xl px-6 py-24'>
+      <div className='grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-center'>
+        <div className='space-y-6'>
+          <div className='space-y-4'>
+            <p className='text-muted-foreground text-xs font-medium tracking-widest uppercase'>
+              {t('Product Introduction')}
+            </p>
+            <h1 className='text-3xl leading-tight font-bold tracking-tight md:text-5xl'>
+              {t('{{product}} helps teams operate AI APIs with control', {
+                product: systemName,
+              })}
+            </h1>
+            <p className='text-muted-foreground text-base leading-relaxed md:text-lg'>
+              {t(
+                'Route requests across providers, manage user access, observe model usage, and expose billing information from a single self-hostable gateway.'
+              )}
+            </p>
+          </div>
+
+          <div className='flex flex-wrap gap-3'>
+            <Button className='rounded-lg' render={<a href='/sign-up' />}>
+              {t('Create an account')}
+              <ArrowRight className='size-4' />
+            </Button>
+            <Button
+              variant='outline'
+              className='rounded-lg'
+              render={<a href={`/#${PUBLIC_PRICING_ANCHOR}`} />}
+            >
+              {t('View pricing')}
+            </Button>
+          </div>
+
+          <div className='text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-2 text-sm'>
+            <span>{t('Customer support:')}</span>
+            <a
+              href={PUBLIC_SUPPORT_MAILTO}
+              className='text-primary inline-flex items-center gap-1.5 font-medium underline underline-offset-4'
+            >
+              <Mail className='size-4' />
+              {PUBLIC_SUPPORT_EMAIL}
+            </a>
+          </div>
         </div>
-        <div className='space-y-2'>
-          <h2 className='text-2xl font-bold'>{t('No About Content Set')}</h2>
-          <p className='text-muted-foreground'>
-            {t(
-              'The administrator has not configured any about content yet. You can set it in the settings page, supporting HTML or URL.'
-            )}
-          </p>
-        </div>
-        <div className='space-y-4 text-sm'>
-          <p>
-            {t('New API Project Repository:')}{' '}
-            <a
-              href='https://github.com/QuantumNous/new-api'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
+
+        <div className='grid gap-4'>
+          {audiences.map((item) => (
+            <div
+              key={item.title}
+              className='border-border/50 bg-muted/20 flex gap-4 rounded-lg border p-5'
             >
-              {t('https://github.com/QuantumNous/new-api')}
-            </a>
-          </p>
-          <p className='text-muted-foreground'>
-            <a
-              href='https://github.com/QuantumNous/new-api'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('NewAPI')}
-            </a>{' '}
-            © {currentYear}{' '}
-            <a
-              href='https://github.com/QuantumNous'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('QuantumNous')}
-            </a>{' '}
-            {t('| Based on')}{' '}
-            <a
-              href='https://github.com/songquanpeng/one-api'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('One API')}
-            </a>{' '}
-            © 2023{' '}
-            <a
-              href='https://github.com/songquanpeng'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('JustSong')}
-            </a>
-          </p>
-          <p className='text-muted-foreground'>
-            {t('This project must be used in compliance with the')}{' '}
-            <a
-              href='https://github.com/QuantumNous/new-api/blob/main/LICENSE'
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-primary hover:underline'
-            >
-              {t('AGPL v3.0 License')}
-            </a>
-            .
-          </p>
+              <div className='bg-background text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-lg border'>
+                {item.icon}
+              </div>
+              <div className='space-y-1.5'>
+                <h2 className='text-base font-semibold'>{item.title}</h2>
+                <p className='text-muted-foreground text-sm leading-relaxed'>
+                  {item.description}
+                </p>
+              </div>
+            </div>
+          ))}
+
+          <div className='border-border/50 bg-background rounded-lg border p-5'>
+            <div className='mb-2 flex items-center gap-2'>
+              <Users className='text-muted-foreground size-5' />
+              <h2 className='text-base font-semibold'>
+                {t('How registration works')}
+              </h2>
+            </div>
+            <p className='text-muted-foreground text-sm leading-relaxed'>
+              {t(
+                'Create an account, review the public pricing and legal terms, then use the console to create API keys, choose available models, and monitor usage.'
+              )}
+            </p>
+          </div>
         </div>
       </div>
     </div>

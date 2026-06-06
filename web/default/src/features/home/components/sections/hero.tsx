@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { PUBLIC_PRICING_ANCHOR } from '@/lib/public-compliance'
 import { Button } from '@/components/ui/button'
 import { HeroTerminalDemo } from '../hero-terminal-demo'
 
@@ -66,7 +67,7 @@ export function Hero(props: HeroProps) {
           style={{ animationDelay: '80ms' }}
         >
           {t(
-            'Power AI applications, manage digital assets, connect the Future'
+            'A self-hostable AI API gateway for developers, product teams, and platform operators to route model requests, manage access, monitor usage, and control spend.'
           )}
         </p>
         <div
@@ -93,7 +94,7 @@ export function Hero(props: HeroProps) {
               <Button
                 variant='outline'
                 className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'
-                render={<Link to='/pricing' />}
+                render={<a href={`#${PUBLIC_PRICING_ANCHOR}`} />}
               >
                 {t('View Pricing')}
               </Button>

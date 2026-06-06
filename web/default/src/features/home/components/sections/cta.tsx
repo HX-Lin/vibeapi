@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { ArrowRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { PUBLIC_PRICING_ANCHOR } from '@/lib/public-compliance'
 import { Button } from '@/components/ui/button'
 import { AnimateInView } from '@/components/animate-in-view'
 
@@ -72,7 +73,7 @@ export function CTA(props: CTAProps) {
           <Button
             variant='outline'
             className='border-border/50 hover:border-border hover:bg-muted/50 rounded-lg'
-            render={<Link to='/pricing' />}
+            render={<a href={`#${PUBLIC_PRICING_ANCHOR}`} />}
           >
             {t('View Pricing')}
           </Button>

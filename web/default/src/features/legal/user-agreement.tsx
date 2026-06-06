@@ -17,6 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 import { useTranslation } from 'react-i18next'
+import { DefaultUserAgreement } from './default-documents'
 import { getUserAgreement } from './api'
 import { LegalDocument } from './legal-document'
 
@@ -30,6 +31,7 @@ export function UserAgreement() {
       emptyMessage={t(
         'The administrator has not configured a user agreement yet.'
       )}
+      fallbackContent={<DefaultUserAgreement />}
     />
   )
 }

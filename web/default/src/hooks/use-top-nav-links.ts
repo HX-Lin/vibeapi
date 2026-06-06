@@ -20,6 +20,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuthStore } from '@/stores/auth-store'
 import { parseHeaderNavModulesFromStatus } from '@/lib/nav-modules'
+import { PUBLIC_PRICING_ANCHOR } from '@/lib/public-compliance'
 import { useStatus } from '@/hooks/use-status'
 
 export type TopNavLink = {
@@ -65,6 +66,11 @@ export function useTopNavLinks(): TopNavLink[] {
   if (modules?.home !== false) {
     links.push({ title: t('Home'), href: '/' })
   }
+
+  links.push({
+    title: t('Pricing'),
+    href: `/#${PUBLIC_PRICING_ANCHOR}`,
+  })
 
   // Console -> /dashboard (new console path)
   if (modules?.console !== false) {

@@ -29,39 +29,24 @@ interface TermsFooterProps {
 export function TermsFooter({
   variant = 'sign-in',
   className,
-  status,
+  status: _status,
 }: TermsFooterProps) {
   const { t } = useTranslation()
   const text =
     variant === 'sign-in'
-      ? 'By clicking sign in, you agree to our'
-      : 'By creating an account, you agree to our'
-
-  const hasUserAgreement = Boolean(status?.user_agreement_enabled)
-  const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
-
-  if (!hasUserAgreement && !hasPrivacyPolicy) {
-    return null
-  }
+      ? t('By clicking sign in, you agree to our')
+      : t('By creating an account, you agree to our')
 
   const agreementLink = {
-    label: 'User Agreement',
+    label: t('User Agreement'),
     href: '/user-agreement',
   }
   const privacyLink = {
-    label: 'Privacy Policy',
+    label: t('Privacy Policy'),
     href: '/privacy-policy',
   }
 
-  const activeLinks =
-    hasUserAgreement || hasPrivacyPolicy
-      ? ([
-          hasUserAgreement ? agreementLink : null,
-          hasPrivacyPolicy ? privacyLink : null,
-        ].filter(Boolean) as Array<{ label: string; href: string }>)
-      : [agreementLink, privacyLink]
-
-  const [firstLink, secondLink] = activeLinks
+  const [firstLink, secondLink] = [agreementLink, privacyLink]
 
   return (
     <p className={cn('text-muted-foreground text-center text-xs', className)}>

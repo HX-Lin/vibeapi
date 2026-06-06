@@ -18,6 +18,7 @@ For commercial licensing, please contact support@quantumnous.com
 */
 import { useQuery } from '@tanstack/react-query'
 import { FileWarning } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -31,6 +32,7 @@ type LegalDocumentProps = {
   queryKey: string
   fetchDocument: () => Promise<LegalDocumentResponse>
   emptyMessage: string
+  fallbackContent?: ReactNode
 }
 
 function isValidUrl(value: string) {
@@ -51,6 +53,7 @@ export function LegalDocument({
   queryKey,
   fetchDocument,
   emptyMessage,
+  fallbackContent,
 }: LegalDocumentProps) {
   const { t } = useTranslation()
   const { data, isLoading } = useQuery({
@@ -79,6 +82,24 @@ export function LegalDocument({
   }
 
   if (!success || !hasContent) {
+    if (fallbackContent) {
+      return (
+        <PublicLayout>
+          <div className='mx-auto max-w-4xl space-y-6 py-12'>
+            <div className='space-y-2'>
+              <h1 className='text-3xl font-semibold tracking-tight'>{title}</h1>
+              <p className='text-muted-foreground text-sm'>
+                {t(
+                  'This default public document is shown because no custom document has been configured.'
+                )}
+              </p>
+            </div>
+            {fallbackContent}
+          </div>
+        </PublicLayout>
+      )
+    }
+
     return (
       <PublicLayout>
         <div className='mx-auto max-w-2xl py-12'>

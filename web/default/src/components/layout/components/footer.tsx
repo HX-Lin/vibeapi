@@ -19,8 +19,12 @@ For commercial licensing, please contact support@quantumnous.com
 import { Fragment, useMemo } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
+import {
+  PUBLIC_PRICING_ANCHOR,
+  PUBLIC_SUPPORT_EMAIL,
+  PUBLIC_SUPPORT_MAILTO,
+} from '@/lib/public-compliance'
 import { cn } from '@/lib/utils'
-import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
 
 interface FooterLink {
@@ -75,30 +79,27 @@ function FooterLinkItem(props: { link: FooterLink }) {
   )
 }
 
-// Renders User Agreement / Privacy Policy links inline with the parent's
-// copyright row when either is configured in System Settings → Site. Emits
-// fragmented siblings so the parent flex container's gap controls spacing.
-function LegalLinks(props: { leadingSeparator?: boolean }) {
+// Emits fragmented siblings so the parent flex container's gap controls spacing.
+function FooterComplianceLinks(props: { leadingSeparator?: boolean }) {
   const { t } = useTranslation()
-  const { status } = useStatus()
-  const items: { key: string; label: string; href: string }[] = []
-  if (status?.user_agreement_enabled) {
-    items.push({
+  const items: { key: string; label: string; href: string }[] = [
+    {
+      key: 'pricing',
+      label: t('Pricing'),
+      href: `/#${PUBLIC_PRICING_ANCHOR}`,
+    },
+    {
       key: 'user-agreement',
       label: t('User Agreement'),
       href: '/user-agreement',
-    })
-  }
-  if (status?.privacy_policy_enabled) {
-    items.push({
+    },
+    {
       key: 'privacy-policy',
       label: t('Privacy Policy'),
       href: '/privacy-policy',
-    })
-  }
-  if (items.length === 0) {
-    return null
-  }
+    },
+  ]
+
   return (
     <>
       {items.map((item, index) => (
@@ -230,13 +231,19 @@ export function Footer(props: FooterProps) {
         )}
       >
         <div className='mx-auto w-full max-w-6xl px-6 py-5'>
-          <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:flex-row sm:px-5'>
+          <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-lg border px-4 py-4 backdrop-blur-sm sm:flex-row sm:px-5'>
             <div
               className='custom-footer text-muted-foreground min-w-0 text-center text-sm sm:text-left'
               dangerouslySetInnerHTML={{ __html: footerHtml }}
             />
             <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
-              <LegalLinks />
+              <a
+                href={PUBLIC_SUPPORT_MAILTO}
+                className='hover:text-foreground transition-colors duration-200'
+              >
+                {PUBLIC_SUPPORT_EMAIL}
+              </a>
+              <FooterComplianceLinks leadingSeparator />
               <ProjectAttribution currentYear={currentYear} inline />
             </div>
           </div>
@@ -265,6 +272,15 @@ export function Footer(props: FooterProps) {
             </Link>
             <p className='text-muted-foreground/60 mt-3 max-w-[200px] text-xs leading-relaxed'>
               {t('Powerful API Management Platform')}
+            </p>
+            <p className='text-muted-foreground/60 mt-3 text-xs leading-relaxed'>
+              {t('Customer support:')}{' '}
+              <a
+                href={PUBLIC_SUPPORT_MAILTO}
+                className='hover:text-foreground font-medium transition-colors'
+              >
+                {PUBLIC_SUPPORT_EMAIL}
+              </a>
             </p>
           </div>
 
@@ -297,7 +313,7 @@ export function Footer(props: FooterProps) {
               &copy; {currentYear} {displayName}.{' '}
               {props.copyright ?? t('footer.defaultCopyright')}
             </span>
-            <LegalLinks leadingSeparator />
+            <FooterComplianceLinks leadingSeparator />
           </div>
           <ProjectAttribution currentYear={currentYear} />
         </div>

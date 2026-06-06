@@ -51,6 +51,9 @@ import { SettingsSection } from '../components/settings-section'
 import { useSettingsForm } from '../hooks/use-settings-form'
 import { useUpdateOption } from '../hooks/use-update-option'
 
+const LANDING_PRICING_TABLE_EXAMPLE =
+  '[{"name":"Starter","price":"$0/month","description":"Self-hosted gateway for small teams","features":["Bring your own provider keys","Basic usage analytics"],"cta":"Create an account"}]'
+
 const _systemInfoSchema = z.object({
   theme: z.object({
     frontend: z.enum(['default', 'classic']),
@@ -61,6 +64,9 @@ const _systemInfoSchema = z.object({
   Footer: z.string().optional(),
   About: z.string().optional(),
   HomePageContent: z.string().optional(),
+  landing_pricing: z.object({
+    table: z.string().optional(),
+  }),
   legal: z.object({
     user_agreement: z.string().optional(),
     privacy_policy: z.string().optional(),
@@ -78,6 +84,31 @@ function normalizeValue(value: unknown): string {
   return typeof value === 'string' ? value : String(value)
 }
 
+function isValidLandingPricingTable(value: string | undefined): boolean {
+  if (!value || value.trim().length === 0) return true
+
+  try {
+    const parsed = JSON.parse(value) as unknown
+    if (!Array.isArray(parsed)) return false
+
+    return parsed.every((item) => {
+      if (!item || typeof item !== 'object') return false
+      const row = item as Record<string, unknown>
+      return (
+        typeof row.name === 'string' &&
+        row.name.trim().length > 0 &&
+        typeof row.price === 'string' &&
+        row.price.trim().length > 0 &&
+        typeof row.description === 'string' &&
+        row.description.trim().length > 0 &&
+        (Array.isArray(row.features) || typeof row.features === 'string')
+      )
+    })
+  } catch {
+    return false
+  }
+}
+
 export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
   const { t } = useTranslation()
   const updateOption = useUpdateOption()
@@ -93,6 +124,9 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     Footer: normalizeValue(defaultValues.Footer),
     About: normalizeValue(defaultValues.About),
     HomePageContent: normalizeValue(defaultValues.HomePageContent),
+    landing_pricing: {
+      table: normalizeValue(defaultValues.landing_pricing?.table),
+    },
     legal: {
       user_agreement: normalizeValue(defaultValues.legal?.user_agreement),
       privacy_policy: normalizeValue(defaultValues.legal?.privacy_policy),
@@ -111,6 +145,16 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
     Footer: z.string().optional(),
     About: z.string().optional(),
     HomePageContent: z.string().optional(),
+    landing_pricing: z.object({
+      table: z
+        .string()
+        .optional()
+        .refine(isValidLandingPricingTable, {
+          message: t(
+            'Enter a valid JSON array for the landing page pricing table'
+          ),
+        }),
+    }),
     legal: z.object({
       user_agreement: z.string().optional(),
       privacy_policy: z.string().optional(),
@@ -321,6 +365,31 @@ export function SystemInfoSection({ defaultValues }: SystemInfoSectionProps) {
                       <FormDescription>
                         {t(
                           'Content displayed on the home page (supports Markdown)'
+                        )}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </SettingsFormGridItem>
+
+              <SettingsFormGridItem span='full'>
+                <FormField
+                  control={form.control}
+                  name='landing_pricing.table'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('Landing Page Pricing Table')}</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder={LANDING_PRICING_TABLE_EXAMPLE}
+                          rows={10}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        {t(
+                          'Optional JSON pricing table shown on the public landing page. Leave empty to use the default public pricing table.'
                         )}
                       </FormDescription>
                       <FormMessage />
