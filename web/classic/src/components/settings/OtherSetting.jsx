@@ -36,6 +36,35 @@ import Text from '@douyinfe/semi-ui/lib/es/typography/text';
 
 const LEGAL_USER_AGREEMENT_KEY = 'legal.user_agreement';
 const LEGAL_PRIVACY_POLICY_KEY = 'legal.privacy_policy';
+const LANDING_PRICING_TABLE_KEY = 'landing_pricing.table';
+const LANDING_PRICING_TABLE_EXAMPLE =
+  '[{"name":"Starter","price":"$0/month","description":"Self-hosted gateway for small teams","features":["Bring your own provider keys","Basic usage analytics"],"cta":"Create an account"}]';
+
+const isValidLandingPricingTable = (value) => {
+  if (!value || value.trim().length === 0) return true;
+
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return false;
+
+    return parsed.every((item) => {
+      if (!item || typeof item !== 'object') return false;
+      return (
+        typeof item.name === 'string' &&
+        item.name.trim().length > 0 &&
+        typeof item.price === 'string' &&
+        item.price.trim().length > 0 &&
+        typeof item.description === 'string' &&
+        item.description.trim().length > 0 &&
+        (item.features === undefined ||
+          Array.isArray(item.features) ||
+          typeof item.features === 'string')
+      );
+    });
+  } catch {
+    return false;
+  }
+};
 
 const OtherSetting = () => {
   const { t } = useTranslation();
@@ -48,6 +77,7 @@ const OtherSetting = () => {
     Footer: '',
     About: '',
     HomePageContent: '',
+    [LANDING_PRICING_TABLE_KEY]: '',
   });
   let [loading, setLoading] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -79,6 +109,7 @@ const OtherSetting = () => {
     SystemName: false,
     Logo: false,
     HomePageContent: false,
+    [LANDING_PRICING_TABLE_KEY]: false,
     About: false,
     Footer: false,
     CheckUpdate: false,
@@ -199,6 +230,43 @@ const OtherSetting = () => {
       setLoadingInput((loadingInput) => ({
         ...loadingInput,
         HomePageContent: false,
+      }));
+    }
+  };
+  // 个性化设置 - 入口页价格表
+  const submitLandingPricingTable = async () => {
+    const value = inputs[LANDING_PRICING_TABLE_KEY] || '';
+    if (!isValidLandingPricingTable(value)) {
+      showError(t('请输入有效的入口页价格表 JSON 数组'));
+      return;
+    }
+
+    try {
+      setLoadingInput((loadingInput) => ({
+        ...loadingInput,
+        [LANDING_PRICING_TABLE_KEY]: true,
+      }));
+      const res = await API.put('/api/option/', {
+        key: LANDING_PRICING_TABLE_KEY,
+        value,
+      });
+      const { success, message } = res.data;
+      if (!success) {
+        showError(message);
+        return;
+      }
+      setInputs((inputs) => ({
+        ...inputs,
+        [LANDING_PRICING_TABLE_KEY]: value,
+      }));
+      showSuccess(t('入口页价格表已更新'));
+    } catch (error) {
+      console.error(t('入口页价格表更新失败'), error);
+      showError(t('入口页价格表更新失败'));
+    } finally {
+      setLoadingInput((loadingInput) => ({
+        ...loadingInput,
+        [LANDING_PRICING_TABLE_KEY]: false,
       }));
     }
   };
@@ -505,6 +573,23 @@ const OtherSetting = () => {
                 loading={loadingInput['HomePageContent']}
               >
                 {t('设置首页内容')}
+              </Button>
+              <Form.TextArea
+                label={t('入口页价格表')}
+                placeholder={LANDING_PRICING_TABLE_EXAMPLE}
+                field={LANDING_PRICING_TABLE_KEY}
+                onChange={handleInputChange}
+                style={{ fontFamily: 'JetBrains Mono, Consolas' }}
+                autosize={{ minRows: 6, maxRows: 12 }}
+                helpText={t(
+                  '在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。',
+                )}
+              />
+              <Button
+                onClick={submitLandingPricingTable}
+                loading={loadingInput[LANDING_PRICING_TABLE_KEY]}
+              >
+                {t('设置入口页价格表')}
               </Button>
               <Form.TextArea
                 label={t('关于')}

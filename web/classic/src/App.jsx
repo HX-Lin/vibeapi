@@ -18,7 +18,13 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { lazy, Suspense, useContext, useMemo } from 'react';
-import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import {
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useParams,
+} from 'react-router-dom';
 import Loading from './components/common/ui/Loading';
 import { AuthRedirect, PrivateRoute, AdminRoute } from './helpers/auth';
 import NotFound from './pages/NotFound';
@@ -48,11 +54,18 @@ const HelpDocPage = lazy(() => import('./pages/HelpCenter/HelpDocPage'));
 const MjLog = lazy(() => import('./pages/MjLog'));
 const TaskLog = lazy(() => import('./pages/TaskLog'));
 const About = lazy(() => import('./pages/About'));
-const PersonalSetting = lazy(() => import('./components/settings/PersonalSetting'));
+const Landing = lazy(() => import('./pages/Landing'));
+const PersonalSetting = lazy(
+  () => import('./components/settings/PersonalSetting'),
+);
 const RegisterForm = lazy(() => import('./components/auth/RegisterForm'));
 const LoginForm = lazy(() => import('./components/auth/LoginForm'));
-const PasswordResetForm = lazy(() => import('./components/auth/PasswordResetForm'));
-const PasswordResetConfirm = lazy(() => import('./components/auth/PasswordResetConfirm'));
+const PasswordResetForm = lazy(
+  () => import('./components/auth/PasswordResetForm'),
+);
+const PasswordResetConfirm = lazy(
+  () => import('./components/auth/PasswordResetConfirm'),
+);
 const OAuth2Callback = lazy(() => import('./components/auth/OAuth2Callback'));
 
 function DynamicOAuth2Callback() {
@@ -89,7 +102,14 @@ function App() {
   return (
     <SetupCheck>
       <Routes>
-        <Route path='/' element={<Navigate to='/console' replace />} />
+        <Route
+          path='/'
+          element={
+            <Suspense fallback={<Loading></Loading>} key={location.pathname}>
+              <Landing />
+            </Suspense>
+          }
+        />
         <Route
           path='/setup'
           element={
@@ -364,7 +384,10 @@ function App() {
             )
           }
         />
-        <Route path='/pricing' element={<Navigate to='/console/pricing' replace />} />
+        <Route
+          path='/pricing'
+          element={<Navigate to='/console/pricing' replace />}
+        />
         <Route
           path='/about'
           element={

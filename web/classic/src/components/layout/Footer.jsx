@@ -18,10 +18,16 @@ For commercial licensing, please contact support@quantumnous.com
 */
 
 import React, { useEffect, useState, useMemo, useContext } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Typography } from '@douyinfe/semi-ui';
 import { getFooterHTML, getLogo, getSystemName } from '../../helpers/utils';
 import { StatusContext } from '../../context/Status';
+import {
+  PUBLIC_PRICING_ANCHOR,
+  PUBLIC_SUPPORT_EMAIL,
+  PUBLIC_SUPPORT_MAILTO,
+} from '../../lib/publicCompliance';
 
 const FooterBar = () => {
   const { t } = useTranslation();
@@ -39,6 +45,35 @@ const FooterBar = () => {
   };
 
   const currentYear = new Date().getFullYear();
+
+  const complianceLinks = (
+    <div className='flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm'>
+      <a
+        href={`/#${PUBLIC_PRICING_ANCHOR}`}
+        className='!text-semi-color-text-1 hover:!text-semi-color-primary'
+      >
+        {t('价格')}
+      </a>
+      <Link
+        to='/user-agreement'
+        className='!text-semi-color-text-1 hover:!text-semi-color-primary'
+      >
+        {t('用户协议')}
+      </Link>
+      <Link
+        to='/privacy-policy'
+        className='!text-semi-color-text-1 hover:!text-semi-color-primary'
+      >
+        {t('隐私政策')}
+      </Link>
+      <a
+        href={PUBLIC_SUPPORT_MAILTO}
+        className='!text-semi-color-text-1 hover:!text-semi-color-primary'
+      >
+        {PUBLIC_SUPPORT_EMAIL}
+      </a>
+    </div>
+  );
 
   const customFooter = useMemo(
     () => (
@@ -209,9 +244,10 @@ const FooterBar = () => {
             </a>
           </div>
         </div>
+        <div className='mt-4 w-full max-w-[1110px]'>{complianceLinks}</div>
       </footer>
     ),
-    [logo, systemName, t, currentYear, isDemoSiteMode],
+    [logo, systemName, t, currentYear, isDemoSiteMode, complianceLinks],
   );
 
   useEffect(() => {
@@ -221,7 +257,7 @@ const FooterBar = () => {
   return (
     <div className='w-full'>
       {footer ? (
-        <footer className='relative h-auto py-4 px-6 md:px-24 w-full flex items-center justify-center overflow-hidden'>
+        <footer className='relative h-auto py-4 px-6 md:px-24 w-full flex flex-col items-center justify-center overflow-hidden'>
           <div className='flex flex-col md:flex-row items-center justify-between w-full max-w-[1110px] gap-4'>
             <div
               className='custom-footer na-cb6feafeb3990c78 text-sm !text-semi-color-text-1'
@@ -241,6 +277,7 @@ const FooterBar = () => {
               </a>
             </div>
           </div>
+          <div className='mt-4'>{complianceLinks}</div>
         </footer>
       ) : (
         customFooter

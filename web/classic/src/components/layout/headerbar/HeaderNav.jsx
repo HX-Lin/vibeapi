@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 // 路径前缀映射：用于高亮当前所在区域
@@ -27,8 +27,11 @@ const PATH_PREFIX_MAP = {
 
 const HeaderNav = ({ headerNavModules, docsLink, t }) => {
   const location = useLocation();
-
-  if (!headerNavModules) return <div className='flex-1' />;
+  const modules = headerNavModules || {
+    home: true,
+    docs: true,
+    about: true,
+  };
 
   // Define navigation items with their config keys and link targets
   const navItems = [
@@ -38,6 +41,12 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
       to: '/',
       external: false,
       exactMatch: true, // 首页仅精确匹配 /
+    },
+    {
+      key: 'pricing',
+      label: t('价格'),
+      to: '/#pricing',
+      external: false,
     },
     {
       key: 'docs',
@@ -51,24 +60,41 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
       to: '/about',
       external: false,
     },
+    {
+      key: 'privacy-policy',
+      label: t('隐私政策'),
+      to: '/privacy-policy',
+      external: false,
+    },
+    {
+      key: 'user-agreement',
+      label: t('用户协议'),
+      to: '/user-agreement',
+      external: false,
+    },
   ];
 
   // Filter items based on headerNavModules config
-  const filteredItems = useMemo(() => {
-    return navItems
-      .filter((item) => {
-        const moduleConfig = headerNavModules[item.key];
-        if (moduleConfig === undefined || moduleConfig === null) return false;
-        if (typeof moduleConfig === 'boolean') return moduleConfig;
-        if (typeof moduleConfig === 'object') return moduleConfig.enabled !== false;
-        return false;
-      })
-      .filter((item) => {
-        // 过滤掉没有文档链接的 docs 项
-        if (item.key === 'docs' && !docsLink) return false;
+  const filteredItems = navItems
+    .filter((item) => {
+      const moduleConfig = modules[item.key];
+      if (
+        item.key === 'pricing' ||
+        item.key === 'privacy-policy' ||
+        item.key === 'user-agreement'
+      ) {
         return true;
-      });
-  }, [headerNavModules, docsLink]);
+      }
+      if (moduleConfig === undefined || moduleConfig === null) return false;
+      if (typeof moduleConfig === 'boolean') return moduleConfig;
+      if (typeof moduleConfig === 'object') return moduleConfig.enabled !== false;
+      return false;
+    })
+    .filter((item) => {
+      // 过滤掉没有文档链接的 docs 项
+      if (item.key === 'docs' && !docsLink) return false;
+      return true;
+    });
 
   if (filteredItems.length === 0) return <div className='flex-1' />;
 
@@ -77,8 +103,10 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
     if (item.external) return false;
     if (item.exactMatch) return location.pathname === item.to;
     // 前缀匹配：/console 匹配 /console/xxx
-    return location.pathname === item.to ||
-      location.pathname.startsWith(item.to + '/');
+    return (
+      location.pathname === item.to ||
+      location.pathname.startsWith(item.to + '/')
+    );
   };
 
   return (
@@ -87,13 +115,13 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
         const isActive = isPathActive(item);
         const className = `header-nav-link${isActive ? ' header-nav-link-active' : ''}`;
 
-        if (item.external) {
+        if (item.external || item.key === 'pricing') {
           return (
             <a
               key={item.key}
               href={item.to}
-              target='_blank'
-              rel='noopener noreferrer'
+              target={item.external ? '_blank' : undefined}
+              rel={item.external ? 'noopener noreferrer' : undefined}
               className='header-nav-link'
             >
               {item.label}
@@ -102,11 +130,7 @@ const HeaderNav = ({ headerNavModules, docsLink, t }) => {
         }
 
         return (
-          <Link
-            key={item.key}
-            to={item.to}
-            className={className}
-          >
+          <Link key={item.key} to={item.to} className={className}>
             {item.label}
           </Link>
         );

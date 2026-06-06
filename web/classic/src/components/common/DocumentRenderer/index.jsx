@@ -64,8 +64,15 @@ const sanitizeHtml = (html) => {
  * @param {string} title - 文档标题
  * @param {string} cacheKey - 本地存储缓存键
  * @param {string} emptyMessage - 空内容时的提示消息
+ * @param {string} fallbackContent - 后台未配置时展示的默认公开内容
  */
-const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
+const DocumentRenderer = ({
+  apiEndpoint,
+  title,
+  cacheKey,
+  emptyMessage,
+  fallbackContent = '',
+}) => {
   const { t } = useTranslation();
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(true);
@@ -84,13 +91,18 @@ const DocumentRenderer = ({ apiEndpoint, title, cacheKey, emptyMessage }) => {
         setContent(data);
         localStorage.setItem(cacheKey, data);
       } else {
-        if (!cachedContent) {
+        if (fallbackContent) {
+          setContent(fallbackContent);
+          localStorage.removeItem(cacheKey);
+        } else if (!cachedContent) {
           showError(message || emptyMessage);
           setContent('');
         }
       }
     } catch (error) {
-      if (!cachedContent) {
+      if (fallbackContent) {
+        setContent(fallbackContent);
+      } else if (!cachedContent) {
         showError(emptyMessage);
         setContent('');
       }
