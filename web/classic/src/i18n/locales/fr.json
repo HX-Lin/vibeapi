@@ -3804,6 +3804,13 @@
     "入口页价格表已更新": "Le tableau des prix de la page d’accueil a été mis à jour",
     "入口页价格表更新失败": "Échec de la mise à jour du tableau des prix de la page d’accueil",
     "设置入口页价格表": "Définir le tableau des prix de la page d’accueil",
-    "在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。": "Saisissez ici un tableau JSON pour les prix de la page d’accueil. Laissez vide pour utiliser le tableau public par défaut. Chaque élément doit contenir name, price et description ; features peut être un tableau ou du texte séparé par des sauts de ligne, et cta est facultatif."
+    "在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。": "Saisissez ici un tableau JSON pour les prix de la page d’accueil. Laissez vide pour utiliser le tableau public par défaut. Chaque élément doit contenir name, price et description ; features peut être un tableau ou du texte séparé par des sauts de ligne, et cta est facultatif.",
+    "客服邮箱": "E-mail de support",
+    "在此输入客服支持邮箱地址": "Saisissez ici l’adresse e-mail du support client",
+    "公开首页、页脚、隐私政策和用户协议会显示这个客服邮箱。": "La page d’accueil publique, le pied de page, la politique de confidentialité et les conditions d’utilisation afficheront cet e-mail de support.",
+    "设置客服邮箱": "Définir l’e-mail de support",
+    "请输入有效的客服邮箱地址": "Saisissez une adresse e-mail de support valide",
+    "客服邮箱已更新": "E-mail de support mis à jour",
+    "客服邮箱更新失败": "Échec de la mise à jour de l’e-mail de support"
   }
 }

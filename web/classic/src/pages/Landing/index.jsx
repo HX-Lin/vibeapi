@@ -35,8 +35,8 @@ import { StatusContext } from '../../context/Status';
 import LazyMarkdownRenderer from '../../components/common/markdown/LazyMarkdownRenderer';
 import {
   PUBLIC_PRICING_ANCHOR,
-  PUBLIC_SUPPORT_EMAIL,
-  PUBLIC_SUPPORT_MAILTO,
+  getPublicSupportEmail,
+  getPublicSupportMailto,
 } from '../../lib/publicCompliance';
 
 const { Title, Text } = Typography;
@@ -135,6 +135,8 @@ const Landing = () => {
   const status = statusState?.status || {};
   const systemName = getSystemName();
   const logo = getLogo();
+  const supportEmail = getPublicSupportEmail(status);
+  const supportMailto = getPublicSupportMailto(supportEmail);
   const canRegister =
     !status?.self_use_mode_enabled && status?.register_enabled !== false;
 
@@ -260,11 +262,11 @@ const Landing = () => {
             </div>
             <div className='mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-semi-color-text-2'>
               <a
-                href={PUBLIC_SUPPORT_MAILTO}
+                href={supportMailto}
                 className='inline-flex items-center gap-1.5 text-semi-color-primary hover:underline'
               >
                 <Mail size={16} />
-                {PUBLIC_SUPPORT_EMAIL}
+                {supportEmail}
               </a>
               <Link
                 to='/privacy-policy'
@@ -390,10 +392,10 @@ const Landing = () => {
             <Text className='block !text-sm !leading-6 !text-semi-color-text-2'>
               {t('如需协助选择方案或了解企业部署，请联系')}{' '}
               <a
-                href={PUBLIC_SUPPORT_MAILTO}
+                href={supportMailto}
                 className='text-semi-color-primary hover:underline'
               >
-                {PUBLIC_SUPPORT_EMAIL}
+                {supportEmail}
               </a>
               。
             </Text>

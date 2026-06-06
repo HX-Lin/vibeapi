@@ -37,6 +37,7 @@ import Text from '@douyinfe/semi-ui/lib/es/typography/text';
 const LEGAL_USER_AGREEMENT_KEY = 'legal.user_agreement';
 const LEGAL_PRIVACY_POLICY_KEY = 'legal.privacy_policy';
 const LANDING_PRICING_TABLE_KEY = 'landing_pricing.table';
+const SUPPORT_EMAIL_KEY = 'support.email';
 const LANDING_PRICING_TABLE_EXAMPLE =
   '[{"name":"Starter","price":"$0/month","description":"Self-hosted gateway for small teams","features":["Bring your own provider keys","Basic usage analytics"],"cta":"Create an account"}]';
 
@@ -66,6 +67,11 @@ const isValidLandingPricingTable = (value) => {
   }
 };
 
+const isValidSupportEmail = (value) => {
+  if (!value || !value.trim()) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+};
+
 const OtherSetting = () => {
   const { t } = useTranslation();
   let [inputs, setInputs] = useState({
@@ -78,6 +84,7 @@ const OtherSetting = () => {
     About: '',
     HomePageContent: '',
     [LANDING_PRICING_TABLE_KEY]: '',
+    [SUPPORT_EMAIL_KEY]: '',
   });
   let [loading, setLoading] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -110,6 +117,7 @@ const OtherSetting = () => {
     Logo: false,
     HomePageContent: false,
     [LANDING_PRICING_TABLE_KEY]: false,
+    [SUPPORT_EMAIL_KEY]: false,
     About: false,
     Footer: false,
     CheckUpdate: false,
@@ -212,6 +220,49 @@ const OtherSetting = () => {
       showError('Logo 更新失败');
     } finally {
       setLoadingInput((loadingInput) => ({ ...loadingInput, Logo: false }));
+    }
+  };
+  // 个性化设置 - 客服邮箱
+  const submitSupportEmail = async () => {
+    const value = (inputs[SUPPORT_EMAIL_KEY] || '').trim();
+    if (!isValidSupportEmail(value)) {
+      showError(t('请输入有效的客服邮箱地址'));
+      return;
+    }
+
+    try {
+      setLoadingInput((loadingInput) => ({
+        ...loadingInput,
+        [SUPPORT_EMAIL_KEY]: true,
+      }));
+      const res = await API.put('/api/option/', {
+        key: SUPPORT_EMAIL_KEY,
+        value,
+      });
+      const { success, message } = res.data;
+      if (!success) {
+        showError(message);
+        return;
+      }
+      setInputs((inputs) => ({ ...inputs, [SUPPORT_EMAIL_KEY]: value }));
+      if (statusState?.status) {
+        statusDispatch({
+          type: 'set',
+          payload: {
+            ...statusState.status,
+            support_email: value,
+          },
+        });
+      }
+      showSuccess(t('客服邮箱已更新'));
+    } catch (error) {
+      console.error(t('客服邮箱更新失败'), error);
+      showError(t('客服邮箱更新失败'));
+    } finally {
+      setLoadingInput((loadingInput) => ({
+        ...loadingInput,
+        [SUPPORT_EMAIL_KEY]: false,
+      }));
     }
   };
   // 个性化设置 - 首页内容
@@ -557,6 +608,21 @@ const OtherSetting = () => {
               />
               <Button onClick={submitLogo} loading={loadingInput['Logo']}>
                 {t('设置 Logo')}
+              </Button>
+              <Form.Input
+                label={t('客服邮箱')}
+                placeholder={t('在此输入客服支持邮箱地址')}
+                field={SUPPORT_EMAIL_KEY}
+                onChange={handleInputChange}
+                helpText={t(
+                  '公开首页、页脚、隐私政策和用户协议会显示这个客服邮箱。',
+                )}
+              />
+              <Button
+                onClick={submitSupportEmail}
+                loading={loadingInput[SUPPORT_EMAIL_KEY]}
+              >
+                {t('设置客服邮箱')}
               </Button>
               <Form.TextArea
                 label={t('首页内容')}

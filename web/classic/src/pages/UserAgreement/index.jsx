@@ -17,15 +17,18 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import DocumentRenderer from '../../components/common/DocumentRenderer';
 import { getSystemName } from '../../helpers';
-import { PUBLIC_SUPPORT_EMAIL } from '../../lib/publicCompliance';
+import { StatusContext } from '../../context/Status';
+import { getPublicSupportEmail } from '../../lib/publicCompliance';
 
 const UserAgreement = () => {
   const { t } = useTranslation();
+  const [statusState] = useContext(StatusContext);
   const systemName = getSystemName();
+  const supportEmail = getPublicSupportEmail(statusState?.status);
   const fallbackContent = `# ${t('用户协议')}
 
 ${t('最后更新：2026 年 6 月 6 日')}
@@ -58,7 +61,7 @@ ${t('服务按当前配置提供，可能并非无错误或不中断。AI 模型
 
 ## ${t('隐私和支持')}
 
-${t('请查看隐私政策了解我们如何处理数据。如需支持，请联系：')} ${PUBLIC_SUPPORT_EMAIL}
+${t('请查看隐私政策了解我们如何处理数据。如需支持，请联系：')} ${supportEmail}
 `;
 
   return (

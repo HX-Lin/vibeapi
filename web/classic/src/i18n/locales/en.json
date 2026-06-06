@@ -3991,6 +3991,13 @@
     "入口页价格表已更新": "Landing page pricing table updated",
     "入口页价格表更新失败": "Failed to update landing page pricing table",
     "设置入口页价格表": "Set landing page pricing table",
-    "在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。": "Enter a landing page pricing table JSON array here. Leave it empty to use the default public pricing table. Each item requires name, price, and description; features can be an array or newline-separated text, and cta is optional."
+    "在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。": "Enter a landing page pricing table JSON array here. Leave it empty to use the default public pricing table. Each item requires name, price, and description; features can be an array or newline-separated text, and cta is optional.",
+    "客服邮箱": "Support email",
+    "在此输入客服支持邮箱地址": "Enter the customer support email address here",
+    "公开首页、页脚、隐私政策和用户协议会显示这个客服邮箱。": "The public homepage, footer, privacy policy, and user agreement will display this support email.",
+    "设置客服邮箱": "Set support email",
+    "请输入有效的客服邮箱地址": "Enter a valid support email address",
+    "客服邮箱已更新": "Support email updated",
+    "客服邮箱更新失败": "Failed to update support email"
   }
 }

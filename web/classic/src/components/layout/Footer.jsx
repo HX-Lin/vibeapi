@@ -25,8 +25,8 @@ import { getFooterHTML, getLogo, getSystemName } from '../../helpers/utils';
 import { StatusContext } from '../../context/Status';
 import {
   PUBLIC_PRICING_ANCHOR,
-  PUBLIC_SUPPORT_EMAIL,
-  PUBLIC_SUPPORT_MAILTO,
+  getPublicSupportEmail,
+  getPublicSupportMailto,
 } from '../../lib/publicCompliance';
 
 const FooterBar = () => {
@@ -35,6 +35,9 @@ const FooterBar = () => {
   const systemName = getSystemName();
   const logo = getLogo();
   const [statusState] = useContext(StatusContext);
+  const status = statusState?.status || {};
+  const supportEmail = getPublicSupportEmail(status);
+  const supportMailto = getPublicSupportMailto(supportEmail);
   const isDemoSiteMode = statusState?.status?.demo_site_enabled || false;
 
   const loadFooter = () => {
@@ -67,10 +70,10 @@ const FooterBar = () => {
         {t('隐私政策')}
       </Link>
       <a
-        href={PUBLIC_SUPPORT_MAILTO}
+        href={supportMailto}
         className='!text-semi-color-text-1 hover:!text-semi-color-primary'
       >
-        {PUBLIC_SUPPORT_EMAIL}
+        {supportEmail}
       </a>
     </div>
   );

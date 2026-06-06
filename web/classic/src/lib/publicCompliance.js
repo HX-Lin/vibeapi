@@ -17,6 +17,15 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-export const PUBLIC_SUPPORT_EMAIL = 'support@quantumnous.com';
-export const PUBLIC_SUPPORT_MAILTO = `mailto:${PUBLIC_SUPPORT_EMAIL}`;
+export const DEFAULT_PUBLIC_SUPPORT_EMAIL = 'support@quantumnous.com';
 export const PUBLIC_PRICING_ANCHOR = 'pricing';
+
+export const getPublicSupportEmail = (status) => {
+  const configuredEmail = status?.support_email;
+  if (typeof configuredEmail === 'string' && configuredEmail.trim()) {
+    return configuredEmail.trim();
+  }
+  return DEFAULT_PUBLIC_SUPPORT_EMAIL;
+};
+
+export const getPublicSupportMailto = (email) => `mailto:${email}`;

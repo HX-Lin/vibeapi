@@ -4337,6 +4337,13 @@
     "入口页价格表已更新": "Đã cập nhật bảng giá trang vào",
     "入口页价格表更新失败": "Cập nhật bảng giá trang vào thất bại",
     "设置入口页价格表": "Thiết lập bảng giá trang vào",
-    "在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。": "Nhập mảng JSON bảng giá trang vào tại đây. Để trống để dùng bảng giá công khai mặc định. Mỗi mục cần name, price và description; features có thể là mảng hoặc văn bản phân tách bằng dòng mới, cta là tùy chọn."
+    "在此输入入口页价格表 JSON 数组，留空则使用默认公开价格表。每项需要 name、price、description，features 可为数组或换行文本，cta 可选。": "Nhập mảng JSON bảng giá trang vào tại đây. Để trống để dùng bảng giá công khai mặc định. Mỗi mục cần name, price và description; features có thể là mảng hoặc văn bản phân tách bằng dòng mới, cta là tùy chọn.",
+    "客服邮箱": "Email hỗ trợ",
+    "在此输入客服支持邮箱地址": "Nhập địa chỉ email hỗ trợ khách hàng tại đây",
+    "公开首页、页脚、隐私政策和用户协议会显示这个客服邮箱。": "Trang chủ công khai, chân trang, chính sách quyền riêng tư và thỏa thuận người dùng sẽ hiển thị email hỗ trợ này.",
+    "设置客服邮箱": "Thiết lập email hỗ trợ",
+    "请输入有效的客服邮箱地址": "Nhập địa chỉ email hỗ trợ hợp lệ",
+    "客服邮箱已更新": "Đã cập nhật email hỗ trợ",
+    "客服邮箱更新失败": "Cập nhật email hỗ trợ thất bại"
   }
 }

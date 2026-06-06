@@ -75,12 +75,14 @@ const DocumentRenderer = ({
 }) => {
   const { t } = useTranslation();
   const [content, setContent] = useState('');
+  const [usingFallback, setUsingFallback] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const loadContent = async () => {
     const cachedContent = localStorage.getItem(cacheKey) || '';
     if (cachedContent) {
       setContent(cachedContent);
+      setUsingFallback(false);
       setLoading(false);
     }
 
@@ -89,22 +91,27 @@ const DocumentRenderer = ({
       const { success, message, data } = res.data;
       if (success && data) {
         setContent(data);
+        setUsingFallback(false);
         localStorage.setItem(cacheKey, data);
       } else {
         if (fallbackContent) {
           setContent(fallbackContent);
+          setUsingFallback(true);
           localStorage.removeItem(cacheKey);
         } else if (!cachedContent) {
           showError(message || emptyMessage);
           setContent('');
+          setUsingFallback(false);
         }
       }
     } catch (error) {
       if (fallbackContent) {
         setContent(fallbackContent);
+        setUsingFallback(true);
       } else if (!cachedContent) {
         showError(emptyMessage);
         setContent('');
+        setUsingFallback(false);
       }
     } finally {
       setLoading(false);
@@ -121,6 +128,12 @@ const DocumentRenderer = ({
   useEffect(() => {
     loadContent();
   }, []);
+
+  useEffect(() => {
+    if (usingFallback && fallbackContent) {
+      setContent(fallbackContent);
+    }
+  }, [fallbackContent, usingFallback]);
 
   // 处理HTML样式注入
   useEffect(() => {
