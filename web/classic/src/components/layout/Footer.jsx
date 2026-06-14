@@ -202,7 +202,7 @@ const FooterBar = () => {
                     rel='noopener noreferrer'
                     className='!text-semi-color-text-1'
                   >
-                    VibeAPI
+                    Tokenflow
                   </a>
                   <a
                     href='https://github.com/coaidev/coai'
@@ -243,7 +243,7 @@ const FooterBar = () => {
               rel='noopener noreferrer'
               className='!text-semi-color-primary font-medium'
             >
-              VibeAPI
+              Tokenflow
             </a>
           </div>
         </div>
@@ -276,7 +276,7 @@ const FooterBar = () => {
                 rel='noopener noreferrer'
                 className='!text-semi-color-primary font-medium'
               >
-                VibeAPI
+                Tokenflow
               </a>
             </div>
           </div>

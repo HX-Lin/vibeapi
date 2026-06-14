@@ -209,6 +209,7 @@ func SyncOptions(frequency int) {
 }
 
 func UpdateOption(key string, value string) error {
+	value = normalizeOptionValue(key, value)
 	// Save to database first
 	option := Option{
 		Key: key,
@@ -235,6 +236,7 @@ func UpdateOptionsBulk(values map[string]string) error {
 	}
 	err := DB.Transaction(func(tx *gorm.DB) error {
 		for k, v := range values {
+			v = normalizeOptionValue(k, v)
 			option := Option{Key: k}
 			if err := tx.FirstOrCreate(&option, Option{Key: k}).Error; err != nil {
 				return err
@@ -250,6 +252,7 @@ func UpdateOptionsBulk(values map[string]string) error {
 		return err
 	}
 	for k, v := range values {
+		v = normalizeOptionValue(k, v)
 		if err := updateOptionMap(k, v); err != nil {
 			return err
 		}
@@ -257,7 +260,15 @@ func UpdateOptionsBulk(values map[string]string) error {
 	return nil
 }
 
+func normalizeOptionValue(key string, value string) string {
+	if key == "SystemName" {
+		return common.NormalizeSystemName(value)
+	}
+	return value
+}
+
 func updateOptionMap(key string, value string) (err error) {
+	value = normalizeOptionValue(key, value)
 	common.OptionMapRWMutex.Lock()
 	defer common.OptionMapRWMutex.Unlock()
 	common.OptionMap[key] = value

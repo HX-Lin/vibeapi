@@ -141,22 +141,25 @@ const VibeAPIDashboard = () => {
     }
   }, []);
 
-  const provisionUser = useCallback(async (userId) => {
-    setProvisioningUserId(userId);
-    try {
-      const res = await API.post(`/api/vibeapi/provision/${userId}`);
-      if (res.data?.success) {
-        showSuccess(t('操作成功'));
-        loadUserUsage();
-      } else {
-        showError(res.data?.message || t('操作失败'));
+  const provisionUser = useCallback(
+    async (userId) => {
+      setProvisioningUserId(userId);
+      try {
+        const res = await API.post(`/api/vibeapi/provision/${userId}`);
+        if (res.data?.success) {
+          showSuccess(t('操作成功'));
+          loadUserUsage();
+        } else {
+          showError(res.data?.message || t('操作失败'));
+        }
+      } catch (e) {
+        showError(t('操作失败'));
+      } finally {
+        setProvisioningUserId(null);
       }
-    } catch (e) {
-      showError(t('操作失败'));
-    } finally {
-      setProvisioningUserId(null);
-    }
-  }, [t, loadUserUsage]);
+    },
+    [t, loadUserUsage],
+  );
 
   const provisionAll = useCallback(async () => {
     try {
@@ -379,7 +382,8 @@ const VibeAPIDashboard = () => {
       align: 'right',
       render: (text) => {
         if (!text) return <Text type='tertiary'>-</Text>;
-        const color = text < 500 ? '#10b981' : text < 2000 ? '#f59e0b' : '#ef4444';
+        const color =
+          text < 500 ? '#10b981' : text < 2000 ? '#f59e0b' : '#ef4444';
         return (
           <Text
             style={{
@@ -421,7 +425,11 @@ const VibeAPIDashboard = () => {
   ];
 
   const isAnyLoading =
-    statusLoading || accountsLoading || tokenStatsLoading || logsLoading || userUsageLoading;
+    statusLoading ||
+    accountsLoading ||
+    tokenStatsLoading ||
+    logsLoading ||
+    userUsageLoading;
 
   // --- User usage columns ---
   const userUsageColumns = [
@@ -493,7 +501,13 @@ const VibeAPIDashboard = () => {
       align: 'right',
       sorter: (a, b) => a.used_quota - b.used_quota,
       render: (text) => (
-        <Text style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums', color: '#ef4444' }}>
+        <Text
+          style={{
+            fontSize: 13,
+            fontVariantNumeric: 'tabular-nums',
+            color: '#ef4444',
+          }}
+        >
           {renderQuota(text)}
         </Text>
       ),
@@ -506,7 +520,14 @@ const VibeAPIDashboard = () => {
       align: 'right',
       sorter: (a, b) => a.quota - b.quota,
       render: (text) => (
-        <Text style={{ fontSize: 13, fontVariantNumeric: 'tabular-nums', color: '#10b981', fontWeight: 500 }}>
+        <Text
+          style={{
+            fontSize: 13,
+            fontVariantNumeric: 'tabular-nums',
+            color: '#10b981',
+            fontWeight: 500,
+          }}
+        >
           {renderQuota(text)}
         </Text>
       ),
@@ -574,13 +595,10 @@ const VibeAPIDashboard = () => {
           </div>
           <div>
             <Title heading={5} style={{ marginBottom: 0 }}>
-              {t('VibeAPI 管理')}
+              {t('Tokenflow 管理')}
             </Title>
             {statusData?.upstream_url && (
-              <Text
-                type='tertiary'
-                style={{ fontSize: 12 }}
-              >
+              <Text type='tertiary' style={{ fontSize: 12 }}>
                 {statusData.upstream_url}
               </Text>
             )}
@@ -596,7 +614,9 @@ const VibeAPIDashboard = () => {
             }}
           >
             <Circle size={7} fill={connectionColor} stroke='none' />
-            <Text style={{ fontSize: 12, color: connectionColor, fontWeight: 500 }}>
+            <Text
+              style={{ fontSize: 12, color: connectionColor, fontWeight: 500 }}
+            >
               {connectionText}
             </Text>
           </div>
@@ -617,7 +637,7 @@ const VibeAPIDashboard = () => {
       {statusData && !statusData.enabled && (
         <Banner
           type='warning'
-          description={t('VibeAPI upstream is not enabled')}
+          description={t('Tokenflow upstream is not enabled')}
           closeIcon={null}
         />
       )}
@@ -716,7 +736,10 @@ const VibeAPIDashboard = () => {
                   <Text type='secondary' style={{ fontSize: 13 }}>
                     {t('共')} {userUsageData.length} {t('个用户')}
                     {' / '}
-                    {userUsageData.filter((u) => u.has_upstream_token).length} {t('已分配令牌')}
+                    {
+                      userUsageData.filter((u) => u.has_upstream_token).length
+                    }{' '}
+                    {t('已分配令牌')}
                   </Text>
                   <Tooltip content={t('为所有未分配令牌的用户批量分配')}>
                     <Button
@@ -736,11 +759,21 @@ const VibeAPIDashboard = () => {
                   rowKey='id'
                   pagination={{ pageSize: 20 }}
                   size='small'
-                  empty={<EmptyState preset='noResult' size='small' description={t('暂无数据')} />}
+                  empty={
+                    <EmptyState
+                      preset='noResult'
+                      size='small'
+                      description={t('暂无数据')}
+                    />
+                  }
                 />
               </>
             ) : (
-              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
+              <EmptyState
+                preset='noResult'
+                size='small'
+                description={t('暂无数据')}
+              />
             )}
           </Spin>
         )}
@@ -754,10 +787,20 @@ const VibeAPIDashboard = () => {
                 dataSource={accountsData}
                 pagination={{ pageSize: 10 }}
                 size='small'
-                empty={<EmptyState preset='noResult' size='small' description={t('暂无数据')} />}
+                empty={
+                  <EmptyState
+                    preset='noResult'
+                    size='small'
+                    description={t('暂无数据')}
+                  />
+                }
               />
             ) : (
-              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
+              <EmptyState
+                preset='noResult'
+                size='small'
+                description={t('暂无数据')}
+              />
             )}
           </Spin>
         )}
@@ -788,7 +831,11 @@ const VibeAPIDashboard = () => {
                 ))}
               </div>
             ) : (
-              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
+              <EmptyState
+                preset='noResult'
+                size='small'
+                description={t('暂无数据')}
+              />
             )}
             {successRate !== null && logsLoaded && (
               <div className='mt-4 flex items-center gap-4 px-3 py-2 rounded-lg bg-blue-50 border border-blue-100'>
@@ -820,10 +867,20 @@ const VibeAPIDashboard = () => {
                 dataSource={logsData}
                 pagination={{ pageSize: 20 }}
                 size='small'
-                empty={<EmptyState preset='noResult' size='small' description={t('暂无数据')} />}
+                empty={
+                  <EmptyState
+                    preset='noResult'
+                    size='small'
+                    description={t('暂无数据')}
+                  />
+                }
               />
             ) : (
-              <EmptyState preset='noResult' size='small' description={t('暂无数据')} />
+              <EmptyState
+                preset='noResult'
+                size='small'
+                description={t('暂无数据')}
+              />
             )}
           </Spin>
         )}

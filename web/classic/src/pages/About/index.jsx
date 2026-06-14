@@ -35,7 +35,7 @@ const About = () => {
   const { t } = useTranslation();
   const [statusState] = useContext(StatusContext);
 
-  const systemName = getSystemName() || 'vibeapi';
+  const systemName = getSystemName() || 'Tokenflow';
   const logo = getLogo();
   const version = statusState?.status?.version || '';
   const docsLink = localStorage.getItem('docs_link') || '';
@@ -243,7 +243,7 @@ const About = () => {
                 className='text-xs'
                 style={{ color: 'var(--semi-color-text-3)' }}
               >
-                Powered by vibeapi
+                Powered by Tokenflow
               </span>
             </div>
           </div>

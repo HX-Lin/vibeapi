@@ -66,7 +66,8 @@ const SiderBar = ({ onNavigate = () => {} }) => {
   const { isSectionCollapsed, toggleSection } = useSidebarSections();
   const showSkeleton = useMinimumLoadingTime(sidebarLoading, 200);
 
-  const vibeapiUpstreamEnabled = statusState?.status?.vibeapi_upstream_enabled || false;
+  const vibeapiUpstreamEnabled =
+    statusState?.status?.vibeapi_upstream_enabled || false;
 
   const [selectedKeys, setSelectedKeys] = useState(['detail']);
   const [openedKeys, setOpenedKeys] = useState([]);
@@ -122,11 +123,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
     });
 
     return filteredItems;
-  }, [
-    localStorage.getItem('enable_data_export'),
-    t,
-    isModuleVisible,
-  ]);
+  }, [localStorage.getItem('enable_data_export'), t, isModuleVisible]);
 
   const financeItems = useMemo(() => {
     const items = [
@@ -218,7 +215,7 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {
-        text: t('VibeAPI 管理'),
+        text: t('Tokenflow 管理'),
         itemKey: 'vibeapi',
         to: '/vibeapi',
         className: isAdmin() && vibeapiUpstreamEnabled ? '' : 'tableHiddle',

@@ -36,7 +36,7 @@ import en_GB from '@douyinfe/semi-ui/lib/es/locale/source/en_GB';
 // Welcome message (Do not remove this without permission from the original developer)
 if (typeof window !== 'undefined') {
   console.log(
-    '%cWE ❤ VIBEAPI%c Github: https://github.com/HX-Lin/vibeapi',
+    '%cWE ❤ TOKENFLOW%c Github: https://github.com/HX-Lin/vibeapi',
     'color: #10b981; font-weight: bold; font-size: 24px;',
     'color: inherit; font-size: 14px;',
   );

@@ -17,9 +17,11 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
+import { normalizeSystemName } from './utils';
+
 export function setStatusData(data) {
   localStorage.setItem('status', JSON.stringify(data));
-  localStorage.setItem('system_name', data.system_name);
+  localStorage.setItem('system_name', normalizeSystemName(data.system_name));
   localStorage.setItem('logo', data.logo);
   localStorage.setItem('footer_html', data.footer_html);
   localStorage.setItem('quota_per_unit', data.quota_per_unit);

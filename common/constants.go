@@ -14,7 +14,7 @@ import (
 
 var StartTime = time.Now().Unix() // unit: second
 var Version = "v0.0.0"            // this hard coding will be replaced automatically when building, no need to manually change
-var SystemName = "Vibe API"
+var SystemName = "Tokenflow"
 var Footer = ""
 var Logo = ""
 var TopUpLink = ""
@@ -77,6 +77,19 @@ var CryptoSecret = uuid.New().String()
 
 var OptionMap map[string]string
 var OptionMapRWMutex sync.RWMutex
+
+func NormalizeSystemName(name string) string {
+	trimmed := strings.TrimSpace(name)
+	if trimmed == "" {
+		return "Tokenflow"
+	}
+	switch strings.ToLower(strings.ReplaceAll(trimmed, " ", "")) {
+	case "vibeapi":
+		return "Tokenflow"
+	default:
+		return trimmed
+	}
+}
 
 var ItemsPerPage = 10
 var MaxRecentItems = 1000

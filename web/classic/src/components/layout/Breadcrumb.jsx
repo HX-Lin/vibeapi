@@ -50,7 +50,7 @@ const ROUTE_BREADCRUMBS = {
   '/console/subscription': [{ labelKey: '订阅管理' }],
   '/console/redemption': [{ labelKey: '兑换码管理' }],
   '/console/user': [{ labelKey: '用户管理' }],
-  '/console/vibeapi': [{ labelKey: 'VibeAPI 管理' }],
+  '/console/vibeapi': [{ labelKey: 'Tokenflow 管理' }],
   '/console/setting': [{ labelKey: '系统设置', dynamic: true }],
 };
 
@@ -89,7 +89,9 @@ const Breadcrumb = () => {
     if (helpMatch) {
       const slug = helpMatch[1];
       const helpDocs = statusState?.status?.help_docs;
-      const doc = Array.isArray(helpDocs) ? helpDocs.find((d) => d.slug === slug) : null;
+      const doc = Array.isArray(helpDocs)
+        ? helpDocs.find((d) => d.slug === slug)
+        : null;
       return [
         { label: t('控制台'), to: '/console', isHome: true },
         { label: t('帮助中心'), to: null, isCurrent: false },
@@ -101,9 +103,7 @@ const Breadcrumb = () => {
     if (!config) return null;
 
     // 构建面包屑：首页 > ... > 当前页
-    const items = [
-      { label: t('控制台'), to: '/console', isHome: true },
-    ];
+    const items = [{ label: t('控制台'), to: '/console', isHome: true }];
 
     config.forEach((item, idx) => {
       const isLast = idx === config.length - 1;
@@ -112,9 +112,8 @@ const Breadcrumb = () => {
       if (item.dynamic && path === '/console/setting') {
         const searchParams = new URLSearchParams(location.search);
         const tab = searchParams.get('tab');
-        const tabLabel = tab && SETTINGS_TAB_LABELS[tab]
-          ? SETTINGS_TAB_LABELS[tab]
-          : null;
+        const tabLabel =
+          tab && SETTINGS_TAB_LABELS[tab] ? SETTINGS_TAB_LABELS[tab] : null;
 
         // 系统设置 作为可点击的父层级
         items.push({
@@ -165,14 +164,22 @@ const Breadcrumb = () => {
                   className={`breadcrumb-text${isLast ? ' breadcrumb-text-current' : ''}`}
                 >
                   {crumb.isHome && (
-                    <Home size={14} strokeWidth={2} className='breadcrumb-home-icon' />
+                    <Home
+                      size={14}
+                      strokeWidth={2}
+                      className='breadcrumb-home-icon'
+                    />
                   )}
                   {crumb.label}
                 </span>
               ) : (
                 <Link to={crumb.to} className='breadcrumb-link'>
                   {crumb.isHome && (
-                    <Home size={14} strokeWidth={2} className='breadcrumb-home-icon' />
+                    <Home
+                      size={14}
+                      strokeWidth={2}
+                      className='breadcrumb-home-icon'
+                    />
                   )}
                   {crumb.label}
                 </Link>
